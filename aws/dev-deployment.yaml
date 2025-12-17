@@ -13,19 +13,19 @@ spec:
     metadata:
       labels:
         app: pdex
-      annotations:
-        vault.hashicorp.com/agent-inject: 'true'
-        vault.hashicorp.com/agent-inject-token: 'true'
-        vault.hashicorp.com/agent-pre-populate-only: 'true'
-        vault.hashicorp.com/auth-path: 'auth/k8s-gold'
-        vault.hashicorp.com/namespace: 'platform-services'
-        vault.hashicorp.com/role: 'fe0394-nonprod'
-        vault.hashicorp.com/agent-inject-secret-secrets.env: 'fe0394-nonprod/secrets.env'
-        vault.hashicorp.com/agent-inject-template-secrets.env: |
-          {{- with secret "fe0394-nonprod/secrets.env" }}
-          {{- range $k, $v := .Data.data }}
-          {{ $k }}={{ $v }}{{ end -}}
-          {{- end  }}
+      # annotations:
+      #   vault.hashicorp.com/agent-inject: 'true'
+      #   vault.hashicorp.com/agent-inject-token: 'true'
+      #   vault.hashicorp.com/agent-pre-populate-only: 'true'
+      #   vault.hashicorp.com/auth-path: 'auth/k8s-gold'
+      #   vault.hashicorp.com/namespace: 'platform-services'
+      #   vault.hashicorp.com/role: 'fe0394-nonprod'
+      #   vault.hashicorp.com/agent-inject-secret-secrets.env: 'fe0394-nonprod/secrets.env'
+      #   vault.hashicorp.com/agent-inject-template-secrets.env: |
+      #     {{- with secret "fe0394-nonprod/secrets.env" }}
+      #     {{- range $k, $v := .Data.data }}
+      #     {{ $k }}={{ $v }}{{ end -}}
+      #     {{- end  }}
 
     spec:
       serviceAccountName: pdex-sa-dev
@@ -92,7 +92,10 @@ kind: Ingress
 metadata:
   name: pdex-ingress-dev
   annotations:
-    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+
 spec:
   rules:
   - host: dev.pdex.gov.bc.ca
