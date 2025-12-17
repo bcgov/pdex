@@ -124,11 +124,12 @@ jobs:
           # Patch the container image (no --record)
           kubectl -n default set image deploy/pdex-app-dev pdex=${DEV_ECR}:${TAG}
 
-          # Optional: show the updated spec
+          # Show the updated spec and troubleshoot info
           kubectl -n default get deploy pdex-app-dev -o wide
+          kubectl -n default describe deploy pdex-app-dev
 
           # Wait for rollout
-          kubectl -n default rollout status deploy/pdex-app-dev --timeout=5m
+          kubectl -n default rollout status deploy/pdex-app-dev --timeout=10m
 
       - name: Finished AWS Deploy
         run: echo "FINISHED AWS Deploy DEV PDEX"

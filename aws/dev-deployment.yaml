@@ -31,7 +31,7 @@ spec:
       serviceAccountName: pdex-sa-dev
       containers:
       - name: pdex
-        image: 977069300318.dkr.ecr.ca-central-1.amazonaws.com/pdex:latest
+        image: 814738839437.dkr.ecr.ca-central-1.amazonaws.com/pdex:__TAG__
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -45,26 +45,23 @@ spec:
           requests:
             cpu: 250m
             memory: 512Mi
-        lifecycle:
-          postStart:
-            exec:
-              command:
-                - /bin/bash
-                - '-c'
-                - >
-                  touch /var/www/html/storage/logs/laravel.log && tail -f
-                  /var/www/html/storage/logs/laravel.log > /proc/1/fd/2 &
+            
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 6
+
         livenessProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - /var/www/html/probe-check.sh
-          initialDelaySeconds: 1000
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
           periodSeconds: 15
           timeoutSeconds: 5
-          successThreshold: 1
-          failureThreshold: 3
 
 ---
 apiVersion: v1
@@ -91,8 +88,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: pdex-ingress-dev
+  spec:
+    ingressClassName: alb     # if you installed AWS Load Balancer Controller
   annotations:
-    kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
 
