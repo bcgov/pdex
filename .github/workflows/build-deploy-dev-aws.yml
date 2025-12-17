@@ -114,9 +114,21 @@ jobs:
           DEV_ECR: ${{ secrets.AWS_ECR_URI_DEV }}
         run: |
           TAG=${{ github.sha }}
-          # Patch the running deployment's image (no sed; safer)
-          kubectl -n default set image deployment/pdex-app-dev pdex=${DEV_ECR}:${TAG} --record
-          kubectl -n default rollout status deployment/pdex-app-dev --timeout=5m
+
+          # Confirm the deployment exists; if not, create it explicitly
+          if ! kubectl -n default get deploy pdex-app-dev >/dev/null 2>&1; then
+            echo "Deployment pdex-app-dev not found. Creating from manifest..."
+            kubectl -n default create -f aws/dev-deployment.yaml
+          fi
+
+          # Patch the container image (no --record)
+          kubectl -n default set image deploy/pdex-app-dev pdex=${DEV_ECR}:${TAG}
+
+          # Optional: show the updated spec
+          kubectl -n default get deploy pdex-app-dev -o wide
+
+          # Wait for rollout
+          kubectl -n default rollout status deploy/pdex-app-dev --timeout=5m
 
       - name: Finished AWS Deploy
         run: echo "FINISHED AWS Deploy DEV PDEX"
