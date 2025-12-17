@@ -65,8 +65,14 @@ jobs:
     name: Deploy to DEV AWS
     needs: build
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     env:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
+      BUILD_ID: ${{ github.event.number }}
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       # Checkout the PR branch
