@@ -1,0 +1,103 @@
+name: Build and Deploy PDEX in DEV AWS
+
+on:
+  push:
+    branches:
+      - dev-aws
+jobs:
+  # Print variables for logging and debugging purposes
+  checkEnv:
+    name: Check Env variables
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print Env Vars
+      run: |
+        echo Git Base Ref: ${{ github.base_ref }}
+        echo Git Build ID: ${{ github.event.number }}
+        echo Git Pull Request Ref: ${{ github.event.pull_request.head.sha }}
+        echo Git Ref Name: ${{ github.ref_name }}
+  # Build PDEX
+  build:
+    name: Build project
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      BUILD_ID: ${{ github.event.number }}
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    
+      # Checkout the PR branch
+      - name: Print env
+        run: |
+          echo BUILD ID: $BUILD_ID
+          echo BUILD NAMESPACE: $BUILD_NAMESPACE
+          echo BRANCH: $BUILD_REF
+
+      - name: Checkout Target Branch
+        uses: actions/checkout@v4
+
+      # Pull AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_TO_USE_TOOLS }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Login to ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and Push to ECR
+        run: |          
+          # Build image
+          docker build . -t ${{ secrets.AWS_ECR_URI }}:${{ github.sha }} --build-arg GITHUB_SHA=${{ github.sha }} --build-arg TIMEOUT=1s --build-arg MAX_CHILDREN=250 --build-arg START_SERVERS=10 --build-arg MIN_SPARE=5 --build-arg MAX_SPARE=15 --build-arg SPAWN_RATE=32
+          
+          # Push image with explicit error handling
+          docker push ${{ secrets.AWS_ECR_URI }}:${{ github.sha }}
+  
+  deploy:
+    name: Deploy to DEV AWS
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+      # Checkout the PR branch
+      - name: Checkout Target Branch
+        uses: actions/checkout@v4
+
+      # Pull AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_TO_USE_DEV }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update Kubeconfig
+        run: |
+          aws eks update-kubeconfig --name pdex-cluster --region ${{ secrets.AWS_REGION }}
+
+      - name: Set image on Kubernetes deployment
+        env:
+          IMAGE: ${{ secrets.AWS_ECR_URI }}:${{ github.event.workflow_run.head_branch }}
+        run: |
+          # Update the image tag in the deployment file
+          # sed -i "s|${{ secrets.AWS_ECR_URI }}:${{ github.sha }}
+          
+          # Apply the deployment
+          kubectl apply -f aws/dev-deployment.yaml
+          
+          # Wait for rollout to complete
+          kubectl rollout status deployment/pdex-app-dev -n default --timeout=5m
+
+      - name: Finished OC Deploy from yaml
+        run: |
+          echo "FINISHED OC Deploy DEV PDEX"
+          echo ++++++++++

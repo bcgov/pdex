@@ -1,0 +1,74 @@
+name: Deploy PDEX Infrastructure in DEV AWS
+
+on:
+  push:
+    branches:
+      - dev-aws-infra
+    paths:
+      - 'terraform/dev/**'
+
+env:
+  TF_VERSION: 1.12.2
+  TG_VERSION: 0.83.2
+  TG_SRC_PATH: terraform
+  TFC_WORKSPACE: dev
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # Print variables for logging and debugging purposes
+  checkEnv:
+    name: Check Env variables
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print Env Vars
+      run: |
+        echo Git Base Ref: ${{ github.base_ref }}
+        echo Git Build ID: ${{ github.event.number }}
+        echo Git Pull Request Ref: ${{ github.event.pull_request.head.sha }}
+        echo Git Ref Name: ${{ github.ref_name }}
+
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless of the GitHub Actions runner OS
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_TO_USE_DEV }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure Terragrunt
+        uses: autero1/action-terragrunt@v3
+        with:
+          terragrunt-version: ${{ env.TG_VERSION }}
+
+      - name: Terragrunt Apply
+        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
+        env:
+          LICENSE_PLATE: ${{ secrets.MY_LICENSE_PLATE }}
+        run: terragrunt run-all apply --non-interactive
+
+
+      - name: Finished Terragrunt Apply
+        run: |
+          echo "FINISHED OC Deploy Infrastructure on AWS DEV for PDEX"
+          echo ++++++++++
+          
