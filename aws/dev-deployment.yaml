@@ -45,7 +45,7 @@ spec:
           requests:
             cpu: 250m
             memory: 512Mi
-            
+
         readinessProbe:
           httpGet:
             path: /
@@ -88,13 +88,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: pdex-ingress-dev
-  spec:
-    ingressClassName: alb     # if you installed AWS Load Balancer Controller
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
 
 spec:
+  ingressClassName: alb     # if you installed AWS Load Balancer Controller
   rules:
   - host: dev.pdex.gov.bc.ca
     http:
