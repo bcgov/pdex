@@ -37,14 +37,24 @@ jobs:
       - name: Login to TOOLS ECR
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build & push image to TOOLS ECR
-        env:
-          TOOLS_ECR: ${{ secrets.AWS_ECR_URI_TOOLS }}
-        run: |
-          set -euo pipefail
-          TAG=${{ github.sha }}
-          docker build . --platform linux/amd64,linux/arm64 -t ${TOOLS_ECR}:${TAG} --build-arg GITHUB_SHA=${TAG}
-          docker push ${TOOLS_ECR}:${TAG}
+      - name: Set up QEMU (for arm64 builds)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
+      - name: Build & push multi-arch image to TOOLS ECR
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ secrets.AWS_ECR_URI_TOOLS }}:${{ github.sha }}
+          build-args: |
+            GITHUB_SHA=${{ github.sha }}
+
 
   deploy:
     name: Mirror to DEV ECR and deploy to EKS (DEV)
@@ -94,15 +104,20 @@ jobs:
           aws ecr describe-repositories --repository-names "${REPO_NAME}" >/dev/null 2>&1 || \
             aws ecr create-repository --repository-name "${REPO_NAME}"
 
-      - name: Retag & push to DEV ECR
+            - name: Install skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+
+      - name: Copy multi-arch image TOOLS -> DEV (preserve manifest)
         env:
           TOOLS_ECR: ${{ secrets.AWS_ECR_URI_TOOLS }}
           DEV_ECR: ${{ secrets.AWS_ECR_URI_DEV }}
         run: |
           set -euo pipefail
           TAG=${{ github.sha }}
-          docker tag ${TOOLS_ECR}:${TAG} ${DEV_ECR}:${TAG}
-          docker push ${DEV_ECR}:${TAG}
+          skopeo copy --all docker://${TOOLS_ECR}:${TAG} docker://${DEV_ECR}:${TAG}
+
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
