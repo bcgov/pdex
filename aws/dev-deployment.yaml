@@ -34,7 +34,7 @@ spec:
       serviceAccountName: pdex-sa-dev
       containers:
       - name: pdex
-        image: 814738839437.dkr.ecr.ca-central-1.amazonaws.com/pdex:__TAG__
+        image: ${DEV_ECR}:${TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

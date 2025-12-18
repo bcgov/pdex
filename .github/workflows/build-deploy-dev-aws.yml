@@ -121,12 +121,14 @@ jobs:
           set -euo pipefail
           TAG=${{ github.sha }}
 
+          # Render env vars into the manifest
+          envsubst < aws/dev-deployment.yaml > aws/dev-deployment.rendered.yaml
+
           # Always apply; this keeps SA/Service/Ingress/Deployment in sync
-          kubectl -n default apply -f aws/dev-deployment.yaml
+          kubectl -n default apply -f aws/dev-deployment.rendered.yaml
 
           # Patch the container image (no --record)
           kubectl -n default set image deploy/pdex-app-dev pdex=${DEV_ECR}:${TAG}
-
 
       - name: Wait for rollout
         run: |
