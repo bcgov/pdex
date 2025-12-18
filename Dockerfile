@@ -155,6 +155,4 @@ RUN composer install && npm install --prefix /var/www/html/ && npm run --prefix 
 # Switch to non-root user for OpenShift compatibility
 USER 1001
 
-ENTRYPOINT ["/sbin/entrypoint.sh"]
-# Start!
-CMD ["apache2-foreground"]
+ENTRYPOINT ["bash", "/sbin/entrypoint.sh"]

@@ -39,7 +39,6 @@ php artisan queue:clear --queue=midnight --force
 echo "Generate API documentation"
 php artisan l5-swagger:generate
 
-# Keep the script running to prevent the container from exiting
-while :; do
-sleep 300
-done
+
+# Replace shell with Apache (PID 1) for proper signal handling
+exec apache2-foreground

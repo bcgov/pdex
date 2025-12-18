@@ -137,6 +137,8 @@ jobs:
         run: |
           set -euo pipefail
 
+          kubectl delete deploy pdex-app-dev -n default
+          
           # Wait for rollout
           kubectl -n default rollout status deploy/pdex-app-dev --timeout=10m
 
