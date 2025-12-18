@@ -43,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           TAG=${{ github.sha }}
-          docker build .  --platform linux/amd64 -t ${TOOLS_ECR}:${TAG} --build-arg GITHUB_SHA=${TAG}
+          docker build . --platform linux/amd64,linux/arm64 -t ${TOOLS_ECR}:${TAG} --build-arg GITHUB_SHA=${TAG}
           docker push ${TOOLS_ECR}:${TAG}
 
   deploy:

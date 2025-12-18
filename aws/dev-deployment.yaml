@@ -28,8 +28,6 @@ spec:
       #     {{- end  }}
 
     spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
       tolerations:
       - key: "CriticalAddonsOnly"
         operator: "Exists"
