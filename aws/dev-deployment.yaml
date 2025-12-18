@@ -28,6 +28,9 @@ spec:
       #     {{- end  }}
 
     spec:
+      tolerations:
+      - key: "CriticalAddonsOnly"
+        operator: "Exists"
       serviceAccountName: pdex-sa-dev
       containers:
       - name: pdex
