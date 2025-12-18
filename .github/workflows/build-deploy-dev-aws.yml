@@ -121,8 +121,11 @@ jobs:
           set -euo pipefail
           TAG=${{ github.sha }}
 
+          export DEV_ECR="${{ secrets.AWS_ECR_URI_DEV }}"
+          export TAG="${{ github.sha }}
+
           # Render env vars into the manifest
-          envsubst < aws/dev-deployment.yaml > aws/dev-deployment.rendered.yaml
+          envsubst '${DEV_ECR} ${TAG}' < aws/dev-deployment.yaml > aws/dev-deployment.rendered.yaml
 
           # Always apply; this keeps SA/Service/Ingress/Deployment in sync
           kubectl -n default apply -f aws/dev-deployment.rendered.yaml
