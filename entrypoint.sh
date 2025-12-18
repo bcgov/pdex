@@ -41,4 +41,4 @@ php artisan l5-swagger:generate
 
 
 # Replace shell with Apache (PID 1) for proper signal handling
-exec apache2-foreground
+# exec apache2-foreground
