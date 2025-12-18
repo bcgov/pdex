@@ -24,8 +24,8 @@ echo "ENV_ARG: ${ENV_ARG}"
 echo "Install composer"
 composer dump-autoload
 
-echo "Starting apache in the background:"
-/usr/sbin/apache2ctl start
+# echo "Starting apache in the background:"
+# /usr/sbin/apache2ctl start
 
 echo "Run migration"
 php artisan migrate --force
@@ -41,4 +41,5 @@ php artisan l5-swagger:generate
 
 
 # Replace shell with Apache (PID 1) for proper signal handling
-# exec apache2-foreground
+echo "Starting apache foreground"
+exec apache2-foreground
