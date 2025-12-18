@@ -34,7 +34,7 @@ spec:
       serviceAccountName: pdex-sa-dev
       containers:
       - name: pdex
-        image: ${DEV_ECR}:${TAG}
+        image: "${DEV_ECR}:${TAG}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

@@ -122,7 +122,7 @@ jobs:
           TAG=${{ github.sha }}
 
           export DEV_ECR="${{ secrets.AWS_ECR_URI_DEV }}"
-          export TAG="${{ github.sha }}
+          export TAG="${{ github.sha }}"
 
           # Render env vars into the manifest
           envsubst '${DEV_ECR} ${TAG}' < aws/dev-deployment.yaml > aws/dev-deployment.rendered.yaml
