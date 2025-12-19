@@ -29,12 +29,6 @@ resource "aws_iam_role_policy_attachment" "eks-cluster-policy" {
 }
 
 #EKS cluster
-# Import existing cluster if it exists
-import {
-  to = aws_eks_cluster.pdex-cluster
-  id = "pdex-cluster"
-}
-
 resource "aws_eks_cluster" "pdex-cluster" {
   name = "pdex-cluster"
   access_config {
