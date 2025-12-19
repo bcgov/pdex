@@ -3,11 +3,9 @@ ARG DEBIAN_VERSION=20.04
 ARG APACHE_OPENIDC_VERSION=2.4.10
 ARG TZ=America/Vancouver
 ARG CA_HOSTS_LIST
-ARG USER_ID
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DEVENV=prod
 # set entrypoint variables
-ENV USER_NAME=${USER_ID}
 ENV USER_HOME=/var/www/html
 ENV PSYSH_CONFIG_DIR=/tmp
 
@@ -28,7 +26,6 @@ COPY / /var/www/html/
 
 EXPOSE 8080 8443 2525
 
-#RUN useradd -u 1000 -ms /bin/bash ${USER_ID}
 RUN apt-get -yq update --fix-missing \
     && apt-get update && apt-get install -y --no-install-recommends apt-utils \
 #php setup, install extensions, setup configs \
@@ -152,9 +149,4 @@ RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions 
 RUN composer install && npm install --prefix /var/www/html/ && npm run --prefix /var/www/html/ ${DEVENV}
 
 
-# Switch to non-root user for OpenShift compatibility
-USER 1001
-
-ENTRYPOINT ["/sbin/entrypoint.sh"]
-# Start!
-CMD ["apache2-foreground"]
+ENTRYPOINT ["bash", "/sbin/entrypoint.sh"]
