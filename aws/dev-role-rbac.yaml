@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: githubactions-secretproviderclass-editor
+  namespace: default
+rules:
+  - apiGroups: ["secrets-store.csi.x-k8s.io"]
+    resources: ["secretproviderclasses"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: githubactions-secretproviderclass-editor
+  namespace: default
+subjects:
+  - kind: User
+    name: "${DEV_RBAC_URI}"
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: githubactions-secretproviderclass-editor
+  apiGroup: rbac.authorization.k8s.io

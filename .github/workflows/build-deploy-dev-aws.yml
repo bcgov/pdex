@@ -49,7 +49,7 @@ jobs:
   deploy:
     name: Mirror to DEV ECR and deploy to EKS (DEV)
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.ref }}
       cancel-in-progress: true
@@ -124,6 +124,10 @@ jobs:
           export DEV_ECR="${{ secrets.AWS_ECR_URI_DEV }}"
           export DEV_SECRETS_ECR="${{ secrets.AWS_SM_URI_DEV }}"
           export TAG="${{ github.sha }}"
+          export DEV_RBAC_URI="${{ secrets.AWS_RBAC_URI_DEV }}"
+
+          envsubst '${DEV_RBAC_URI}' < aws/dev-role-rbac.yaml > aws/dev-role-rbac.rendered.yaml
+          kubectl -n default apply -f aws/dev-role-rbac.rendered.yaml
 
           # Render env vars into the manifest
           envsubst '${DEV_ECR} ${TAG} ${DEV_SECRETS_ECR}' < aws/dev-deployment.yaml > aws/dev-deployment.rendered.yaml
