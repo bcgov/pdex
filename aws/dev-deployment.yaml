@@ -4,6 +4,7 @@ metadata:
   name: pdex-app-dev
   labels:
     app: pdex
+
 spec:
   replicas: 1
   selector:
@@ -13,20 +14,6 @@ spec:
     metadata:
       labels:
         app: pdex
-      annotations:
-        vault.hashicorp.com/agent-inject: 'true'
-        vault.hashicorp.com/agent-inject-token: 'true'
-        vault.hashicorp.com/agent-pre-populate-only: 'true'
-        vault.hashicorp.com/auth-path: 'auth/k8s-gold'
-        vault.hashicorp.com/namespace: 'platform-services'
-        vault.hashicorp.com/role: 'fe0394-nonprod'
-        vault.hashicorp.com/agent-inject-secret-secrets.env: 'fe0394-nonprod/secrets.env'
-        vault.hashicorp.com/agent-inject-template-secrets.env: |
-          {{- with secret "fe0394-nonprod/secrets.env" }}
-          {{- range $k, $v := .Data.data }}
-          {{ $k }}={{ $v }}{{ end -}}
-          {{- end  }}
-
     spec:
       nodeSelector:
         kubernetes.io/arch: amd64
@@ -59,7 +46,6 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 3
           failureThreshold: 6
-
         livenessProbe:
           httpGet:
             path: /up
@@ -67,13 +53,36 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 15
           timeoutSeconds: 5
+        volumeMounts:
+        - name: pdex-secrets
+          mountPath: /vault/secrets
+          readOnly: true
 
+      volumes:
+        - name: pdex-secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: pdex-secrets-env
+---
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: pdex-secrets-env
+  namespace: default
+spec:
+  provider: aws
+  parameters:
+    objects: |
+      - objectName: "${DEV_SECRETS_ECR}"
+        objectType: "secretsmanager"
+        objectAlias: "secrets.env"
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pdex-sa-dev
-
 ---
 apiVersion: v1
 kind: Service
