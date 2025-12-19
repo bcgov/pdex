@@ -1,9 +1,9 @@
-name: Deploy PDEX Infrastructure in DEV AWS using Terragrunt
+name: Deploy PDEX Infrastructure in DEV AWS
 
 on:
-  push:
-    branches:
-      - dev-aws-infra
+  pull_request:
+    branches: [ dev-aws-infra ]
+    types: [ closed ]
     paths:
       - 'terraform/dev/**'
 
