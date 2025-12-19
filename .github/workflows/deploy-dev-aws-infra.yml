@@ -33,6 +33,7 @@ jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
 
     # Use the Bash shell regardless of the GitHub Actions runner OS
     defaults:
