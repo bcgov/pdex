@@ -115,7 +115,7 @@ jobs:
             safe_import "aws_rds_cluster.postgres-pdex" "pdex-postgres-cluster"
             RDS_INSTANCE=$(aws rds describe-db-clusters --db-cluster-identifier pdex-postgres-cluster --query "DBClusters[0].DBClusterMembers[0].DBInstanceIdentifier" --output text --region ca-central-1 2>/dev/null || echo "")
             if [ ! -z "$RDS_INSTANCE" ] && [ "$RDS_INSTANCE" != "None" ]; then
-              safe_import "aws_rds_cluster_instance.postgres-pdex" "pdex-postgres-cluster:$RDS_INSTANCE"
+              safe_import "aws_rds_cluster_instance.postgres-pdex" "$RDS_INSTANCE"
             fi
           fi
           
