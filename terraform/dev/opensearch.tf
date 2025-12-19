@@ -5,6 +5,17 @@ resource "aws_iam_service_linked_role" "es" {
 	aws_service_name = "es.amazonaws.com"
 }
 
+# OpenSearch credentials from Secrets Manager
+data "aws_secretsmanager_secret_version" "opensearch_creds" {
+  secret_id = "pdex-opensearch-creds"
+}
+
+locals {
+  opensearch_creds = jsondecode(
+    data.aws_secretsmanager_secret_version.opensearch_creds.secret_string
+  )
+}
+
 
 resource "aws_elasticsearch_domain" "pdex-jb-cluster" {
 	domain_name	= "pdex-jb-cluster"
@@ -66,8 +77,8 @@ EOF
 		enabled = true
 		internal_user_database_enabled = true
 		master_user_options {
-			master_user_name = local.db_creds3.es_username
-			master_user_password = local.db_creds3.es_password
+			master_user_name = local.opensearch_creds.es_username
+			master_user_password = local.opensearch_creds.es_password
 		}
 	}
 	
