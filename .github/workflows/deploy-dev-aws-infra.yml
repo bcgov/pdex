@@ -59,6 +59,75 @@ jobs:
         with:
           terragrunt-version: ${{ env.TG_VERSION }}
 
+      - name: Import Existing AWS Resources
+        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
+        env:
+          LICENSE_PLATE: ${{ secrets.MY_LICENSE_PLATE }}
+        continue-on-error: true
+        run: |
+          terragrunt init
+          
+          # Import Security Groups
+          terraform import aws_security_group.alb_sg sg-0614e4549c9a369f7 || true
+          terraform import aws_security_group.allow_postgres sg-0f7ca813c3674f8e4 || true
+          terraform import aws_security_group.allow_redis sg-0dabaaf22d619e8e3 || true
+          terraform import aws_security_group.allow_tls sg-0975c8b04dd4ff0df || true
+          terraform import aws_security_group.allow_nfs sg-01a8ba1622fb3ef65 || true
+          
+          # Import Target Groups
+          CER_TG_ARN=$(aws elbv2 describe-target-groups --names cer-target-group --query "TargetGroups[0].TargetGroupArn" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$CER_TG_ARN" ]; then terraform import aws_alb_target_group.cer "$CER_TG_ARN" || true; fi
+          
+          CDQ_TG_ARN=$(aws elbv2 describe-target-groups --names cdq-target-group --query "TargetGroups[0].TargetGroupArn" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$CDQ_TG_ARN" ]; then terraform import aws_alb_target_group.cdq "$CDQ_TG_ARN" || true; fi
+          
+          PDEX_TG_ARN=$(aws elbv2 describe-target-groups --names pdex-target-group --query "TargetGroups[0].TargetGroupArn" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$PDEX_TG_ARN" ]; then terraform import aws_alb_target_group.pdex "$PDEX_TG_ARN" || true; fi
+          
+          # Import ALB
+          ALB_ARN=$(aws elbv2 describe-load-balancers --names default --query "LoadBalancers[0].LoadBalancerArn" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$ALB_ARN" ]; then terraform import aws_lb.default_alb "$ALB_ARN" || true; fi
+          
+          # Import RDS
+          terraform import aws_db_subnet_group.data_subnet data-subnet || true
+          terraform import aws_rds_cluster.postgres-pdex pdex-postgres-cluster || true
+          RDS_INSTANCE=$(aws rds describe-db-clusters --db-cluster-identifier pdex-postgres-cluster --query "DBClusters[0].DBClusterMembers[0].DBInstanceIdentifier" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$RDS_INSTANCE" ]; then terraform import aws_rds_cluster_instance.postgres-pdex "pdex-postgres-cluster:$RDS_INSTANCE" || true; fi
+          
+          # Import ElastiCache
+          terraform import aws_elasticache_subnet_group.default redis-subnet-group-drupal || true
+          terraform import aws_elasticache_replication_group.pdex_redis_rg pdex-rep-group || true
+          terraform import 'aws_elasticache_cluster.replica[0]' pdex-rep-group-0 || true
+          
+          # Import EFS
+          EFS_ID=$(aws efs describe-file-systems --creation-token pdex-cer-efs --query "FileSystems[0].FileSystemId" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$EFS_ID" ] && [ "$EFS_ID" != "None" ]; then
+            terraform import aws_efs_file_system.pdex-cer "$EFS_ID" || true
+            MT_IDS=$(aws efs describe-mount-targets --file-system-id "$EFS_ID" --query "MountTargets[*].MountTargetId" --output text --region ca-central-1 2>/dev/null || echo "")
+            MT_ARRAY=($MT_IDS)
+            if [ ${#MT_ARRAY[@]} -ge 1 ]; then terraform import aws_efs_mount_target.data_azA "${MT_ARRAY[0]}" || true; fi
+            if [ ${#MT_ARRAY[@]} -ge 2 ]; then terraform import aws_efs_mount_target.data_azB "${MT_ARRAY[1]}" || true; fi
+          fi
+          
+          # Import KMS
+          terraform import aws_kms_key.pdex-kms-key 43934437-94a9-4668-bfbf-b5394622743a || true
+          
+          # Import OpenSearch
+          terraform import aws_elasticsearch_domain.pdex-jb-cluster pdex-jb-cluster || true
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          terraform import aws_iam_service_linked_role.es "arn:aws:iam::${ACCOUNT_ID}:role/aws-service-role/es.amazonaws.com/AWSServiceRoleForAmazonElasticsearchService" || true
+          
+          # Import IAM Roles
+          terraform import aws_iam_role.eks-cluster-role eks-cluster-role || true
+          terraform import aws_iam_role.efs-csi-role efs-csi-role || true
+          terraform import aws_iam_role.eks-ng-role eks-ng-role || true
+          terraform import aws_iam_role.cluster_auto_scaler_role cluster_auto_scaler_role || true
+          terraform import aws_iam_role.ses_mailer_role ses_mailer_role || true
+          terraform import aws_iam_role.alb_role AWSLoadBalancerControllerIAMRole || true
+          terraform import aws_iam_policy.alb_policy "arn:aws:iam::${ACCOUNT_ID}:policy/AWSLoadBalancerControllerIAMPolicy" || true
+          
+          echo "Import step completed (errors ignored)"
+
       - name: Terragrunt Apply
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
         env:
