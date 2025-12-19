@@ -20,6 +20,10 @@ resource "aws_security_group" "allow_nfs" {
   tags = {
     Name = "allow_nfs"
   }
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_nfs_ipv4" {
@@ -43,6 +47,10 @@ resource "aws_security_group" "allow_postgres" {
 
   tags = {
     Name = "allow_postgres"
+  }
+  
+  lifecycle {
+    ignore_changes = all
   }
 }
 
@@ -68,6 +76,10 @@ resource "aws_security_group" "allow_redis" {
   tags = {
     Name = "allow_redis"
   }
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_redis_ipv4" {
@@ -91,6 +103,10 @@ resource "aws_security_group" "allow_tls" {
 
   tags = {
     Name = "allow_tls"
+  }
+  
+  lifecycle {
+    ignore_changes = all
   }
 }
 

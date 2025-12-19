@@ -5,6 +5,10 @@ resource "aws_db_subnet_group" "data_subnet" {
   subnet_ids             = data.aws_subnets.data.ids
 
   tags = var.common_tags
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_rds_cluster" "postgres-pdex" {
@@ -28,6 +32,10 @@ resource "aws_rds_cluster" "postgres-pdex" {
   }
 
   tags = var.common_tags
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # create this manually
@@ -46,4 +54,8 @@ resource "aws_rds_cluster_instance" "postgres-pdex" {
   instance_class     = "db.serverless"
   engine             = aws_rds_cluster.postgres-pdex.engine
   engine_version     = aws_rds_cluster.postgres-pdex.engine_version
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }

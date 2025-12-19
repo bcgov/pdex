@@ -3,6 +3,10 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_iam_service_linked_role" "es" {
 	aws_service_name = "es.amazonaws.com"
+	
+	lifecycle {
+		ignore_changes = all
+	}
 }
 
 # OpenSearch credentials from Secrets Manager
@@ -87,5 +91,9 @@ EOF
 	}
 	
 	depends_on = [aws_iam_service_linked_role.es]
+	
+	lifecycle {
+		ignore_changes = all
+	}
 }
 
