@@ -55,67 +55,70 @@ resource "aws_lb" "default_alb" {
   }
 }
 
-# Look up ACM certificate for ALB (must be in same region as ALB)
-data "aws_acm_certificate" "alb_cert" {
-  domain   = "dev.pdex.gov.bc.ca"
-  statuses = ["ISSUED"]
-  most_recent = true
-}
+# TODO: Create ACM certificate for dev.pdex.gov.bc.ca in ca-central-1, then uncomment below
+# aws acm request-certificate --domain-name dev.pdex.gov.bc.ca --validation-method DNS --region ca-central-1
 
-resource "aws_lb_listener" "https_listener" {
-  load_balancer_arn = aws_lb.default_alb.arn
-  port              = 443
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = data.aws_acm_certificate.alb_cert.arn
+# # Look up ACM certificate for ALB (must be in same region as ALB)
+# data "aws_acm_certificate" "alb_cert" {
+#   domain   = "dev.pdex.gov.bc.ca"
+#   statuses = ["ISSUED"]
+#   most_recent = true
+# }
+# 
+# resource "aws_lb_listener" "https_listener" {
+#   load_balancer_arn = aws_lb.default_alb.arn
+#   port              = 443
+#   protocol          = "HTTPS"
+#   ssl_policy        = "ELBSecurityPolicy-2016-08"
+#   certificate_arn   = data.aws_acm_certificate.alb_cert.arn
+# 
+#   default_action {
+#     type             = "fixed-response"
+#     fixed_response {
+#       content_type = "text/plain"
+#       message_body = "Not Found - Missing Cert"
+#       status_code  = "404"
+#     }
+#   }
+# }
 
-  default_action {
-    type             = "fixed-response"
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "Not Found - Missing Cert"
-      status_code  = "404"
-    }
-  }
-}
+# resource "aws_lb_listener_rule" "healthcheck_fixed_response" {
+#   listener_arn = aws_lb_listener.https_listener.arn
+#   priority     = 10
+# 
+#   action {
+#     type = "fixed-response"
+# 
+#     fixed_response {
+#       content_type = "text/plain"
+#       message_body = "OK"
+#       status_code  = "200"
+#     }
+#   }
+# 
+#   condition {
+#     path_pattern {
+#       values = ["/bcgovhealthcheck"]
+#     }
+#   }
+# }
 
-resource "aws_lb_listener_rule" "healthcheck_fixed_response" {
-  listener_arn = aws_lb_listener.https_listener.arn
-  priority     = 10
-
-  action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "OK"
-      status_code  = "200"
-    }
-  }
-
-  condition {
-    path_pattern {
-      values = ["/bcgovhealthcheck"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "host_based_weighted_routing" {
-  listener_arn = aws_lb_listener.https_listener.arn
-  priority     = 100
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.cer.arn
-  }
-
-  condition {
-    host_header {
-      values = ["pdex-cer.*"]
-    }
-  }
-    
-}
+# resource "aws_lb_listener_rule" "host_based_weighted_routing" { {
+#   listener_arn = aws_lb_listener.https_listener.arn
+#   priority     = 100
+# 
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_alb_target_group.cer.arn
+#   }
+# 
+#   condition {
+#     host_header {
+#       values = ["pdex-cer.*"]
+#     }
+#   }
+#     
+# }
 
 resource "aws_alb_target_group" "cdq" {
   name                 = "cdq-target-group"
@@ -142,22 +145,22 @@ resource "aws_alb_target_group" "cdq" {
   tags = var.common_tags
 }
 
-resource "aws_lb_listener_rule" "host_based_weighted_routing2" {
-  listener_arn = aws_lb_listener.https_listener.arn
-  priority     = 110
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.cdq.arn
-  }
-
-  condition {
-    host_header {
-      values = ["pdex-cdq.*"]
-    }
-  }
-    
-}
+# resource "aws_lb_listener_rule" "host_based_weighted_routing2" {
+#   listener_arn = aws_lb_listener.https_listener.arn
+#   priority     = 110
+# 
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_alb_target_group.cdq.arn
+#   }
+# 
+#   condition {
+#     host_header {
+#       values = ["pdex-cdq.*"]
+#     }
+#   }
+#     
+# }
 
 resource "aws_alb_target_group" "pdex" {
   name                 = "pdex-target-group"
@@ -184,19 +187,19 @@ resource "aws_alb_target_group" "pdex" {
   tags = var.common_tags
 }
 
-resource "aws_lb_listener_rule" "host_based_weighted_routing3" {
-  listener_arn = aws_lb_listener.https_listener.arn
-  priority     = 120
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.pdex.arn
-  }
-
-  condition {
-    host_header {
-      values = ["pdex.*"]
-    }
-  }
-    
-}
+# resource "aws_lb_listener_rule" "host_based_weighted_routing3" {
+#   listener_arn = aws_lb_listener.https_listener.arn
+#   priority     = 120
+# 
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_alb_target_group.pdex.arn
+#   }
+# 
+#   condition {
+#     host_header {
+#       values = ["pdex.*"]
+#     }
+#   }
+#     
+# }

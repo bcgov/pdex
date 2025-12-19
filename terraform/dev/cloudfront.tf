@@ -1,13 +1,18 @@
 # cloudfront.tf
 
-# CloudFront requires certificates to be in us-east-1
-data "aws_acm_certificate" "cloudfront_cert" {
-  provider = aws.us_east_1
-  domain   = "dev.pdex.gov.bc.ca"
-  statuses = ["ISSUED"]
-  most_recent = true
-}
+# TODO: Create ACM certificate for dev.pdex.gov.bc.ca in us-east-1, then uncomment below
+# aws acm request-certificate --domain-name dev.pdex.gov.bc.ca --validation-method DNS --region us-east-1
 
+# # CloudFront requires certificates to be in us-east-1
+# data "aws_acm_certificate" "cloudfront_cert" {
+#   provider = aws.us_east_1
+#   domain   = "dev.pdex.gov.bc.ca"
+#   statuses = ["ISSUED"]
+#   most_recent = true
+# }
+
+# Temporarily disabled until certificate is created
+/*
 resource "random_integer" "cf_origin_id" {
   min = 1
   max = 100
@@ -93,4 +98,5 @@ output "cloudfront_url" {
   value = "https://${aws_cloudfront_distribution.pdex-cer[0].domain_name}"
 
 }
+*/
 
