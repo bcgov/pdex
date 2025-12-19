@@ -1,4 +1,4 @@
-name: Deploy PDEX Infrastructure in DEV AWS
+name: Deploy PDEX Infrastructure in DEV AWS using Terragrunt
 
 on:
   push:
