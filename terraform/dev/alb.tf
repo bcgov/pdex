@@ -1,3 +1,8 @@
+# NOTE: If these resources already exist in AWS, you need to import them first:
+# terraform import aws_security_group.alb_sg sg-xxxxx
+# terraform import aws_alb_target_group.cer arn:aws:elasticloadbalancing:...
+# OR delete them from AWS and let Terraform recreate them
+
 resource "aws_security_group" "alb_sg" {
   name        = "alb-https-sg"
   description = "Allow HTTPS inbound traffic"
@@ -15,10 +20,6 @@ resource "aws_security_group" "alb_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-  
-  lifecycle {
-    ignore_changes = all
   }
 }
 
