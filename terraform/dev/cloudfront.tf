@@ -1,4 +1,13 @@
 # cloudfront.tf
+
+# CloudFront requires certificates to be in us-east-1
+data "aws_acm_certificate" "cloudfront_cert" {
+  provider = aws.us_east_1
+  domain   = "dev.pdex.gov.bc.ca"
+  statuses = ["ISSUED"]
+  most_recent = true
+}
+
 resource "random_integer" "cf_origin_id" {
   min = 1
   max = 100
@@ -75,7 +84,7 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
   aliases = ["dev.pdex.gov.bc.ca"]
 
   viewer_certificate {
-    acm_certificate_arn = "arn:aws:acm:us-east-1:396067939651:certificate/8422cb87-5c47-4dcf-86b3-04a93695fbca"
+    acm_certificate_arn = data.aws_acm_certificate.cloudfront_cert.arn
     ssl_support_method = "sni-only"
   }
 }
