@@ -71,66 +71,103 @@ jobs:
           LICENSE_PLATE: ${{ secrets.MY_LICENSE_PLATE }}
         continue-on-error: true
         run: |
-          # Import Security Groups
-          terragrunt import aws_security_group.alb_sg sg-0614e4549c9a369f7 || true
-          terragrunt import aws_security_group.allow_postgres sg-0f7ca813c3674f8e4 || true
-          terragrunt import aws_security_group.allow_redis sg-0dabaaf22d619e8e3 || true
-          terragrunt import aws_security_group.allow_tls sg-0975c8b04dd4ff0df || true
-          terragrunt import aws_security_group.allow_nfs sg-01a8ba1622fb3ef65 || true
+          # Function to safely import resources
+          safe_import() {
+            local resource=$1
+            local id=$2
+            echo "Attempting to import $resource with id $id"
+            terragrunt import "$resource" "$id" 2>&1 | grep -v "Error: Cannot import non-existent" || true
+          }
           
-          # Import Target Groups
-          CER_TG_ARN=$(aws elbv2 describe-target-groups --names cer-target-group --query "TargetGroups[0].TargetGroupArn" --output text --region ca-central-1 2>/dev/null || echo "")
-          if [ ! -z "$CER_TG_ARN" ]; then terragrunt import aws_alb_target_group.cer "$CER_TG_ARN" || true; fi
+          # Import Security Groups - check if they exist first
+          SG_IDS="sg-0614e4549c9a369f7 sg-0f7ca813c3674f8e4 sg-0dabaaf22d619e8e3 sg-0975c8b04dd4ff0df sg-01a8ba1622fb3ef65"
+          RESOURCES="alb_sg allow_postgres allow_redis allow_tls allow_nfs"
           
-          CDQ_TG_ARN=$(aws elbv2 describe-target-groups --names cdq-target-group --query "TargetGroups[0].TargetGroupArn" --output text --region ca-central-1 2>/dev/null || echo "")
-          if [ ! -z "$CDQ_TG_ARN" ]; then terragrunt import aws_alb_target_group.cdq "$CDQ_TG_ARN" || true; fi
+          for sg_id in $SG_IDS; do
+            if aws ec2 describe-security-groups --group-ids "$sg_id" --region ca-central-1 2>/dev/null | grep -q "GroupId"; then
+              resource_name=$(echo $RESOURCES | cut -d' ' -f1)
+              RESOURCES=$(echo $RESOURCES | cut -d' ' -f2-)
+              safe_import "aws_security_group.$resource_name" "$sg_id"
+            fi
+          done
           
-          PDEX_TG_ARN=$(aws elbv2 describe-target-groups --names pdex-target-group --query "TargetGroups[0].TargetGroupArn" --output text --region ca-central-1 2>/dev/null || echo "")
-          if [ ! -z "$PDEX_TG_ARN" ]; then terragrunt import aws_alb_target_group.pdex "$PDEX_TG_ARN" || true; fi
+          # Import Target Groups - with existence check
+          for tg_name in cer-target-group cdq-target-group pdex-target-group; do
+            TG_ARN=$(aws elbv2 describe-target-groups --names "$tg_name" --query "TargetGroups[0].TargetGroupArn" --output text --region ca-central-1 2>/dev/null || echo "")
+            if [ ! -z "$TG_ARN" ] && [ "$TG_ARN" != "None" ]; then
+              resource_name=$(echo "$tg_name" | cut -d'-' -f1)
+              safe_import "aws_alb_target_group.$resource_name" "$TG_ARN"
+            fi
+          done
           
           # Import ALB
           ALB_ARN=$(aws elbv2 describe-load-balancers --names default --query "LoadBalancers[0].LoadBalancerArn" --output text --region ca-central-1 2>/dev/null || echo "")
-          if [ ! -z "$ALB_ARN" ]; then terragrunt import aws_lb.default_alb "$ALB_ARN" || true; fi
+          if [ ! -z "$ALB_ARN" ] && [ "$ALB_ARN" != "None" ]; then
+            safe_import "aws_lb.default_alb" "$ALB_ARN"
+          fi
           
-          # Import RDS
-          terragrunt import aws_db_subnet_group.data_subnet data-subnet || true
-          terragrunt import aws_rds_cluster.postgres-pdex pdex-postgres-cluster || true
-          RDS_INSTANCE=$(aws rds describe-db-clusters --db-cluster-identifier pdex-postgres-cluster --query "DBClusters[0].DBClusterMembers[0].DBInstanceIdentifier" --output text --region ca-central-1 2>/dev/null || echo "")
-          if [ ! -z "$RDS_INSTANCE" ]; then terragrunt import aws_rds_cluster_instance.postgres-pdex "pdex-postgres-cluster:$RDS_INSTANCE" || true; fi
+          # Import RDS - with existence checks
+          if aws rds describe-db-subnet-groups --db-subnet-group-name data-subnet --region ca-central-1 2>/dev/null | grep -q "DBSubnetGroupName"; then
+            safe_import "aws_db_subnet_group.data_subnet" "data-subnet"
+          fi
+          
+          if aws rds describe-db-clusters --db-cluster-identifier pdex-postgres-cluster --region ca-central-1 2>/dev/null | grep -q "DBClusterIdentifier"; then
+            safe_import "aws_rds_cluster.postgres-pdex" "pdex-postgres-cluster"
+            RDS_INSTANCE=$(aws rds describe-db-clusters --db-cluster-identifier pdex-postgres-cluster --query "DBClusters[0].DBClusterMembers[0].DBInstanceIdentifier" --output text --region ca-central-1 2>/dev/null || echo "")
+            if [ ! -z "$RDS_INSTANCE" ] && [ "$RDS_INSTANCE" != "None" ]; then
+              safe_import "aws_rds_cluster_instance.postgres-pdex" "pdex-postgres-cluster:$RDS_INSTANCE"
+            fi
+          fi
           
           # Import ElastiCache
-          terragrunt import aws_elasticache_subnet_group.default redis-subnet-group-drupal || true
-          terragrunt import aws_elasticache_replication_group.pdex_redis_rg pdex-rep-group || true
-          terragrunt import 'aws_elasticache_cluster.replica[0]' pdex-rep-group-0 || true
+          if aws elasticache describe-cache-subnet-groups --cache-subnet-group-name redis-subnet-group-drupal --region ca-central-1 2>/dev/null | grep -q "CacheSubnetGroupName"; then
+            safe_import "aws_elasticache_subnet_group.default" "redis-subnet-group-drupal"
+          fi
+          
+          if aws elasticache describe-replication-groups --replication-group-id pdex-rep-group --region ca-central-1 2>/dev/null | grep -q "ReplicationGroupId"; then
+            safe_import "aws_elasticache_replication_group.pdex_redis_rg" "pdex-rep-group"
+            safe_import 'aws_elasticache_cluster.replica[0]' "pdex-rep-group-0"
+          fi
           
           # Import EFS
           EFS_ID=$(aws efs describe-file-systems --creation-token pdex-cer-efs --query "FileSystems[0].FileSystemId" --output text --region ca-central-1 2>/dev/null || echo "")
           if [ ! -z "$EFS_ID" ] && [ "$EFS_ID" != "None" ]; then
-            terragrunt import aws_efs_file_system.pdex-cer "$EFS_ID" || true
+            safe_import "aws_efs_file_system.pdex-cer" "$EFS_ID"
             MT_IDS=$(aws efs describe-mount-targets --file-system-id "$EFS_ID" --query "MountTargets[*].MountTargetId" --output text --region ca-central-1 2>/dev/null || echo "")
             MT_ARRAY=($MT_IDS)
-            if [ ${#MT_ARRAY[@]} -ge 1 ]; then terragrunt import aws_efs_mount_target.data_azA "${MT_ARRAY[0]}" || true; fi
-            if [ ${#MT_ARRAY[@]} -ge 2 ]; then terragrunt import aws_efs_mount_target.data_azB "${MT_ARRAY[1]}" || true; fi
+            if [ ${#MT_ARRAY[@]} -ge 1 ]; then safe_import "aws_efs_mount_target.data_azA" "${MT_ARRAY[0]}"; fi
+            if [ ${#MT_ARRAY[@]} -ge 2 ]; then safe_import "aws_efs_mount_target.data_azB" "${MT_ARRAY[1]}"; fi
           fi
           
           # Import KMS
-          terragrunt import aws_kms_key.pdex-kms-key 43934437-94a9-4668-bfbf-b5394622743a || true
+          if aws kms describe-key --key-id 43934437-94a9-4668-bfbf-b5394622743a --region ca-central-1 2>/dev/null | grep -q "KeyId"; then
+            safe_import "aws_kms_key.pdex-kms-key" "43934437-94a9-4668-bfbf-b5394622743a"
+          fi
           
           # Import OpenSearch
-          terragrunt import aws_elasticsearch_domain.pdex-jb-cluster pdex-jb-cluster || true
+          if aws opensearch describe-domain --domain-name pdex-jb-cluster --region ca-central-1 2>/dev/null | grep -q "DomainName"; then
+            safe_import "aws_elasticsearch_domain.pdex-jb-cluster" "pdex-jb-cluster"
+          fi
+          
+          # Import IAM resources
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          terragrunt import aws_iam_service_linked_role.es "arn:aws:iam::${ACCOUNT_ID}:role/aws-service-role/es.amazonaws.com/AWSServiceRoleForAmazonElasticsearchService" || true
           
-          # Import IAM Roles
-          terragrunt import aws_iam_role.eks-cluster-role eks-cluster-role || true
-          terragrunt import aws_iam_role.efs-csi-role efs-csi-role || true
-          terragrunt import aws_iam_role.eks-ng-role eks-ng-role || true
-          terragrunt import aws_iam_role.cluster_auto_scaler_role cluster_auto_scaler_role || true
-          terragrunt import aws_iam_role.ses_mailer_role ses_mailer_role || true
-          terragrunt import aws_iam_role.alb_role AWSLoadBalancerControllerIAMRole || true
-          terragrunt import aws_iam_policy.alb_policy "arn:aws:iam::${ACCOUNT_ID}:policy/AWSLoadBalancerControllerIAMPolicy" || true
+          for role in eks-cluster-role efs-csi-role eks-ng-role cluster_auto_scaler_role ses_mailer_role AWSLoadBalancerControllerIAMRole; do
+            if aws iam get-role --role-name "$role" 2>/dev/null | grep -q "RoleName"; then
+              resource_name=$(echo "$role" | sed 's/AWSLoadBalancerControllerIAMRole/alb_role/')
+              safe_import "aws_iam_role.$resource_name" "$role"
+            fi
+          done
           
-          echo "Import step completed (errors ignored)"
+          if aws iam get-policy --policy-arn "arn:aws:iam::${ACCOUNT_ID}:policy/AWSLoadBalancerControllerIAMPolicy" 2>/dev/null | grep -q "PolicyName"; then
+            safe_import "aws_iam_policy.alb_policy" "arn:aws:iam::${ACCOUNT_ID}:policy/AWSLoadBalancerControllerIAMPolicy"
+          fi
+          
+          if aws iam get-role --role-name aws-service-role/es.amazonaws.com/AWSServiceRoleForAmazonElasticsearchService 2>/dev/null | grep -q "RoleName"; then
+            safe_import "aws_iam_service_linked_role.es" "arn:aws:iam::${ACCOUNT_ID}:role/aws-service-role/es.amazonaws.com/AWSServiceRoleForAmazonElasticsearchService"
+          fi
+          
+          echo "Import step completed successfully (errors ignored)"
 
       - name: Terragrunt Apply
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
