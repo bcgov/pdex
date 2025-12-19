@@ -4,8 +4,6 @@ on:
   pull_request:
     branches: [ dev-aws-infra ]
     types: [ closed ]
-    paths:
-      - 'terraform/dev/**'
 
 env:
   TF_VERSION: 1.12.2
