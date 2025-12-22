@@ -72,7 +72,7 @@ EOF
 	}
 	
 	tags = {
-		Domain = "WorkBCJBCluster"
+		Domain = "PdexJBCluster"
 	}
 	
 	depends_on = [aws_iam_service_linked_role.es]
