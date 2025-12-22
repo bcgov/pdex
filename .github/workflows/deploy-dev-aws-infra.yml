@@ -97,6 +97,19 @@ jobs:
           if [ ! -z "$NFS_SG_ID" ] && [ "$NFS_SG_ID" != "None" ]; then
             echo "Found NFS SG: $NFS_SG_ID"
             safe_import "aws_security_group.allow_nfs" "$NFS_SG_ID"
+            
+            # Import security group rules for NFS
+            echo "=== Importing NFS Security Group Rules ==="
+            NFS_RULES=$(aws ec2 describe-security-group-rules --filters "Name=group-id,Values=$NFS_SG_ID" --query "SecurityGroupRules[*].SecurityGroupRuleId" --output text --region ca-central-1 2>/dev/null || echo "")
+            for rule_id in $NFS_RULES; do
+              RULE_INFO=$(aws ec2 describe-security-group-rules --security-group-rule-ids "$rule_id" --query "SecurityGroupRules[0]" --region ca-central-1 2>/dev/null)
+              IS_EGRESS=$(echo "$RULE_INFO" | grep -o '"IsEgress": true' || echo "")
+              if [ ! -z "$IS_EGRESS" ]; then
+                safe_import "aws_vpc_security_group_egress_rule.allow_all_traffic_ipv4" "$rule_id"
+              else
+                safe_import "aws_vpc_security_group_ingress_rule.allow_nfs_ipv4" "$rule_id"
+              fi
+            done
           fi
           
           echo "=== Importing Postgres Security Group ==="
@@ -104,6 +117,19 @@ jobs:
           if [ ! -z "$PG_SG_ID" ] && [ "$PG_SG_ID" != "None" ]; then
             echo "Found Postgres SG: $PG_SG_ID"
             safe_import "aws_security_group.allow_postgres" "$PG_SG_ID"
+            
+            # Import security group rules for Postgres
+            echo "=== Importing Postgres Security Group Rules ==="
+            PG_RULES=$(aws ec2 describe-security-group-rules --filters "Name=group-id,Values=$PG_SG_ID" --query "SecurityGroupRules[*].SecurityGroupRuleId" --output text --region ca-central-1 2>/dev/null || echo "")
+            for rule_id in $PG_RULES; do
+              RULE_INFO=$(aws ec2 describe-security-group-rules --security-group-rule-ids "$rule_id" --query "SecurityGroupRules[0]" --region ca-central-1 2>/dev/null)
+              IS_EGRESS=$(echo "$RULE_INFO" | grep -o '"IsEgress": true' || echo "")
+              if [ ! -z "$IS_EGRESS" ]; then
+                safe_import "aws_vpc_security_group_egress_rule.allow_all_traffic_ipv4a" "$rule_id"
+              else
+                safe_import "aws_vpc_security_group_ingress_rule.allow_postgres_ipv4" "$rule_id"
+              fi
+            done
           fi
           
           echo "=== Importing Redis Security Group ==="
@@ -111,6 +137,19 @@ jobs:
           if [ ! -z "$REDIS_SG_ID" ] && [ "$REDIS_SG_ID" != "None" ]; then
             echo "Found Redis SG: $REDIS_SG_ID"
             safe_import "aws_security_group.allow_redis" "$REDIS_SG_ID"
+            
+            # Import security group rules for Redis
+            echo "=== Importing Redis Security Group Rules ==="
+            REDIS_RULES=$(aws ec2 describe-security-group-rules --filters "Name=group-id,Values=$REDIS_SG_ID" --query "SecurityGroupRules[*].SecurityGroupRuleId" --output text --region ca-central-1 2>/dev/null || echo "")
+            for rule_id in $REDIS_RULES; do
+              RULE_INFO=$(aws ec2 describe-security-group-rules --security-group-rule-ids "$rule_id" --query "SecurityGroupRules[0]" --region ca-central-1 2>/dev/null)
+              IS_EGRESS=$(echo "$RULE_INFO" | grep -o '"IsEgress": true' || echo "")
+              if [ ! -z "$IS_EGRESS" ]; then
+                safe_import "aws_vpc_security_group_egress_rule.allow_all_traffic_ipv4b" "$rule_id"
+              else
+                safe_import "aws_vpc_security_group_ingress_rule.allow_redis_ipv4" "$rule_id"
+              fi
+            done
           fi
           
           echo "=== Importing TLS Security Group ==="
@@ -118,6 +157,19 @@ jobs:
           if [ ! -z "$TLS_SG_ID" ] && [ "$TLS_SG_ID" != "None" ]; then
             echo "Found TLS SG: $TLS_SG_ID"
             safe_import "aws_security_group.allow_tls" "$TLS_SG_ID"
+            
+            # Import security group rules for TLS
+            echo "=== Importing TLS Security Group Rules ==="
+            TLS_RULES=$(aws ec2 describe-security-group-rules --filters "Name=group-id,Values=$TLS_SG_ID" --query "SecurityGroupRules[*].SecurityGroupRuleId" --output text --region ca-central-1 2>/dev/null || echo "")
+            for rule_id in $TLS_RULES; do
+              RULE_INFO=$(aws ec2 describe-security-group-rules --security-group-rule-ids "$rule_id" --query "SecurityGroupRules[0]" --region ca-central-1 2>/dev/null)
+              IS_EGRESS=$(echo "$RULE_INFO" | grep -o '"IsEgress": true' || echo "")
+              if [ ! -z "$IS_EGRESS" ]; then
+                safe_import "aws_vpc_security_group_egress_rule.allow_all_traffic_ipv4c" "$rule_id"
+              else
+                safe_import "aws_vpc_security_group_ingress_rule.allow_tls_ipv4" "$rule_id"
+              fi
+            done
           fi
           
           # Import Target Groups - with existence check
