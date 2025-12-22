@@ -1,8 +1,3 @@
-# NOTE: If these resources already exist in AWS, you need to import them first:
-# terraform import aws_security_group.alb_sg sg-xxxxx
-# terraform import aws_alb_target_group.cer arn:aws:elasticloadbalancing:...
-# OR delete them from AWS and let Terraform recreate them
-
 resource "aws_security_group" "alb_sg" {
   name        = "alb-https-sg"
   description = "Allow HTTPS inbound traffic"
@@ -20,10 +15,6 @@ resource "aws_security_group" "alb_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-  
-  lifecycle {
-    ignore_changes = all
   }
 }
 
@@ -47,7 +38,6 @@ resource "aws_alb_target_group" "cer" {
     
   lifecycle {
     create_before_destroy = true
-    ignore_changes = all
   }
 
   tags = var.common_tags
@@ -63,76 +53,62 @@ resource "aws_lb" "default_alb" {
   tags = {
     Public = "True"
   }
-  
-  lifecycle {
-    ignore_changes = all
+}
+
+resource "aws_lb_listener" "https_listener" {
+  load_balancer_arn = aws_lb.default_alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:ca-central-1:396067939651:certificate/5818f61d-2848-48aa-9781-fdaf67be4bb9"
+
+  default_action {
+    type             = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Not Found"
+      status_code  = "404"
+    }
   }
 }
 
-# TODO: Create ACM certificate for dev.pdex.gov.bc.ca in ca-central-1, then uncomment below
-# aws acm request-certificate --domain-name dev.pdex.gov.bc.ca --validation-method DNS --region ca-central-1
+resource "aws_lb_listener_rule" "healthcheck_fixed_response" {
+  listener_arn = aws_lb_listener.https_listener.arn
+  priority     = 10
 
-# # Look up ACM certificate for ALB (must be in same region as ALB)
-# data "aws_acm_certificate" "alb_cert" {
-#   domain   = "dev.pdex.gov.bc.ca"
-#   statuses = ["ISSUED"]
-#   most_recent = true
-# }
-# 
-# resource "aws_lb_listener" "https_listener" {
-#   load_balancer_arn = aws_lb.default_alb.arn
-#   port              = 443
-#   protocol          = "HTTPS"
-#   ssl_policy        = "ELBSecurityPolicy-2016-08"
-#   certificate_arn   = data.aws_acm_certificate.alb_cert.arn
-# 
-#   default_action {
-#     type             = "fixed-response"
-#     fixed_response {
-#       content_type = "text/plain"
-#       message_body = "Not Found - Missing Cert"
-#       status_code  = "404"
-#     }
-#   }
-# }
+  action {
+    type = "fixed-response"
 
-# resource "aws_lb_listener_rule" "healthcheck_fixed_response" {
-#   listener_arn = aws_lb_listener.https_listener.arn
-#   priority     = 10
-# 
-#   action {
-#     type = "fixed-response"
-# 
-#     fixed_response {
-#       content_type = "text/plain"
-#       message_body = "OK"
-#       status_code  = "200"
-#     }
-#   }
-# 
-#   condition {
-#     path_pattern {
-#       values = ["/bcgovhealthcheck"]
-#     }
-#   }
-# }
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "OK"
+      status_code  = "200"
+    }
+  }
 
-# resource "aws_lb_listener_rule" "host_based_weighted_routing" { {
-#   listener_arn = aws_lb_listener.https_listener.arn
-#   priority     = 100
-# 
-#   action {
-#     type             = "forward"
-#     target_group_arn = aws_alb_target_group.cer.arn
-#   }
-# 
-#   condition {
-#     host_header {
-#       values = ["pdex-cer.*"]
-#     }
-#   }
-#     
-# }
+  condition {
+    path_pattern {
+      values = ["/bcgovhealthcheck"]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "host_based_weighted_routing" {
+  listener_arn = aws_lb_listener.https_listener.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.cer.arn
+  }
+
+  condition {
+    host_header {
+      values = ["pdex-cer.*"]
+    }
+  }
+    
+}
 
 resource "aws_alb_target_group" "cdq" {
   name                 = "cdq-target-group"
@@ -154,28 +130,27 @@ resource "aws_alb_target_group" "cdq" {
     
   lifecycle {
     create_before_destroy = true
-    ignore_changes = all
   }
 
   tags = var.common_tags
 }
 
-# resource "aws_lb_listener_rule" "host_based_weighted_routing2" {
-#   listener_arn = aws_lb_listener.https_listener.arn
-#   priority     = 110
-# 
-#   action {
-#     type             = "forward"
-#     target_group_arn = aws_alb_target_group.cdq.arn
-#   }
-# 
-#   condition {
-#     host_header {
-#       values = ["pdex-cdq.*"]
-#     }
-#   }
-#     
-# }
+resource "aws_lb_listener_rule" "host_based_weighted_routing2" {
+  listener_arn = aws_lb_listener.https_listener.arn
+  priority     = 110
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.cdq.arn
+  }
+
+  condition {
+    host_header {
+      values = ["pdex-cdq.*"]
+    }
+  }
+    
+}
 
 resource "aws_alb_target_group" "pdex" {
   name                 = "pdex-target-group"
@@ -197,25 +172,24 @@ resource "aws_alb_target_group" "pdex" {
     
   lifecycle {
     create_before_destroy = true
-    ignore_changes = all
   }
 
   tags = var.common_tags
 }
 
-# resource "aws_lb_listener_rule" "host_based_weighted_routing3" {
-#   listener_arn = aws_lb_listener.https_listener.arn
-#   priority     = 120
-# 
-#   action {
-#     type             = "forward"
-#     target_group_arn = aws_alb_target_group.pdex.arn
-#   }
-# 
-#   condition {
-#     host_header {
-#       values = ["pdex.*"]
-#     }
-#   }
-#     
-# }
+resource "aws_lb_listener_rule" "host_based_weighted_routing3" {
+  listener_arn = aws_lb_listener.https_listener.arn
+  priority     = 120
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.pdex.arn
+  }
+
+  condition {
+    host_header {
+      values = ["pdex.*"]
+    }
+  }
+    
+}

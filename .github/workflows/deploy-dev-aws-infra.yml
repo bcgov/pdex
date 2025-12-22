@@ -149,8 +149,8 @@ jobs:
           fi
           
           # Import ElastiCache
-          if aws elasticache describe-cache-subnet-groups --cache-subnet-group-name redis-subnet-group-drupal --region ca-central-1 2>/dev/null | grep -q "CacheSubnetGroupName"; then
-            safe_import "aws_elasticache_subnet_group.default" "redis-subnet-group-drupal"
+          if aws elasticache describe-cache-subnet-groups --cache-subnet-group-name redis-subnet-group-laravel --region ca-central-1 2>/dev/null | grep -q "CacheSubnetGroupName"; then
+            safe_import "aws_elasticache_subnet_group.default" "redis-subnet-group-laravel"
           fi
           
           if aws elasticache describe-replication-groups --replication-group-id pdex-rep-group --region ca-central-1 2>/dev/null | grep -q "ReplicationGroupId"; then

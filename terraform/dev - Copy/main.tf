@@ -1,4 +1,3 @@
-
 locals {
   common_tags        = var.common_tags
   environment		 = var.vpc_name

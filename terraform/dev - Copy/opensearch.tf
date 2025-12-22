@@ -3,6 +3,21 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_iam_service_linked_role" "es" {
 	aws_service_name = "es.amazonaws.com"
+	
+	lifecycle {
+		ignore_changes = all
+	}
+}
+
+# OpenSearch credentials from Secrets Manager
+data "aws_secretsmanager_secret_version" "opensearch_creds" {
+  secret_id = "pdex-opensearch-creds"
+}
+
+locals {
+  opensearch_creds = jsondecode(
+    data.aws_secretsmanager_secret_version.opensearch_creds.secret_string
+  )
 }
 
 
@@ -66,15 +81,19 @@ EOF
 		enabled = true
 		internal_user_database_enabled = true
 		master_user_options {
-			master_user_name = local.db_creds3.es_username
-			master_user_password = local.db_creds3.es_password
+			master_user_name = local.opensearch_creds.es_username
+			master_user_password = local.opensearch_creds.es_password
 		}
 	}
 	
 	tags = {
-		Domain = "WorkBCJBCluster"
+		Domain = "PdexJBCluster"
 	}
 	
 	depends_on = [aws_iam_service_linked_role.es]
+	
+	lifecycle {
+		ignore_changes = all
+	}
 }
 

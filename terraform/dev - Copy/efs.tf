@@ -8,6 +8,10 @@ resource "aws_efs_file_system" "pdex-cer" {
     },
     var.common_tags
   )
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_efs_mount_target" "data_azA" {
@@ -15,6 +19,10 @@ resource "aws_efs_mount_target" "data_azA" {
   subnet_id       = sort(data.aws_subnets.data.ids)[0]
   security_groups = [data.aws_security_group.app.id, aws_security_group.allow_nfs.id]
   depends_on = [aws_security_group.allow_nfs]
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_efs_mount_target" "data_azB" {
@@ -22,6 +30,10 @@ resource "aws_efs_mount_target" "data_azB" {
   subnet_id       = sort(data.aws_subnets.data.ids)[1]
   security_groups = [data.aws_security_group.app.id, aws_security_group.allow_nfs.id]
   depends_on = [aws_security_group.allow_nfs]
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
   
 resource "aws_efs_backup_policy" "pdex-cer-efs-backups-policy" {

@@ -16,6 +16,10 @@ resource "aws_iam_role" "eks-cluster-role" {
       },
     ]
   })
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #Cluster role policy
@@ -38,6 +42,10 @@ resource "aws_eks_cluster" "pdex-cluster" {
     aws_iam_role_policy_attachment.eks-cluster-policy,
     aws_iam_role.eks-cluster-role,
   ]
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #EKS cluster addons
@@ -78,6 +86,10 @@ resource "aws_iam_role" "efs-csi-role" {
     }]
     Version = "2012-10-17"
   })
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #EFS CSI policy
@@ -110,6 +122,10 @@ resource "aws_iam_role" "eks-ng-role" {
     }]
     Version = "2012-10-17"
   })
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #Node group policies
@@ -157,6 +173,10 @@ resource "aws_eks_node_group" "eks-ng" {
     aws_iam_role_policy_attachment.ng-AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.ng-AmazonEC2ContainerRegistryReadOnly,
   ]
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 
@@ -177,6 +197,10 @@ resource "aws_iam_role" "cluster_auto_scaler_role" {
     }]
     Version = "2012-10-17"
   })
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #Cluster auto scaler policy
@@ -223,6 +247,10 @@ resource "aws_iam_role" "ses_mailer_role" {
     }]
     Version = "2012-10-17"
   })
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #SES Mailer policy

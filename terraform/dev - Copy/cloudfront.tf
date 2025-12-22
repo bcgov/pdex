@@ -1,4 +1,18 @@
 # cloudfront.tf
+
+# TODO: Create ACM certificate for dev.pdex.gov.bc.ca in us-east-1, then uncomment below
+# aws acm request-certificate --domain-name dev.pdex.gov.bc.ca --validation-method DNS --region us-east-1
+
+# # CloudFront requires certificates to be in us-east-1
+# data "aws_acm_certificate" "cloudfront_cert" {
+#   provider = aws.us_east_1
+#   domain   = "dev.pdex.gov.bc.ca"
+#   statuses = ["ISSUED"]
+#   most_recent = true
+# }
+
+# Temporarily disabled until certificate is created
+/*
 resource "random_integer" "cf_origin_id" {
   min = 1
   max = 100
@@ -17,7 +31,7 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
       "TLSv1.2"]
     }
 
-    domain_name = "pdex-cer.f2da56-dev.stratus.cloud.gov.bc.ca"
+    domain_name = "pdex-cer.a55eb5-dev.stratus.cloud.gov.bc.ca"
     origin_id   = random_integer.cf_origin_id.result
 	
 	custom_header {
@@ -29,7 +43,7 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
 
   enabled         = true
   is_ipv6_enabled = true
-  comment         = "Post-Secondary Data Exchange"
+  comment         = "PDEX"
 
   default_cache_behavior {
     allowed_methods = [
@@ -59,7 +73,7 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
 	
     # SimpleCORS
     response_headers_policy_id = "60669652-455b-4ae9-85a4-c4c02393f86c"
-}
+  }
 
   price_class = "PriceClass_100"
 
@@ -84,4 +98,5 @@ output "cloudfront_url" {
   value = "https://${aws_cloudfront_distribution.pdex-cer[0].domain_name}"
 
 }
+*/
 
