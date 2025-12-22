@@ -133,6 +133,36 @@ jobs:
           ALB_ARN=$(aws elbv2 describe-load-balancers --names default --query "LoadBalancers[0].LoadBalancerArn" --output text --region ca-central-1 2>/dev/null || echo "")
           if [ ! -z "$ALB_ARN" ] && [ "$ALB_ARN" != "None" ]; then
             safe_import "aws_lb.default_alb" "$ALB_ARN"
+            
+            # Import ALB Listener (HTTPS on port 443)
+            echo "=== Importing ALB HTTPS Listener ==="
+            LISTENER_ARN=$(aws elbv2 describe-listeners --load-balancer-arn "$ALB_ARN" --query "Listeners[?Port==\`443\`].ListenerArn" --output text --region ca-central-1 2>/dev/null || echo "")
+            if [ ! -z "$LISTENER_ARN" ] && [ "$LISTENER_ARN" != "None" ]; then
+              echo "Found HTTPS listener: $LISTENER_ARN"
+              safe_import "aws_lb_listener.https_listener" "$LISTENER_ARN"
+              
+              # Import listener rules
+              echo "=== Importing ALB Listener Rules ==="
+              RULE_ARNS=$(aws elbv2 describe-rules --listener-arn "$LISTENER_ARN" --query "Rules[?!IsDefault].RuleArn" --output text --region ca-central-1 2>/dev/null || echo "")
+              if [ ! -z "$RULE_ARNS" ]; then
+                for rule_arn in $RULE_ARNS; do
+                  echo "Found listener rule: $rule_arn"
+                  # Extract priority to determine which resource to import
+                  PRIORITY=$(aws elbv2 describe-rules --rule-arns "$rule_arn" --query "Rules[0].Priority" --output text --region ca-central-1 2>/dev/null || echo "")
+                  if [ "$PRIORITY" == "10" ]; then
+                    safe_import "aws_lb_listener_rule.healthcheck_fixed_response" "$rule_arn"
+                  elif [ "$PRIORITY" == "100" ]; then
+                    safe_import "aws_lb_listener_rule.cer" "$rule_arn"
+                  elif [ "$PRIORITY" == "200" ]; then
+                    safe_import "aws_lb_listener_rule.cdq" "$rule_arn"
+                  elif [ "$PRIORITY" == "300" ]; then
+                    safe_import "aws_lb_listener_rule.pdex" "$rule_arn"
+                  fi
+                done
+              fi
+            else
+              echo "HTTPS listener not found"
+            fi
           fi
           
           # Import RDS - with existence checks
@@ -189,6 +219,18 @@ jobs:
           if aws eks describe-cluster --name pdex-cluster --region ca-central-1 2>/dev/null | grep -q "cluster"; then
             echo "Found EKS cluster: pdex-cluster"
             safe_import "aws_eks_cluster.pdex-cluster" "pdex-cluster"
+            
+            # Import EKS Node Groups
+            echo "=== Importing EKS Node Groups ==="
+            NODE_GROUPS=$(aws eks list-nodegroups --cluster-name pdex-cluster --query "nodegroups" --output text --region ca-central-1 2>/dev/null || echo "")
+            if [ ! -z "$NODE_GROUPS" ]; then
+              for ng in $NODE_GROUPS; do
+                echo "Found node group: $ng"
+                safe_import "aws_eks_node_group.pdex-cluster" "pdex-cluster:$ng"
+              done
+            else
+              echo "No node groups found"
+            fi
           else
             echo "EKS cluster not found, will be created"
           fi
