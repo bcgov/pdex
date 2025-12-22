@@ -91,6 +91,35 @@ jobs:
             echo "ALB security group not found, will be created"
           fi
           
+          # Import other security groups
+          echo "=== Importing NFS Security Group ==="
+          NFS_SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=allow_nfs" "Name=vpc-id,Values=vpc-0beb5c99b7f010268" --query "SecurityGroups[0].GroupId" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$NFS_SG_ID" ] && [ "$NFS_SG_ID" != "None" ]; then
+            echo "Found NFS SG: $NFS_SG_ID"
+            safe_import "aws_security_group.allow_nfs" "$NFS_SG_ID"
+          fi
+          
+          echo "=== Importing Postgres Security Group ==="
+          PG_SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=allow_postgres" "Name=vpc-id,Values=vpc-0beb5c99b7f010268" --query "SecurityGroups[0].GroupId" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$PG_SG_ID" ] && [ "$PG_SG_ID" != "None" ]; then
+            echo "Found Postgres SG: $PG_SG_ID"
+            safe_import "aws_security_group.allow_postgres" "$PG_SG_ID"
+          fi
+          
+          echo "=== Importing Redis Security Group ==="
+          REDIS_SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=allow_redis" "Name=vpc-id,Values=vpc-0beb5c99b7f010268" --query "SecurityGroups[0].GroupId" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$REDIS_SG_ID" ] && [ "$REDIS_SG_ID" != "None" ]; then
+            echo "Found Redis SG: $REDIS_SG_ID"
+            safe_import "aws_security_group.allow_redis" "$REDIS_SG_ID"
+          fi
+          
+          echo "=== Importing TLS Security Group ==="
+          TLS_SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=allow_tls" "Name=vpc-id,Values=vpc-0beb5c99b7f010268" --query "SecurityGroups[0].GroupId" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$TLS_SG_ID" ] && [ "$TLS_SG_ID" != "None" ]; then
+            echo "Found TLS SG: $TLS_SG_ID"
+            safe_import "aws_security_group.allow_tls" "$TLS_SG_ID"
+          fi
+          
           # Import Target Groups - with existence check
           for tg_name in cer-target-group cdq-target-group pdex-target-group; do
             TG_ARN=$(aws elbv2 describe-target-groups --names "$tg_name" --query "TargetGroups[0].TargetGroupArn" --output text --region ca-central-1 2>/dev/null || echo "")
