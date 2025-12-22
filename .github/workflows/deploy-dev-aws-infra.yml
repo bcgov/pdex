@@ -81,9 +81,14 @@ jobs:
           
           # Skip importing security groups that are attached to active resources (RDS, Redis, etc)
           # These will be created fresh by Terraform
-          # Only import standalone ALB security group if it exists
-          if aws ec2 describe-security-groups --group-ids sg-0614e4549c9a369f7 --region ca-central-1 2>/dev/null | grep -q "GroupId"; then
-            safe_import "aws_security_group.alb_sg" "sg-0614e4549c9a369f7"
+          # Import standalone ALB security group
+          echo "=== Importing ALB Security Group ==="
+          ALB_SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=alb-https-sg" "Name=vpc-id,Values=vpc-0beb5c99b7f010268" --query "SecurityGroups[0].GroupId" --output text --region ca-central-1 2>/dev/null || echo "")
+          if [ ! -z "$ALB_SG_ID" ] && [ "$ALB_SG_ID" != "None" ]; then
+            echo "Found ALB SG: $ALB_SG_ID"
+            safe_import "aws_security_group.alb_sg" "$ALB_SG_ID"
+          else
+            echo "ALB security group not found, will be created"
           fi
           
           # Import Target Groups - with existence check
@@ -144,6 +149,25 @@ jobs:
             safe_import "aws_elasticsearch_domain.pdex-jb-cluster" "pdex-jb-cluster"
           fi
           
+          # Import IAM Service-Linked Role for OpenSearch
+          echo "=== Importing IAM Service-Linked Role for OpenSearch ==="
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          if aws iam get-role --role-name AWSServiceRoleForAmazonElasticsearchService 2>/dev/null | grep -q "RoleName"; then
+            echo "Found IAM service-linked role for OpenSearch"
+            safe_import "aws_iam_service_linked_role.es" "arn:aws:iam::${ACCOUNT_ID}:role/aws-service-role/es.amazonaws.com/AWSServiceRoleForAmazonElasticsearchService"
+          else
+            echo "IAM service-linked role not found, will be created"
+          fi
+          
+          # Import EKS Cluster
+          echo "=== Importing EKS Cluster ==="
+          if aws eks describe-cluster --name pdex-cluster --region ca-central-1 2>/dev/null | grep -q "cluster"; then
+            echo "Found EKS cluster: pdex-cluster"
+            safe_import "aws_eks_cluster.pdex-cluster" "pdex-cluster"
+          else
+            echo "EKS cluster not found, will be created"
+          fi
+          
           # Import IAM resources
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           
@@ -156,10 +180,6 @@ jobs:
           
           if aws iam get-policy --policy-arn "arn:aws:iam::${ACCOUNT_ID}:policy/AWSLoadBalancerControllerIAMPolicy" 2>/dev/null | grep -q "PolicyName"; then
             safe_import "aws_iam_policy.alb_policy" "arn:aws:iam::${ACCOUNT_ID}:policy/AWSLoadBalancerControllerIAMPolicy"
-          fi
-          
-          if aws iam get-role --role-name aws-service-role/es.amazonaws.com/AWSServiceRoleForAmazonElasticsearchService 2>/dev/null | grep -q "RoleName"; then
-            safe_import "aws_iam_service_linked_role.es" "arn:aws:iam::${ACCOUNT_ID}:role/aws-service-role/es.amazonaws.com/AWSServiceRoleForAmazonElasticsearchService"
           fi
           
           echo "Import step completed successfully (errors ignored)"
