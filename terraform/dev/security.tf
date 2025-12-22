@@ -32,12 +32,20 @@ resource "aws_vpc_security_group_ingress_rule" "allow_nfs_ipv4" {
   from_port         = 2049
   ip_protocol       = "tcp"
   to_port           = 2049
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
   security_group_id = aws_security_group.allow_nfs.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_security_group" "allow_postgres" {
@@ -60,12 +68,20 @@ resource "aws_vpc_security_group_ingress_rule" "allow_postgres_ipv4" {
   from_port         = 5432
   ip_protocol       = "tcp"
   to_port           = 5432
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4a" {
   security_group_id = aws_security_group.allow_postgres.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_security_group" "allow_redis" {
@@ -88,12 +104,20 @@ resource "aws_vpc_security_group_ingress_rule" "allow_redis_ipv4" {
   from_port         = 6379
   ip_protocol       = "tcp"
   to_port           = 6379
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4b" {
   security_group_id = aws_security_group.allow_redis.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_security_group" "allow_tls" {
@@ -116,10 +140,18 @@ resource "aws_vpc_security_group_ingress_rule" "allow_tls_ipv4" {
   from_port         = 443
   ip_protocol       = "tcp"
   to_port           = 443
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4c" {
   security_group_id = aws_security_group.allow_tls.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }

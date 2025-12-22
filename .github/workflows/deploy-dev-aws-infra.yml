@@ -79,17 +79,12 @@ jobs:
             terragrunt import "$resource" "$id" 2>&1 | grep -v "Error: Cannot import non-existent" || true
           }
           
-          # Import Security Groups - check if they exist first
-          SG_IDS="sg-0614e4549c9a369f7 sg-0f7ca813c3674f8e4 sg-0dabaaf22d619e8e3 sg-0975c8b04dd4ff0df sg-01a8ba1622fb3ef65"
-          RESOURCES="alb_sg allow_postgres allow_redis allow_tls allow_nfs"
-          
-          for sg_id in $SG_IDS; do
-            if aws ec2 describe-security-groups --group-ids "$sg_id" --region ca-central-1 2>/dev/null | grep -q "GroupId"; then
-              resource_name=$(echo $RESOURCES | cut -d' ' -f1)
-              RESOURCES=$(echo $RESOURCES | cut -d' ' -f2-)
-              safe_import "aws_security_group.$resource_name" "$sg_id"
-            fi
-          done
+          # Skip importing security groups that are attached to active resources (RDS, Redis, etc)
+          # These will be created fresh by Terraform
+          # Only import standalone ALB security group if it exists
+          if aws ec2 describe-security-groups --group-ids sg-0614e4549c9a369f7 --region ca-central-1 2>/dev/null | grep -q "GroupId"; then
+            safe_import "aws_security_group.alb_sg" "sg-0614e4549c9a369f7"
+          fi
           
           # Import Target Groups - with existence check
           for tg_name in cer-target-group cdq-target-group pdex-target-group; do
