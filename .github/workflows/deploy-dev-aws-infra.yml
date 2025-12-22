@@ -226,7 +226,8 @@ jobs:
             if [ ! -z "$NODE_GROUPS" ]; then
               for ng in $NODE_GROUPS; do
                 echo "Found node group: $ng"
-                safe_import "aws_eks_node_group.pdex-cluster" "pdex-cluster:$ng"
+                # Import using the resource name from eks.tf (eks-ng)
+                safe_import "aws_eks_node_group.eks-ng" "pdex-cluster:$ng"
               done
             else
               echo "No node groups found"
