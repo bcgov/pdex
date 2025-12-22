@@ -173,10 +173,6 @@ jobs:
             safe_import "aws_kms_key.pdex-kms-key" "43934437-94a9-4668-bfbf-b5394622743a"
           fi
           
-          # Import OpenSearch
-          if aws opensearch describe-domain --domain-name pdex-jb-cluster --region ca-central-1 2>/dev/null | grep -q "DomainName"; then
-            safe_import "aws_elasticsearch_domain.pdex-jb-cluster" "pdex-jb-cluster"
-          fi
           
           # Import IAM Service-Linked Role for OpenSearch
           echo "=== Importing IAM Service-Linked Role for OpenSearch ==="
