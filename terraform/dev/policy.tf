@@ -1,10 +1,10 @@
 resource "aws_iam_policy" "alb_policy" {
-  name   = "AWSLoadBalancerControllerIAMPolicy"
+  name   = "AWSLoadBalancerControllerIAMPolicy-Dev"
   policy = file("${path.module}/iam_policy.json")
 }
 
 resource "aws_iam_role" "alb_role" {
-  name = "AWSLoadBalancerControllerIAMRole"
+  name = "AWSLoadBalancerControllerIAMRole-Dev"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

@@ -70,6 +70,10 @@ resource "aws_lb_listener" "https_listener" {
       status_code  = "404"
     }
   }
+
+  lifecycle {
+    ignore_changes = [certificate_arn]
+  }
 }
 
 resource "aws_lb_listener_rule" "healthcheck_fixed_response" {
