@@ -57,3 +57,5 @@ data "aws_subnet" "web" {
   for_each = toset(data.aws_subnets.web.ids)
   id       = each.value
 }
+
+
