@@ -1,5 +1,4 @@
 locals {
-  project          = get_env("LICENSE_PLATE")
   environment      = reverse(split("/", get_terragrunt_dir()))[0]
 }
 /*
