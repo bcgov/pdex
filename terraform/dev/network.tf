@@ -1,10 +1,7 @@
 # network.tf
 
 data "aws_vpc" "main" {
-  filter {
-    name = "tag:Name"
-    values = [var.vpc_name]
-  }
+  id = var.vpc_name
 }
 
 data "aws_subnets" "app" {

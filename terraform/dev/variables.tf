@@ -12,7 +12,7 @@ variable "aws_region" {
 
 variable "vpc_name" {
   type = string
-  description = "Name of the VPC to deploy resources into"
+  description = "VPC ID to deploy resources into"
 }
 
 variable "common_tags" {
