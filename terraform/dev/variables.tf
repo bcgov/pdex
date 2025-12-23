@@ -10,9 +10,15 @@ variable "aws_region" {
   default     = "ca-central-1"
 }
 
-variable "vpc_name" {
+variable "vpc_id" {
   type = string
   description = "VPC ID to deploy resources into"
+}
+
+variable "environment_name" {
+  type = string
+  description = "Environment name for subnet naming (e.g., Dev, Test, Prod)"
+  default = "Dev"
 }
 
 variable "common_tags" {

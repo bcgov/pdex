@@ -46,5 +46,5 @@ EOF
 }
 
 inputs = {
-  vpc_name = "${upper(substr(local.environment, 0, 1))}${substr(local.environment, 1, -1)}"
+  # Don't auto-generate vpc_name, let it be passed from environment
 }
