@@ -255,17 +255,6 @@ jobs:
             safe_import "aws_kms_key.pdex-kms-key" "43934437-94a9-4668-bfbf-b5394622743a"
           fi
           
-          
-          # Import IAM Service-Linked Role for OpenSearch
-          echo "=== Importing IAM Service-Linked Role for OpenSearch ==="
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          if aws iam get-role --role-name AWSServiceRoleForAmazonElasticsearchService 2>/dev/null | grep -q "RoleName"; then
-            echo "Found IAM service-linked role for OpenSearch"
-            safe_import "aws_iam_service_linked_role.es" "arn:aws:iam::${ACCOUNT_ID}:role/aws-service-role/es.amazonaws.com/AWSServiceRoleForAmazonElasticsearchService"
-          else
-            echo "IAM service-linked role not found, will be created"
-          fi
-          
           # Import EKS Cluster
           echo "=== Importing EKS Cluster ==="
           if aws eks describe-cluster --name pdex-cluster --region ca-central-1 2>/dev/null | grep -q "cluster"; then
@@ -308,7 +297,9 @@ jobs:
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
         env:
           LICENSE_PLATE: ${{ secrets.MY_LICENSE_PLATE }}
-        run: terragrunt run-all apply --non-interactive
+        run: |
+          terragrunt run-all destroy --non-interactive --terragrunt-parallelism 1
+          terragrunt run-all apply --non-interactive --terragrunt-parallelism 1
 
 
       - name: Finished Terragrunt Apply
