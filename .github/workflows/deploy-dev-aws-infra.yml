@@ -59,6 +59,31 @@ jobs:
         with:
           terragrunt-version: ${{ env.TG_VERSION }}
 
+      - name: Debug backend and state
+        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
+        run: |
+          set -e
+          echo "=== terragrunt-info ==="
+          terragrunt run-all terragrunt-info --non-interactive
+          
+          echo "=== show generated backend.tf (first few) ==="
+          find . -name backend.tf -maxdepth 4 -print -exec sed -n '1,80p' {} \;
+
+          echo "=== state list (may be empty) ==="
+          terragrunt run-all state list --non-interactive || true
+
+      - name: Create S3 bucket for Terraform state if it doesn't exist
+        run: |
+          BUCKET_NAME="terraform-remote-state-pdex-dev"
+          if ! aws s3 ls "s3://${BUCKET_NAME}" 2>&1 > /dev/null; then
+            echo "Creating S3 bucket ${BUCKET_NAME}..."
+            aws s3api create-bucket --bucket ${BUCKET_NAME} --region ca-central-1 --create-bucket-configuration LocationConstraint=ca-central-1
+            aws s3api put-bucket-versioning --bucket ${BUCKET_NAME} --versioning-configuration Status=Enabled
+            aws s3api put-bucket-encryption --bucket ${BUCKET_NAME} --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+            echo "S3 bucket ${BUCKET_NAME} created successfully"
+          else
+            echo "S3 bucket ${BUCKET_NAME} already exists"
+          fi
 
       - name: Terragrunt Init
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
