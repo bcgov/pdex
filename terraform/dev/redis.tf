@@ -3,7 +3,7 @@
 resource "aws_elasticache_replication_group" "pdex_redis_rg" {
 	automatic_failover_enabled	=	true
 	preferred_cache_cluster_azs	=	["ca-central-1a", "ca-central-1b"]
-	replication_group_id		=	"pdex-rep-group"
+  replication_group_id		=	"pdex-rep-group"
 	description			=	"Redis replication group for PDEX"
 	node_type			=	"cache.t4g.small"
 	num_cache_clusters		=	2
