@@ -59,6 +59,11 @@ jobs:
         with:
           terragrunt-version: ${{ env.TG_VERSION }}
 
+
+      - name: Terragrunt Init
+        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
+        run: terragrunt run-all init --non-interactive
+
       - name: Terragrunt Apply
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
         env:
