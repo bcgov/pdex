@@ -106,11 +106,13 @@ jobs:
 
         run: |
           terragrunt import aws_eks_cluster.pdex-cluster pdex-cluster --non-interactive
-          terragrunt import aws_iam_role.efs_csi_role efs-csi-role --non-interactive
-          terragrunt import aws_iam_role.eks_ng_role eks-ng-role --non-interactive
-          terragrunt import aws_iam_role.cluster_auto_scaler_role cluster_auto_scaler_role --non-interactive
-          terragrunt import aws_iam_role.ses_mailer_role ses_mailer_role --non-interactive
+          terragrunt import aws_iam_role.efs_csi efs-csi-role --non-interactive
+          terragrunt import aws_iam_role.eks_ng eks-ng-role --non-interactive
+          terragrunt import aws_iam_role.cluster_auto_scaler cluster_auto_scaler_role --non-interactive
+          terragrunt import aws_iam_role.ses_mailer ses_mailer_role --non-interactive
           terragrunt import aws_iam_policy.alb_policy arn:aws:iam::814738839437:policy/AWSLoadBalancerControllerIAMPolicy-Dev --non-interactive
+
+
           terragrunt import aws_elasticache_replication_group.pdex_redis_rg pdex-rep-group --non-interactive
 
 
