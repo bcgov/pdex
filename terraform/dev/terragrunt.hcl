@@ -11,6 +11,6 @@ generate "dev_tfvars" {
   if_exists         = "overwrite"
   disable_signature = true
   contents          = <<-EOF
-    cloudfront = false
+    cloudfront = true
   EOF
 }

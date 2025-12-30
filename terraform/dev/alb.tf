@@ -32,7 +32,7 @@ resource "aws_alb_target_group" "cer" {
     protocol            = "HTTP"
     matcher             = "200"
     timeout             = "5"
-    path                = "/index.html"
+    path                = "/index.php"
     unhealthy_threshold = "2"
   }
     
@@ -92,7 +92,7 @@ resource "aws_lb_listener_rule" "healthcheck_fixed_response" {
 
   condition {
     path_pattern {
-      values = ["/bcgovhealthcheck"]
+      values = ["/up"]
     }
   }
 }
@@ -141,7 +141,7 @@ resource "aws_alb_target_group" "cdq" {
     protocol            = "HTTP"
     matcher             = "200"
     timeout             = "5"
-    path                = "/index.html"
+    path                = "/index.php"
     unhealthy_threshold = "2"
   }
     
@@ -183,7 +183,7 @@ resource "aws_alb_target_group" "pdex" {
     protocol            = "HTTP"
     matcher             = "200"
     timeout             = "5"
-    path                = "/index.html"
+    path                = "/index.php"
     unhealthy_threshold = "2"
   }
     

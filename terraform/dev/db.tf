@@ -36,10 +36,19 @@ data "aws_secretsmanager_secret_version" "creds" {
   secret_id = "pdex-db-creds"
 }
 
+data "aws_secretsmanager_secret_version" "opensearch_creds" {
+  secret_id = "pdex-opensearch-creds"
+}
+
+
 locals {
   db_creds = jsondecode(
     data.aws_secretsmanager_secret_version.creds.secret_string
   )
+  opensearch_creds = jsondecode(
+    data.aws_secretsmanager_secret_version.opensearch_creds.secret_string
+  )
+
 }
   
 resource "aws_rds_cluster_instance" "postgres-pdex" {
