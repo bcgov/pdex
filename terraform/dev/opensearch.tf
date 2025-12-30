@@ -66,8 +66,8 @@ EOF
 		enabled = true
 		internal_user_database_enabled = true
 		master_user_options {
-			master_user_name = local.pdex-opensearch-creds.es_username
-			master_user_password = local.pdex-opensearch-creds.es_password
+			master_user_name = local.db_creds.es_username
+			master_user_password = local.db_creds.es_password
 		}
 	}
 	
