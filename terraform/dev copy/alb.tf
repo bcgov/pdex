@@ -60,7 +60,7 @@ resource "aws_lb_listener" "https_listener" {
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = var.certificate_arn
+  certificate_arn   = "arn:aws:acm:ca-central-1:814738839437:certificate/d3429e5f-6f7d-44ed-b4b2-caa8f7a82935"
 
   default_action {
     type             = "fixed-response"
@@ -69,10 +69,6 @@ resource "aws_lb_listener" "https_listener" {
       message_body = "Not Found"
       status_code  = "404"
     }
-  }
-
-  lifecycle {
-    ignore_changes = [certificate_arn]
   }
 }
 
@@ -112,19 +108,6 @@ resource "aws_lb_listener_rule" "host_based_weighted_routing" {
     }
   }
     
-}
-
-data "aws_security_group" "eks_node_sg" {
-  id = aws_eks_cluster.pdex-cluster.vpc_config[0].cluster_security_group_id
-}
-
-resource "aws_security_group_rule" "allow_alb" {
-  type                     = "ingress"
-  from_port                = 80
-  to_port                  = 80
-  protocol                 = "tcp"
-  security_group_id        = data.aws_security_group.eks_node_sg.id
-  source_security_group_id = aws_security_group.alb_sg.id
 }
 
 resource "aws_alb_target_group" "cdq" {
@@ -208,11 +191,5 @@ resource "aws_lb_listener_rule" "host_based_weighted_routing3" {
       values = ["pdex.*"]
     }
   }
-
-  condition {
-    http_header {
-      http_header_name = "Pdex-Source"
-      values = [var.source_token]
-    }
-  }  
+    
 }

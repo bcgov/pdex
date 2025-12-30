@@ -1,7 +1,10 @@
 # network.tf
 
 data "aws_vpc" "main" {
-  id = var.vpc_id
+  filter {
+    name = "tag:Name"
+    values = [var.vpc_name]
+  }
 }
 
 data "aws_subnets" "app" {
@@ -54,3 +57,5 @@ data "aws_subnet" "web" {
   for_each = toset(data.aws_subnets.web.ids)
   id       = each.value
 }
+
+

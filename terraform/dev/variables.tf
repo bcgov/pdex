@@ -10,52 +10,16 @@ variable "aws_region" {
   default     = "ca-central-1"
 }
 
-variable "vpc_name" {
+variable "vpc_id" {
   type = string
+  description = "VPC ID to deploy resources into"
 }
 
-#variable "app_name" {
-#  description = "Name of the application"
-#  type        = string
-#  default     = "pdex-cer"
-#}
-
-#variable "app_image" {
-#  description = "Docker image to run in the ECS cluster. _Note_: there is a blank default value, which will cause service and task resource creation to be supressed unless an image is specified."
-#  type        = string
-#  default     = ""
-#}
-
-#variable "app_repo" {
-#  description = "ECR docker image repo"
-#  type        = string
-#  default     = ""
-#}
-
-#variable "app_port" {
-#  description = "Port exposed by the docker image to redirect traffic to"
-#  default     = 443
-#}
-
-#variable "app_count" {
-#  description = "Number of docker containers to run"
-#  default     = 1
-#}
-
-
-#variable "health_check_path" {
-#  default = "/index.html"
-#}
-
-#variable "fargate_cpu" {
-#  description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
-#  default     = 2048
-#}
-
-#variable "fargate_memory" {
-#  description = "Fargate instance memory to provision (in MiB)"
-#  default     = 4096
-#}
+variable "environment_name" {
+  type = string
+  description = "Environment name for subnet naming (e.g., Dev, Test, Prod)"
+  default = "Dev"
+}
 
 variable "common_tags" {
   description = "Common tags for created resources"
@@ -64,24 +28,30 @@ variable "common_tags" {
   }
 }
 
-#variable "service_names" {
-#  description = "List of service names to use as subdomains"
-#  default     = ["pdex-cer"]
-#  type        = list(string)
-#}
-
-#variable "alb_name" {
-#  description = "Name of the internal alb"
-#  default     = "default"
-#  type        = string
-#}
-
 variable "cloudfront" {
-  description = "enable or disable the cloudfront distrabution creation"
+  description = "enable or disable the cloudfront distribution creation"
   type        = bool
 }
 
-#variable "cloudfront_origin_domain" {
-#  description = "domain name of the app"
-#  type        = string
-#}
+variable "cloudfront_origin_domain" {
+  description = "domain name of the app for CloudFront origin"
+  type        = string
+  default     = ""
+}
+
+variable "certificate_arn" {
+  description = "ARN of the ACM certificate for ALB HTTPS listener"
+  type        = string
+}
+
+variable "cloudfront_certificate_arn" {
+  description = "ARN of the ACM certificate for CloudFront (must be in us-east-1)"
+  type        = string
+  default     = ""
+}
+
+variable "source_token" {
+  description = "Source token for PDEX header validation"
+  type        = string
+  sensitive   = true
+}

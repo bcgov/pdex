@@ -11,7 +11,6 @@ resource "aws_rds_cluster" "postgres-pdex" {
   cluster_identifier      = "pdex-postgres-cluster"
   engine                  = "aurora-postgresql"
   engine_version          = "16.8"
-  engine_mode             = "provisioned"
   master_username         = local.db_creds.adm_username
   master_password         = local.db_creds.adm_password
   backup_retention_period = 5
@@ -43,7 +42,6 @@ locals {
 }
   
 resource "aws_rds_cluster_instance" "postgres-pdex" {
-  count = 2
   cluster_identifier = aws_rds_cluster.postgres-pdex.id
   instance_class     = "db.serverless"
   engine             = aws_rds_cluster.postgres-pdex.engine

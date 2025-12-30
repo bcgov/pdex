@@ -1,21 +1,22 @@
-# name: Build and Deploy PDEX in DEV Azure
+name: Build and Deploy PDEX in DEV Azure
 
-# on:
-#   push:
-#     branches:
-#       - dev
-# jobs:
-#   # Print variables for logging and debugging purposes
-#   checkEnv:
-#     name: Check Env variables
-#     runs-on: ubuntu-latest
-#     steps:
-#     - name: Print Env Vars
-#       run: |
-#         echo Git Base Ref: ${{ github.base_ref }}
-#         echo Git Build ID: ${{ github.event.number }}
-#         echo Git Pull Request Ref: ${{ github.event.pull_request.head.sha }}
-#         echo Git Ref Name: ${{ github.ref_name }}
+on:
+  pull_request:
+    branches: [ dev-azure ]
+    types: [ closed ]
+
+jobs:
+  # Print variables for logging and debugging purposes
+  checkEnv:
+    name: Check Env variables
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print Env Vars
+      run: |
+        echo Git Base Ref: ${{ github.base_ref }}
+        echo Git Build ID: ${{ github.event.number }}
+        echo Git Pull Request Ref: ${{ github.event.pull_request.head.sha }}
+        echo Git Ref Name: ${{ github.ref_name }}
 #   # Build PDEX
 #   build:
 #     name: Build project

@@ -1,4 +1,18 @@
 # cloudfront.tf
+
+# TODO: Create ACM certificate for dev.pdex.gov.bc.ca in us-east-1, then uncomment below
+# aws acm request-certificate --domain-name dev.pdex.gov.bc.ca --validation-method DNS --region us-east-1
+
+# # CloudFront requires certificates to be in us-east-1
+# data "aws_acm_certificate" "cloudfront_cert" {
+#   provider = aws.us_east_1
+#   domain   = "dev.pdex.gov.bc.ca"
+#   statuses = ["ISSUED"]
+#   most_recent = true
+# }
+
+# Temporarily disabled until certificate is created
+/*
 resource "random_integer" "cf_origin_id" {
   min = 1
   max = 100
@@ -17,13 +31,19 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
       "TLSv1.2"]
     }
 
-    domain_name = var.cloudfront_origin_domain
+    domain_name = "pdex-cer.a55eb5-dev.stratus.cloud.gov.bc.ca"
     origin_id   = random_integer.cf_origin_id.result
+	
+	custom_header {
+	  name = "X-Forwarded-Host"
+	  value = "dev.pdex.gov.bc.ca"
+	}
+	
   }
 
   enabled         = true
   is_ipv6_enabled = true
-  comment         = "PDEX - Dev"
+  comment         = "PDEX"
 
   default_cache_behavior {
     allowed_methods = [
@@ -59,19 +79,24 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
 
   restrictions {
     geo_restriction {
-      restriction_type = "none"
-      locations        = []
+      restriction_type = "whitelist"
+      locations = ["CA"]
     }
   }
 
   tags = var.common_tags
+  
+  aliases = ["dev.pdex.gov.bc.ca"]
 
   viewer_certificate {
-    acm_certificate_arn = var.cloudfront_certificate_arn
+    acm_certificate_arn = data.aws_acm_certificate.cloudfront_cert.arn
     ssl_support_method = "sni-only"
   }
 }
 
 output "cloudfront_url" {
-  value = var.cloudfront ? "https://${aws_cloudfront_distribution.pdex-cer[0].domain_name}" : "CloudFront disabled"
+  value = "https://${aws_cloudfront_distribution.pdex-cer[0].domain_name}"
+
 }
+*/
+

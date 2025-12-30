@@ -1,8 +1,8 @@
 locals {
-  project          = get_env("LICENSE_PLATE")
   environment      = reverse(split("/", get_terragrunt_dir()))[0]
+  project          = "pdex"
 }
-/*
+
 generate "remote_state" {
   path      = "backend.tf"
   if_exists = "overwrite"
@@ -13,12 +13,10 @@ terraform {
     key = "pdex-infra.tfstate"
     region = "ca-central-1"
     encrypt = true
-	use_lockfile = true # enable native S3 locking
   }
 }
 EOF
 }
-*/
 /*
 generate "tfvars" {
   path              = "terragrunt.auto.tfvars"
@@ -37,9 +35,15 @@ generate "provider" {
   provider "aws" {
     region  = var.aws_region
   }
+  
+  # CloudFront requires certificates in us-east-1
+  provider "aws" {
+    alias  = "us_east_1"
+    region = "us-east-1"
+  }
 EOF
 }
 
 inputs = {
-  vpc_name = "${upper(substr(local.environment, 0, 1))}${substr(local.environment, 1, -1)}"
+  # Don't auto-generate vpc_name, let it be passed from environment
 }

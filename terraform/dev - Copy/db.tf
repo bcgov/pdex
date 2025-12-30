@@ -5,13 +5,16 @@ resource "aws_db_subnet_group" "data_subnet" {
   subnet_ids             = data.aws_subnets.data.ids
 
   tags = var.common_tags
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_rds_cluster" "postgres-pdex" {
   cluster_identifier      = "pdex-postgres-cluster"
   engine                  = "aurora-postgresql"
   engine_version          = "16.8"
-  engine_mode             = "provisioned"
   master_username         = local.db_creds.adm_username
   master_password         = local.db_creds.adm_password
   backup_retention_period = 5
@@ -29,6 +32,10 @@ resource "aws_rds_cluster" "postgres-pdex" {
   }
 
   tags = var.common_tags
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # create this manually
@@ -43,9 +50,12 @@ locals {
 }
   
 resource "aws_rds_cluster_instance" "postgres-pdex" {
-  count = 2
   cluster_identifier = aws_rds_cluster.postgres-pdex.id
   instance_class     = "db.serverless"
   engine             = aws_rds_cluster.postgres-pdex.engine
   engine_version     = aws_rds_cluster.postgres-pdex.engine_version
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }

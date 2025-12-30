@@ -16,6 +16,10 @@ resource "aws_iam_role" "eks-cluster-role" {
       },
     ]
   })
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #Cluster role policy
@@ -38,6 +42,10 @@ resource "aws_eks_cluster" "pdex-cluster" {
     aws_iam_role_policy_attachment.eks-cluster-policy,
     aws_iam_role.eks-cluster-role,
   ]
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #EKS cluster addons
@@ -78,6 +86,10 @@ resource "aws_iam_role" "efs-csi-role" {
     }]
     Version = "2012-10-17"
   })
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #EFS CSI policy
@@ -110,6 +122,10 @@ resource "aws_iam_role" "eks-ng-role" {
     }]
     Version = "2012-10-17"
   })
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #Node group policies
@@ -134,11 +150,16 @@ resource "aws_eks_node_group" "eks-ng" {
   node_group_name = "eks-ng"
   node_role_arn   = aws_iam_role.eks-ng-role.arn
   subnet_ids      = data.aws_subnets.app.ids
+  
+#  launch_template {
+#    id      = aws_launch_template.eks_nodes_lt.id
+#    version = "$Latest"
+#  }
 
   scaling_config {
     desired_size = 3
     max_size     = 10
-    min_size     = 2
+    min_size     = 1
   }
 
   update_config {
@@ -152,6 +173,10 @@ resource "aws_eks_node_group" "eks-ng" {
     aws_iam_role_policy_attachment.ng-AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.ng-AmazonEC2ContainerRegistryReadOnly,
   ]
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 
@@ -172,6 +197,10 @@ resource "aws_iam_role" "cluster_auto_scaler_role" {
     }]
     Version = "2012-10-17"
   })
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 #Cluster auto scaler policy
@@ -201,7 +230,7 @@ resource "aws_iam_role_policy" "cluster_auto_scaler" {
   EOF
 }
 
-#Pod identity role for SES mailer
+#SES Mailer role
 resource "aws_iam_role" "ses_mailer_role" {
   name = "ses_mailer_role"
 
@@ -218,9 +247,13 @@ resource "aws_iam_role" "ses_mailer_role" {
     }]
     Version = "2012-10-17"
   })
+  
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
-#Pod identity policy for SES
+#SES Mailer policy
 resource "aws_iam_role_policy" "ses_mailer_policy" {
   name   = "ses_mailer_policy"
   role   = aws_iam_role.ses_mailer_role.id
@@ -232,12 +265,25 @@ resource "aws_iam_role_policy" "ses_mailer_policy" {
               "Effect": "Allow",
               "Action": [
                   "ses:SendEmail",
-                  "ses:SendRawEmail",
-                  "ses:ListIdentities"
+		  "ses:SendRawEmail",
+		  "ses:ListIdentities"
               ],
               "Resource": "*"
           }
       ]
   }
   EOF
+}
+
+data "aws_security_group" "eks_node_sg" {
+  id = aws_eks_cluster.pdex-cluster.vpc_config[0].cluster_security_group_id
+}
+
+resource "aws_security_group_rule" "allow_alb" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  security_group_id        = data.aws_security_group.eks_node_sg.id
+  source_security_group_id = aws_security_group.alb_sg.id
 }
