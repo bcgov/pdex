@@ -103,8 +103,9 @@ jobs:
           TF_VAR_environment_name: "Dev"
           TF_VAR_certificate_arn: "arn:aws:acm:ca-central-1:814738839437:certificate/b885894d-c4c1-4742-bc0d-88a8136eac68"
           TF_VAR_source_token: ${{ secrets.AWS_HEADER_TOKEN_DEV }}
+
+          # terragrunt import aws_security_group.alb_sg sg-044d5ff5364df5af6 --non-interactive
         run: |
-          terragrunt import aws_security_group.alb_sg sg-044d5ff5364df5af6 --non-interactive
           terragrunt import aws_lb.default_alb arn:aws:elasticloadbalancing:ca-central-1:814738839437:loadbalancer/app/default/9d7598e4923aa8a6 --non-interactive
           terragrunt import aws_alb_target_group.cer arn:aws:elasticloadbalancing:ca-central-1:814738839437:targetgroup/cer-target-group/ae2d6731f3ce367e  --non-interactive
           terragrunt import aws_alb_target_group.cdq arn:aws:elasticloadbalancing:ca-central-1:814738839437:targetgroup/cdq-target-group/1ce6369bcad7745f  --non-interactive
