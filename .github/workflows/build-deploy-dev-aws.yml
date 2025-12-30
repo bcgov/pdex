@@ -113,6 +113,10 @@ jobs:
         run: |
           set -euo pipefail
           aws eks update-kubeconfig --name pdex-cluster --region ${{ secrets.AWS_REGION }}
+          
+          # Verify we can connect
+          kubectl cluster-info
+          kubectl get nodes || echo "Warning: Cannot list nodes yet, cluster may still be initializing"
 
       - name: Deploy to EKS using DEV ECR image
         env:
