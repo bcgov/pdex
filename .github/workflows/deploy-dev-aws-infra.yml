@@ -59,23 +59,23 @@ jobs:
         with:
           terragrunt-version: ${{ env.TG_VERSION }}
 
-      - name: Debug backend + state
-        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
-        run: |
-          set -e
+      # - name: Debug backend + state
+      #   working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
+      #   run: |
+      #     set -e
 
-          echo "=== list generated backend.tf ==="
-          find . -maxdepth 4 -name backend.tf -print -exec sed -n '1,80p' {} \;
+      #     echo "=== list generated backend.tf ==="
+      #     find . -maxdepth 4 -name backend.tf -print -exec sed -n '1,80p' {} \;
 
-          echo "=== terraform init backend info ==="
-          # Shows backend type and some details (safe)
-          terraform -chdir=. init -backend=false >/dev/null 2>&1 || true
+      #     echo "=== terraform init backend info ==="
+      #     # Shows backend type and some details (safe)
+      #     terraform -chdir=. init -backend=false >/dev/null 2>&1 || true
 
-          echo "=== terraform state list ==="
-          terragrunt state list --non-interactive || true
+      #     echo "=== terraform state list ==="
+      #     terragrunt state list --non-interactive || true
 
-          echo "=== terraform state pull (first lines) ==="
-          terragrunt state pull --non-interactive | head -n 40 || true
+      #     echo "=== terraform state pull (first lines) ==="
+      #     terragrunt state pull --non-interactive | head -n 40 || true
 
       - name: Create S3 bucket for Terraform state if it doesn't exist
         run: |
@@ -104,13 +104,14 @@ jobs:
           TF_VAR_certificate_arn: "arn:aws:acm:ca-central-1:814738839437:certificate/b885894d-c4c1-4742-bc0d-88a8136eac68"
           TF_VAR_source_token: ${{ secrets.AWS_HEADER_TOKEN_DEV }}
 
-          # terragrunt import aws_security_group.alb_sg sg-044d5ff5364df5af6 --non-interactive
         run: |
-          terragrunt import aws_rds_cluster.postgres-pdex pdex-postgres-cluster --non-interactive
-          terragrunt import aws_efs_mount_target.data_azA fsmt-098e7b601fcbeac44 --non-interactive
-          terragrunt import aws_efs_mount_target.data_azB fsmt-09c9b6530d0b5674c --non-interactive
-          terragrunt import aws_iam_role.eks-cluster-role eks-cluster-role --non-interactive
-
+          terragrunt import aws_eks_cluster.pdex-cluster pdex-cluster --non-interactive
+          terragrunt import aws_iam_role.efs_csi_role efs-csi-role --non-interactive
+          terragrunt import aws_iam_role.eks_ng_role eks-ng-role --non-interactive
+          terragrunt import aws_iam_role.cluster_auto_scaler_role cluster_auto_scaler_role --non-interactive
+          terragrunt import aws_iam_role.ses_mailer_role ses_mailer_role --non-interactive
+          terragrunt import aws_iam_policy.alb_policy arn:aws:iam::814738839437:policy/AWSLoadBalancerControllerIAMPolicy-Dev --non-interactive
+          terragrunt import aws_elasticache_replication_group.pdex_redis_rg pdex-rep-group --non-interactive
 
 
           terragrunt plan
