@@ -106,18 +106,12 @@ jobs:
 
           # terragrunt import aws_security_group.alb_sg sg-044d5ff5364df5af6 --non-interactive
         run: |
-          terragrunt import aws_lb.default_alb arn:aws:elasticloadbalancing:ca-central-1:814738839437:loadbalancer/app/default/9d7598e4923aa8a6 --non-interactive
-          terragrunt import aws_alb_target_group.cer arn:aws:elasticloadbalancing:ca-central-1:814738839437:targetgroup/cer-target-group/ae2d6731f3ce367e  --non-interactive
-          terragrunt import aws_alb_target_group.cdq arn:aws:elasticloadbalancing:ca-central-1:814738839437:targetgroup/cdq-target-group/1ce6369bcad7745f  --non-interactive
-          terragrunt import aws_alb_target_group.pdex arn:aws:elasticloadbalancing:ca-central-1:814738839437:targetgroup/pdex-target-group/1a76080ff75172a6 --non-interactive
-          terragrunt import aws_db_subnet_group.data_subnet data-subnet --non-interactive
-          terragrunt import aws_efs_file_system.pdex-cer fs-0a9dfb2b0565b975a --non-interactive
-          terragrunt import aws_iam_role.alb_role AWSLoadBalancerControllerIAMRole-Dev --non-interactive
-          terragrunt import aws_elasticache_subnet_group.default redis-subnet-group-pdex --non-interactive
+          terragrunt import aws_rds_cluster.postgres-pdex pdex-postgres-cluster --non-interactive
+          terragrunt import aws_efs_mount_target.data_azA fsmt-098e7b601fcbeac44 --non-interactive
+          terragrunt import aws_efs_mount_target.data_azB fsmt-09c9b6530d0b5674c --non-interactive
+          terragrunt import aws_iam_role.eks-cluster-role eks-cluster-role --non-interactive
 
-          terragrunt import aws_security_group.allow_nfs sg-0071435a3d57e7f60 --non-interactive
-          terragrunt import aws_security_group.allow_postgres sg-00b63d01855832ce2  --non-interactive
-          terragrunt import aws_security_group.allow_redis sg-08e14cf155d80d9ee --non-interactive
+
 
           terragrunt plan
 
