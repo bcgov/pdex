@@ -90,6 +90,12 @@ jobs:
             echo "S3 bucket ${BUCKET_NAME} already exists"
           fi
 
+      - name: Terragrunt Import ALB SG (one-time)
+        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
+        run: |
+          terragrunt init --non-interactive
+          terragrunt import aws_security_group.alb_sg sg-044d5ff5364df5af6 --non-interactive
+
       - name: Terragrunt Init
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
         run: terragrunt run-all init --non-interactive
