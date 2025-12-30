@@ -124,6 +124,8 @@ jobs:
           TF_VAR_environment_name: "Dev"
           TF_VAR_certificate_arn: "arn:aws:acm:ca-central-1:814738839437:certificate/b885894d-c4c1-4742-bc0d-88a8136eac68"
           TF_VAR_source_token: ${{ secrets.AWS_HEADER_TOKEN_DEV }}
+          TF_VAR_cloudfront_origin_domain: "dev.pdex.gov.bc.ca.ca-central-1.elb.amazonaws.com"  # Add this
+          TF_VAR_cloudfront_certificate_arn: "arn:aws:acm:us-east-1:814738839437:certificate/b885894d-c4c1-4742-bc0d-88a8136eac68"  # Must be in us-east-1
         run: terragrunt run-all apply --non-interactive
 
       - name: Finished Terragrunt Apply
