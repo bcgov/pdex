@@ -25,7 +25,7 @@ resource "helm_release" "secrets_store_csi_driver" {
   namespace  = "kube-system"
   repository = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
   chart      = "secrets-store-csi-driver"
-  version    = "1.4.6" # pick a known stable; can bump later
+  version    = "1.4.6"
 
   set {
     name  = "syncSecret.enabled"
@@ -37,6 +37,5 @@ resource "helm_release" "secrets_store_csi_driver" {
     value = "true"
   }
 
-  # Ensures cluster exists first
   depends_on = [aws_eks_cluster.pdex-cluster]
 }
