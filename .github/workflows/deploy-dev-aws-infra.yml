@@ -108,7 +108,7 @@ jobs:
           TF_VAR_github_actions_role_arn: ${{ secrets.AWS_ROLE_ARN_TO_USE_DEV }}
 
         run: |
-          terragrunt import aws_eks_access_entry.github_actions "pdex-cluster:arn:aws:iam::814738839437:role/GitHubActionsPDEXDevRole" --non-interactive
+          terragrunt import helm_release.secrets_store_csi_driver "pdex-cluster:arn:aws:iam::814738839437:role/GitHubActionsPDEXDevRole" --non-interactive
 
       #     terragrunt import aws_iam_role.efs_csi efs-csi-role --non-interactive
       #     terragrunt import aws_iam_role.eks_ng eks-ng-role --non-interactive
