@@ -59,23 +59,23 @@ jobs:
         with:
           terragrunt-version: ${{ env.TG_VERSION }}
 
-      - name: Debug backend + state
-        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
-        run: |
-          set -e
+      # - name: Debug backend + state
+      #   working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
+      #   run: |
+      #     set -e
 
-          echo "=== list generated backend.tf ==="
-          find . -maxdepth 4 -name backend.tf -print -exec sed -n '1,80p' {} \;
+      #     echo "=== list generated backend.tf ==="
+      #     find . -maxdepth 4 -name backend.tf -print -exec sed -n '1,80p' {} \;
 
-          echo "=== terraform init backend info ==="
-          # Shows backend type and some details (safe)
-          terraform -chdir=. init -backend=false >/dev/null 2>&1 || true
+      #     echo "=== terraform init backend info ==="
+      #     # Shows backend type and some details (safe)
+      #     terraform -chdir=. init -backend=false >/dev/null 2>&1 || true
 
-          echo "=== terraform state list ==="
-          terragrunt state list --non-interactive || true
+      #     echo "=== terraform state list ==="
+      #     terragrunt state list --non-interactive || true
 
-          echo "=== terraform state pull (first lines) ==="
-          terragrunt state pull --non-interactive | head -n 40 || true
+      #     echo "=== terraform state pull (first lines) ==="
+      #     terragrunt state pull --non-interactive | head -n 40 || true
 
       - name: Create S3 bucket for Terraform state if it doesn't exist
         run: |
@@ -133,7 +133,10 @@ jobs:
           TF_VAR_cloudfront_origin_domain: "dev.pdex.gov.bc.ca.ca-central-1.elb.amazonaws.com"
           TF_VAR_cloudfront_certificate_arn: "arn:aws:acm:us-east-1:814738839437:certificate/4e46dda5-00b6-49b4-869a-5529077cf4db"
           TF_VAR_github_actions_role_arn: ${{ secrets.AWS_ROLE_ARN_TO_USE_DEV }}
-        run: terragrunt run-all apply --non-interactive
+        run: |
+          terragrunt run-all validate --non-interactive
+          terragrunt run-all plan --non-interactive
+          terragrunt run-all apply --non-interactive
 
       - name: Finished Terragrunt Apply
         run: |

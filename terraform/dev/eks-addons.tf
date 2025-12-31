@@ -27,15 +27,16 @@ resource "helm_release" "secrets_store_csi_driver" {
   chart      = "secrets-store-csi-driver"
   version    = "1.4.6"
 
-  set {
-    name  = "syncSecret.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "enableSecretRotation"
-    value = "true"
-  }
+  set = [
+    {
+        name  = "syncSecret.enabled"
+        value = "true"
+    },
+    {
+        name  = "enableSecretRotation"
+        value = "true"
+    }
+  ]
 
   depends_on = [aws_eks_cluster.pdex-cluster]
 }
