@@ -1,4 +1,10 @@
 #Cluster role
+resource "aws_eks_access_entry" "github_actions" {
+  cluster_name  = aws_eks_cluster.pdex-cluster.name
+  principal_arn = "arn:aws:iam::814738839437:role/GitHubActionsPDEXDevRole"
+  type          = "STANDARD"
+}
+
 resource "aws_iam_role" "eks-cluster-role" {
   name = "eks-cluster-role"
   assume_role_policy = jsonencode({
