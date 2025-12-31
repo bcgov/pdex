@@ -96,15 +96,17 @@ jobs:
         run: terragrunt run-all init --non-interactive
 
 
-      # - name: Terragrunt Import ALB SG (one-time)
-      #   working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
-      #   env:
-      #     TF_VAR_vpc_id: "vpc-0beb5c99b7f010268"
-      #     TF_VAR_environment_name: "Dev"
-      #     TF_VAR_certificate_arn: "arn:aws:acm:ca-central-1:814738839437:certificate/b885894d-c4c1-4742-bc0d-88a8136eac68"
-      #     TF_VAR_source_token: ${{ secrets.AWS_HEADER_TOKEN_DEV }}
+      - name: Terragrunt Import ALB SG (one-time)
+        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
+        env:
+          TF_VAR_vpc_id: "vpc-0beb5c99b7f010268"
+          TF_VAR_environment_name: "Dev"
+          TF_VAR_certificate_arn: "arn:aws:acm:ca-central-1:814738839437:certificate/b885894d-c4c1-4742-bc0d-88a8136eac68"
+          TF_VAR_source_token: ${{ secrets.AWS_HEADER_TOKEN_DEV }}
 
-      #   run: |
+        run: |
+          terragrunt import aws_eks_access_entry.github_actions "pdex-cluster:arn:aws:iam::814738839437:role/GitHubActionsPDEXDevRole" --non-interactive
+
       #     terragrunt import aws_iam_role.efs_csi efs-csi-role --non-interactive
       #     terragrunt import aws_iam_role.eks_ng eks-ng-role --non-interactive
       #     terragrunt import aws_iam_role.cluster_auto_scaler cluster_auto_scaler_role --non-interactive
