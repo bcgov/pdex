@@ -1,79 +1,31 @@
-# Grant GitHub Actions role access to the EKS cluster
-resource "aws_eks_access_entry" "github_actions" {
-  cluster_name  = aws_eks_cluster.pdex-cluster.name
-  principal_arn = var.github_actions_role_arn
-  type          = "STANDARD"
+data "aws_eks_cluster" "this" {
+  name = aws_eks_cluster.pdex-cluster.name
 }
 
-resource "aws_eks_access_policy_association" "github_actions_admin" {
-  cluster_name  = aws_eks_cluster.pdex-cluster.name
-  principal_arn = var.github_actions_role_arn
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-
-  access_scope {
-    type = "cluster"
-  }
-
-  depends_on = [aws_eks_access_entry.github_actions]
+data "aws_eks_cluster_auth" "this" {
+  name = aws_eks_cluster.pdex-cluster.name
 }
 
-# Helm provider for installing Secrets Store CSI Driver
-terraform {
-  required_providers {
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.12"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.25"
-    }
-  }
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.this.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.this.token
 }
 
 provider "helm" {
   kubernetes {
-    host                   = aws_eks_cluster.pdex-cluster.endpoint
-    cluster_ca_certificate = base64decode(aws_eks_cluster.pdex-cluster.certificate_authority[0].data)
-    exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args = [
-        "eks",
-        "get-token",
-        "--cluster-name",
-        aws_eks_cluster.pdex-cluster.name,
-        "--region",
-        var.aws_region
-      ]
-    }
+    host                   = data.aws_eks_cluster.this.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.this.token
   }
 }
 
-provider "kubernetes" {
-  host                   = aws_eks_cluster.pdex-cluster.endpoint
-  cluster_ca_certificate = base64decode(aws_eks_cluster.pdex-cluster.certificate_authority[0].data)
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args = [
-      "eks",
-      "get-token",
-      "--cluster-name",
-      aws_eks_cluster.pdex-cluster.name,
-      "--region",
-      var.aws_region
-    ]
-  }
-}
-
-# Install Secrets Store CSI Driver via Helm
 resource "helm_release" "secrets_store_csi_driver" {
   name       = "csi-secrets-store"
+  namespace  = "kube-system"
   repository = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
   chart      = "secrets-store-csi-driver"
-  namespace  = "kube-system"
-  version    = "1.4.6"
+  version    = "1.4.6" # pick a known stable; can bump later
 
   set {
     name  = "syncSecret.enabled"
@@ -85,18 +37,6 @@ resource "helm_release" "secrets_store_csi_driver" {
     value = "true"
   }
 
-  depends_on = [
-    aws_eks_cluster.pdex-cluster,
-    aws_eks_node_group.eks-ng
-  ]
-}
-# Install AWS Provider for Secrets Store CSI Driver via Helm
-resource "helm_release" "secrets_store_csi_driver_aws_provider" {
-  name       = "secrets-store-csi-driver-provider-aws"
-  repository = "https://aws.github.io/secrets-store-csi-driver-provider-aws"
-  chart      = "secrets-store-csi-driver-provider-aws"
-  namespace  = "kube-system"
-  version    = "0.5.0"
-
-  depends_on = [helm_release.secrets_store_csi_driver]
+  # Ensures cluster exists first
+  depends_on = [aws_eks_cluster.pdex-cluster]
 }
