@@ -59,23 +59,23 @@ jobs:
         with:
           terragrunt-version: ${{ env.TG_VERSION }}
 
-      # - name: Debug backend + state
-      #   working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
-      #   run: |
-      #     set -e
+      - name: Debug backend + state
+        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
+        run: |
+          set -e
 
-      #     echo "=== list generated backend.tf ==="
-      #     find . -maxdepth 4 -name backend.tf -print -exec sed -n '1,80p' {} \;
+          echo "=== list generated backend.tf ==="
+          find . -maxdepth 4 -name backend.tf -print -exec sed -n '1,80p' {} \;
 
-      #     echo "=== terraform init backend info ==="
-      #     # Shows backend type and some details (safe)
-      #     terraform -chdir=. init -backend=false >/dev/null 2>&1 || true
+          echo "=== terraform init backend info ==="
+          # Shows backend type and some details (safe)
+          terraform -chdir=. init -backend=false >/dev/null 2>&1 || true
 
-      #     echo "=== terraform state list ==="
-      #     terragrunt state list --non-interactive || true
+          echo "=== terraform state list ==="
+          terragrunt state list --non-interactive || true
 
-      #     echo "=== terraform state pull (first lines) ==="
-      #     terragrunt state pull --non-interactive | head -n 40 || true
+          echo "=== terraform state pull (first lines) ==="
+          terragrunt state pull --non-interactive | head -n 40 || true
 
       - name: Create S3 bucket for Terraform state if it doesn't exist
         run: |
