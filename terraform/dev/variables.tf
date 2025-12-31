@@ -55,3 +55,8 @@ variable "source_token" {
   type        = string
   sensitive   = true
 }
+
+variable "github_actions_role_arn" {
+  description = "ARN of the GitHub Actions IAM role for EKS access"
+  type        = string
+}
