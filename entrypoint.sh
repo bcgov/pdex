@@ -24,24 +24,34 @@ fi
 if [ -n "$ENV_SRC" ]; then
   echo "Installing env file from $ENV_SRC -> $ENV_DST"
   
-  # Use /tmp which is writable
-  WRITABLE_ENV="/tmp/.env"
+  echo "Debug: Source file content preview:"
+  head -n 3 "$ENV_SRC"
   
   echo "Debug: Current .env file status:"
   ls -la "$ENV_DST" 2>/dev/null || echo ".env does not exist yet"
 
-  # Copy to writable location
-  cp -f "$ENV_SRC" "$WRITABLE_ENV"
-  chmod 644 "$WRITABLE_ENV"
-  
-  # Create symlink if /var/www/html is read-only
-  if [ ! -L "$ENV_DST" ]; then
-    ln -sf "$WRITABLE_ENV" "$ENV_DST" 2>/dev/null || echo "Cannot create symlink, using direct file"
+  # If .env already exists and is not a symlink, try to remove it
+  if [ -e "$ENV_DST" ] && [ ! -L "$ENV_DST" ]; then
+    rm -f "$ENV_DST" 2>/dev/null || echo "Cannot remove existing .env (read-only filesystem)"
   fi
   
-  cd /var/www/html
+  # Try to create symlink directly to vault secrets (avoids copying)
+  if ln -sf "$ENV_SRC" "$ENV_DST" 2>/dev/null; then
+    echo "Successfully created symlink to $ENV_SRC"
+    cd /var/www/html
+  else
+    echo "Cannot create symlink (read-only filesystem)"
+    # Since we can't write to /var/www/html, we need to work around it
+    # Option: Copy to a writable location and source as env vars
+    echo "Loading environment variables from $ENV_SRC"
+    set -a  # automatically export all variables
+    source "$ENV_SRC" 2>/dev/null || echo "Warning: Could not source env file"
+    set +a
+    cd /var/www/html
+  fi
 else
   echo "No secrets env file found in /vault/secrets"
+  cd /var/www/html
 fi
 
 echo "ENV_ARG: ${ENV_ARG}"
