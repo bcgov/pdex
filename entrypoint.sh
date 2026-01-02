@@ -54,6 +54,10 @@ else
   cd /var/www/html
 fi
 
+# cat .env
+echo "ENV file content preview:"
+cat .env || echo ".env file not found or not accessible"
+
 echo "ENV_ARG: ${ENV_ARG}"
 
 echo "Install composer"
