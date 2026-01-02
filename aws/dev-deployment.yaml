@@ -4,7 +4,6 @@ metadata:
   name: pdex-app-dev
   labels:
     app: pdex
-
 spec:
   replicas: 1
   selector:
@@ -20,7 +19,10 @@ spec:
       tolerations:
       - key: "CriticalAddonsOnly"
         operator: "Exists"
+
+      # You can keep this ServiceAccount if you want, but it no longer needs IRSA/OIDC annotations
       serviceAccountName: pdex-sa-dev
+
       containers:
       - name: pdex
         image: "${DEV_ECR}:${TAG}"
@@ -46,6 +48,7 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 3
           failureThreshold: 6
+
         livenessProbe:
           httpGet:
             path: /up
@@ -53,36 +56,27 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 15
           timeoutSeconds: 5
+
         volumeMounts:
         - name: pdex-secrets
           mountPath: /vault/secrets
           readOnly: true
 
       volumes:
-        - name: pdex-secrets
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: pdex-secrets-env
----
-apiVersion: secrets-store.csi.x-k8s.io/v1
-kind: SecretProviderClass
-metadata:
-  name: pdex-secrets-env
-  namespace: default
-spec:
-  provider: aws
-  parameters:
-    objects: |
-      - objectName: "${DEV_SECRETS_ECR}"
-        objectType: "secretsmanager"
-        objectAlias: "secrets.env"
+      - name: pdex-secrets
+        secret:
+          secretName: pdex-secrets
+          items:
+          - key: secrets.env
+            path: secrets.env
+
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pdex-sa-dev
+  namespace: default
+
 ---
 apiVersion: v1
 kind: Service
@@ -105,9 +99,8 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-
 spec:
-  ingressClassName: alb     # if you installed AWS Load Balancer Controller
+  ingressClassName: alb
   rules:
   - host: dev.pdex.gov.bc.ca
     http:
