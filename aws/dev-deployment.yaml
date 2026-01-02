@@ -23,6 +23,39 @@ spec:
       # You can keep this ServiceAccount if you want, but it no longer needs IRSA/OIDC annotations
       serviceAccountName: pdex-sa-dev
 
+      initContainers:
+      - name: secrets-init
+        image: busybox:latest
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Processing secrets from Kubernetes Secret..."
+          # Read the secret data and convert to .env format
+          cd /vault/secrets
+          if [ -f secrets.env ]; then
+            # If it's JSON format, parse it
+            if grep -q '^{' secrets.env; then
+              echo "Detected JSON format, converting to .env format..."
+              # Extract key-value pairs from JSON and write to temp location
+              # Use simple grep/sed to parse JSON (basic approach)
+              cat secrets.env | tr -d '{}"\n' | tr ',' '\n' | sed 's/:/=/' > /tmp/secrets.env
+            else
+              # Already in .env format, just copy
+              cp secrets.env /tmp/secrets.env
+            fi
+          else
+            echo "ERROR: secrets.env not found in /vault/secrets"
+            exit 1
+          fi
+          echo "Secrets processed successfully"
+          cat /tmp/secrets.env
+        volumeMounts:
+        - name: pdex-secrets
+          mountPath: /vault/secrets
+          readOnly: true
+        - name: secrets-temp
+          mountPath: /tmp
+
       containers:
       - name: pdex
         image: "${DEV_ECR}:${TAG}"
@@ -61,6 +94,9 @@ spec:
         - name: pdex-secrets
           mountPath: /vault/secrets
           readOnly: true
+        - name: secrets-temp
+          mountPath: /tmp
+          readOnly: false
 
       volumes:
       - name: pdex-secrets
@@ -69,6 +105,8 @@ spec:
           items:
           - key: secrets.env
             path: secrets.env
+      - name: secrets-temp
+        emptyDir: {}
 
 ---
 apiVersion: v1

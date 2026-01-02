@@ -15,7 +15,11 @@ php -r "echo date_default_timezone_get() . PHP_EOL;"
 ENV_DST="/var/www/html/.env"
 ENV_SRC=""
 
-if [ -f /vault/secrets/secrets.env ]; then
+# Check for processed secrets first (from init container)
+if [ -f /tmp/secrets.env ]; then
+  ENV_SRC="/tmp/secrets.env"
+  echo "Found processed secrets in /tmp/secrets.env"
+elif [ -f /vault/secrets/secrets.env ]; then
   ENV_SRC="/vault/secrets/secrets.env"
 elif [ -f /vault/secrets/test-secrets.env ]; then
   ENV_SRC="/vault/secrets/test-secrets.env"
@@ -45,7 +49,14 @@ if [ -n "$ENV_SRC" ]; then
     # Option: Copy to a writable location and source as env vars
     echo "Loading environment variables from $ENV_SRC"
     set -a  # automatically export all variables
+
+    # the file is -rw-r--r--, we can not source it directly we need to chmod to 777 first
+    chmod 777 "$ENV_SRC" 2>/dev/null || echo "Warning: Could not chmod env file"
     source "$ENV_SRC" 2>/dev/null || echo "Warning: Could not source env file"
+
+    # now chmod back to original
+    chmod 644 "$ENV_SRC" 2>/dev/null || echo "Warning: Could not chmod back env file"
+
     set +a
     cd /var/www/html
   fi
