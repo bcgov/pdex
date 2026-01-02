@@ -23,14 +23,23 @@ fi
 
 if [ -n "$ENV_SRC" ]; then
   echo "Installing env file from $ENV_SRC -> $ENV_DST"
-  cd /var/www/html
+  
+  # Use /tmp which is writable
+  WRITABLE_ENV="/tmp/.env"
   
   echo "Debug: Current .env file status:"
   ls -la "$ENV_DST" 2>/dev/null || echo ".env does not exist yet"
 
-  # Copy into place and set permissions (overwrite without removing first)
-  cat "$ENV_SRC" > "$ENV_DST"
-  chmod 644 "$ENV_DST"
+  # Copy to writable location
+  cp -f "$ENV_SRC" "$WRITABLE_ENV"
+  chmod 644 "$WRITABLE_ENV"
+  
+  # Create symlink if /var/www/html is read-only
+  if [ ! -L "$ENV_DST" ]; then
+    ln -sf "$WRITABLE_ENV" "$ENV_DST" 2>/dev/null || echo "Cannot create symlink, using direct file"
+  fi
+  
+  cd /var/www/html
 else
   echo "No secrets env file found in /vault/secrets"
 fi
