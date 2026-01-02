@@ -38,20 +38,20 @@ if [ -n "$ENV_SRC" ]; then
   # Try to create symlink directly to vault secrets (avoids copying)
   if ln -sf "$ENV_SRC" "$ENV_DST" 2>/dev/null; then
     echo "Successfully created symlink to $ENV_SRC"
+    cd /var/www/html
   else
     echo "Cannot create symlink (read-only filesystem)"
-    echo "Attempting to copy to writable location..."
-    # Use /tmp which is writable
-    WRITABLE_ENV="/tmp/.env"
-    cp -f "$ENV_SRC" "$WRITABLE_ENV"
-    chmod 644 "$WRITABLE_ENV"
-    export ENV_DST="$WRITABLE_ENV"
-    echo "Using .env from $WRITABLE_ENV"
+    # Since we can't write to /var/www/html, we need to work around it
+    # Option: Copy to a writable location and source as env vars
+    echo "Loading environment variables from $ENV_SRC"
+    set -a  # automatically export all variables
+    source "$ENV_SRC" 2>/dev/null || echo "Warning: Could not source env file"
+    set +a
+    cd /var/www/html
   fi
-  
-  cd /var/www/html
 else
   echo "No secrets env file found in /vault/secrets"
+  cd /var/www/html
 fi
 
 echo "ENV_ARG: ${ENV_ARG}"
