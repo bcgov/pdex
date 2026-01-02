@@ -24,19 +24,29 @@ fi
 if [ -n "$ENV_SRC" ]; then
   echo "Installing env file from $ENV_SRC -> $ENV_DST"
   
-  # Use /tmp which is writable
-  WRITABLE_ENV="/tmp/.env"
+  echo "Debug: Source file content preview:"
+  head -n 3 "$ENV_SRC"
   
   echo "Debug: Current .env file status:"
   ls -la "$ENV_DST" 2>/dev/null || echo ".env does not exist yet"
 
-  # Copy to writable location
-  cp -f "$ENV_SRC" "$WRITABLE_ENV"
-  chmod 644 "$WRITABLE_ENV"
+  # If .env already exists and is not a symlink, try to remove it
+  if [ -e "$ENV_DST" ] && [ ! -L "$ENV_DST" ]; then
+    rm -f "$ENV_DST" 2>/dev/null || echo "Cannot remove existing .env (read-only filesystem)"
+  fi
   
-  # Create symlink if /var/www/html is read-only
-  if [ ! -L "$ENV_DST" ]; then
-    ln -sf "$WRITABLE_ENV" "$ENV_DST" 2>/dev/null || echo "Cannot create symlink, using direct file"
+  # Try to create symlink directly to vault secrets (avoids copying)
+  if ln -sf "$ENV_SRC" "$ENV_DST" 2>/dev/null; then
+    echo "Successfully created symlink to $ENV_SRC"
+  else
+    echo "Cannot create symlink (read-only filesystem)"
+    echo "Attempting to copy to writable location..."
+    # Use /tmp which is writable
+    WRITABLE_ENV="/tmp/.env"
+    cp -f "$ENV_SRC" "$WRITABLE_ENV"
+    chmod 644 "$WRITABLE_ENV"
+    export ENV_DST="$WRITABLE_ENV"
+    echo "Using .env from $WRITABLE_ENV"
   fi
   
   cd /var/www/html
