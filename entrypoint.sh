@@ -11,21 +11,33 @@ echo "Setup TZ"
 php -r "date_default_timezone_set('${TZ}');"
 php -r "echo date_default_timezone_get();"
 
+ENV_DST="/var/www/html/.env"
+ENV_SRC=""
+
 if [ -f /vault/secrets/secrets.env ]; then
-    touch .env && cp -rf /vault/secrets/secrets.env /var/www/html/.env
-    chmod 644 /var/www/html/.env
+  ENV_SRC="/vault/secrets/secrets.env"
+elif [ -f /vault/secrets/test-secrets.env ]; then
+  ENV_SRC="/vault/secrets/test-secrets.env"
 fi
-if [ -f /vault/secrets/test-secrets.env ]; then
-    touch .env && cp -rf /vault/secrets/test-secrets.env /var/www/html/.env
-    chmod 644 /var/www/html/.env
+
+if [ -n "$ENV_SRC" ]; then
+  echo "Installing env file from $ENV_SRC -> $ENV_DST"
+  cd /var/www/html
+
+  # Remove file or symlink if it exists (including dangling symlink)
+  rm -f "$ENV_DST"
+
+  # Copy into place and set permissions
+  cp -f "$ENV_SRC" "$ENV_DST"
+  chmod 644 "$ENV_DST"
+else
+  echo "No secrets env file found in /vault/secrets"
 fi
+
 echo "ENV_ARG: ${ENV_ARG}"
 
 echo "Install composer"
 composer dump-autoload
-
-# echo "Starting apache in the background:"
-# /usr/sbin/apache2ctl start
 
 echo "Run migration"
 php artisan migrate --force
@@ -39,7 +51,5 @@ php artisan queue:clear --queue=midnight --force
 echo "Generate API documentation"
 php artisan l5-swagger:generate
 
-
-# Replace shell with Apache (PID 1) for proper signal handling
 echo "Starting apache foreground"
 exec apache2-foreground
