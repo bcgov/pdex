@@ -8,8 +8,9 @@ echo "APACHE_REMOTE_IP_TRUSTED_PROXY: ${APACHE_REMOTE_IP_TRUSTED_PROXY}"
 echo "APACHE_REMOTE_IP_INTERNAL_PROXY: ${APACHE_REMOTE_IP_INTERNAL_PROXY}"
 
 echo "Setup TZ"
+export TZ="${TZ:-America/Vancouver}"
 php -r "date_default_timezone_set('${TZ}');"
-php -r "echo date_default_timezone_get();"
+php -r "echo date_default_timezone_get() . PHP_EOL;"
 
 ENV_DST="/var/www/html/.env"
 ENV_SRC=""
@@ -23,12 +24,12 @@ fi
 if [ -n "$ENV_SRC" ]; then
   echo "Installing env file from $ENV_SRC -> $ENV_DST"
   cd /var/www/html
+  
+  echo "Debug: Current .env file status:"
+  ls -la "$ENV_DST" 2>/dev/null || echo ".env does not exist yet"
 
-  # Remove file or symlink if it exists (including dangling symlink)
-  rm -f "$ENV_DST"
-
-  # Copy into place and set permissions
-  cp -f "$ENV_SRC" "$ENV_DST"
+  # Copy into place and set permissions (overwrite without removing first)
+  cat "$ENV_SRC" > "$ENV_DST"
   chmod 644 "$ENV_DST"
 else
   echo "No secrets env file found in /vault/secrets"
