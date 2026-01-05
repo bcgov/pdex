@@ -84,7 +84,7 @@ echo "Clear our midnight queue"
 php artisan queue:clear --queue=midnight --force
 
 echo "Generate API documentation"
-php artisan l5-swagger:generate
+php artisan l5-swagger:generate || echo "Warning: API documentation generation failed, continuing..."
 
 echo "Starting apache foreground"
 exec apache2-foreground
