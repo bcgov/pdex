@@ -4,11 +4,11 @@ resource "aws_security_group" "alb_sg" {
   vpc_id      = data.aws_vpc.main.id
 
   ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.cloudfront.id]
-    description = "Allow HTTPS from CloudFront"
+    description     = "Allow HTTPS from CloudFront"
   }
 
   egress {
