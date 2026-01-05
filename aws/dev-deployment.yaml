@@ -30,25 +30,18 @@ spec:
         args:
         - |
           echo "Processing secrets from Kubernetes Secret..."
-          # Read the secret data and convert to .env format
+          # Convert all secret files to .env format
           cd /vault/secrets
-          if [ -f secrets.env ]; then
-            # If it's JSON format, parse it
-            if grep -q '^{' secrets.env; then
-              echo "Detected JSON format, converting to .env format..."
-              # Extract key-value pairs from JSON and write to temp location
-              # Use simple grep/sed to parse JSON (basic approach)
-              cat secrets.env | tr -d '{}"\n' | tr ',' '\n' | sed 's/:/=/' > /tmp/secrets.env
-            else
-              # Already in .env format, just copy
-              cp secrets.env /tmp/secrets.env
+          rm -f /tmp/secrets.env
+          for file in *; do
+            if [ -f "$file" ]; then
+              echo "${file}=$(cat $file)" >> /tmp/secrets.env
             fi
-          else
-            echo "ERROR: secrets.env not found in /vault/secrets"
-            exit 1
-          fi
-          echo "Secrets processed successfully"
-          cat /tmp/secrets.env
+          done
+          echo "Secrets processed successfully. Generated .env file:"
+          wc -l /tmp/secrets.env
+          echo "First 3 lines:"
+          head -n 3 /tmp/secrets.env
         volumeMounts:
         - name: pdex-secrets
           mountPath: /vault/secrets
@@ -102,9 +95,6 @@ spec:
       - name: pdex-secrets
         secret:
           secretName: pdex-secrets
-          items:
-          - key: secrets.env
-            path: secrets.env
       - name: secrets-temp
         emptyDir: {}
 
