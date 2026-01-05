@@ -19,7 +19,7 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
 
     domain_name = var.cloudfront_origin_domain
     origin_id   = random_integer.cf_origin_id.result
-    
+        
     custom_header {
       name  = "Pdex-Source"
       value = var.source_token
