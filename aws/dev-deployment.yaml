@@ -20,9 +20,6 @@ spec:
       - key: "CriticalAddonsOnly"
         operator: "Exists"
 
-      # You can keep this ServiceAccount if you want, but it no longer needs IRSA/OIDC annotations
-      serviceAccountName: pdex-sa-dev
-
       initContainers:
       - name: secrets-init
         image: busybox:latest
@@ -66,22 +63,22 @@ spec:
             cpu: 250m
             memory: 512Mi
 
-        readinessProbe:
-          httpGet:
-            path: /up
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 3
-          failureThreshold: 6
+        # readinessProbe:
+        #   httpGet:
+        #     path: /up
+        #     port: 8080
+        #   initialDelaySeconds: 10
+        #   periodSeconds: 10
+        #   timeoutSeconds: 3
+        #   failureThreshold: 6
 
-        livenessProbe:
-          httpGet:
-            path: /up
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 15
-          timeoutSeconds: 5
+        # livenessProbe:
+        #   httpGet:
+        #     path: /up
+        #     port: 8080
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 15
+        #   timeoutSeconds: 5
 
         volumeMounts:
         - name: pdex-secrets
@@ -97,13 +94,6 @@ spec:
           secretName: pdex-secrets
       - name: secrets-temp
         emptyDir: {}
-
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: pdex-sa-dev
-  namespace: default
 
 ---
 apiVersion: v1

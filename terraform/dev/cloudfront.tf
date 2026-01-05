@@ -19,11 +19,18 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
 
     domain_name = var.cloudfront_origin_domain
     origin_id   = random_integer.cf_origin_id.result
+        
+    custom_header {
+      name  = "Pdex-Source"
+      value = var.source_token
+    }
   }
 
   enabled         = true
   is_ipv6_enabled = true
   comment         = "PDEX - Dev"
+  
+  aliases = ["dev.pdex.gov.bc.ca"]
 
   default_cache_behavior {
     allowed_methods = [
