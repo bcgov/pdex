@@ -1,14 +1,13 @@
 resource "aws_security_group" "alb_sg" {
   name        = "alb-https-sg"
-  description = "Allow HTTPS inbound traffic from CloudFront only"
+  description = "Allow HTTPS inbound traffic"
   vpc_id      = data.aws_vpc.main.id
 
   ingress {
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
-    prefix_list_ids = [data.aws_ec2_managed_prefix_list.cloudfront.id]
-    description     = "Allow HTTPS from CloudFront"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -17,11 +16,6 @@ resource "aws_security_group" "alb_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-# AWS managed prefix list for CloudFront
-data "aws_ec2_managed_prefix_list" "cloudfront" {
-  name = "com.amazonaws.global.cloudfront.origin-facing"
 }
 
 resource "aws_alb_target_group" "cer" {
@@ -51,7 +45,7 @@ resource "aws_alb_target_group" "cer" {
 
 resource "aws_lb" "default_alb" {
   name               = "default"
-  internal           = false
+  internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = data.aws_subnets.web.ids
