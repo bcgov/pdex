@@ -30,8 +30,6 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
   is_ipv6_enabled = true
   comment         = "PDEX - Dev"
   
-  aliases = ["dev.pdex.gov.bc.ca"]
-
   default_cache_behavior {
     allowed_methods = [
       "DELETE",
@@ -72,6 +70,8 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
   }
 
   tags = var.common_tags
+
+  aliases = ["dev.pdex.gov.bc.ca"]
 
   viewer_certificate {
     acm_certificate_arn = var.cloudfront_certificate_arn
