@@ -78,17 +78,6 @@ resource "aws_lb_listener" "https_listener" {
   }
 }
 
-# Perimeter health probe: fixed 200 at /bcgovhealthcheck
-resource "aws_lb_listener_rule" "health_fixed_200" {
-  listener_arn = aws_lb_listener.https_listener.arn
-  priority     = 10
-  action {
-    type = "fixed-response"
-    fixed_response { status_code = "200" content_type = "text/plain" message_body = "OK" }
-  }
-  condition { path_pattern { values = ["/bcgovhealthcheck"] } }
-}
-
 resource "aws_lb_listener_rule" "healthcheck_fixed_response" {
   listener_arn = aws_lb_listener.https_listener.arn
   priority     = 10
