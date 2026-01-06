@@ -237,4 +237,8 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
       }
     }
   }
+
+  depends_on = [
+    helm_release.aws_load_balancer_controller
+  ]
 }
