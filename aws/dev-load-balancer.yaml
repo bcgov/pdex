@@ -7,6 +7,43 @@ metadata:
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::814738839437:role/AWSLoadBalancerControllerIAMRole-Dev
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aws-load-balancer-controller
+rules:
+- apiGroups: [""]
+  resources: ["pods", "nodes", "namespaces", "endpoints", "services", "services/status"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+- apiGroups: ["extensions", "networking.k8s.io"]
+  resources: ["ingresses", "ingressclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["extensions", "networking.k8s.io"]
+  resources: ["ingresses/status"]
+  verbs: ["update", "patch"]
+- apiGroups: ["elbv2.k8s.aws"]
+  resources: ["targetgroupbindings", "ingressclassparams"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["elbv2.k8s.aws"]
+  resources: ["targetgroupbindings/status"]
+  verbs: ["update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aws-load-balancer-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aws-load-balancer-controller
+subjects:
+- kind: ServiceAccount
+  name: aws-load-balancer-controller
+  namespace: kube-system
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,3 +66,4 @@ spec:
         args:
         - --cluster-name=pdex-cluster
         - --ingress-class=alb
+        - --aws-vpc-id=vpc-0beb5c99b7f010268
