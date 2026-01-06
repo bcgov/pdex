@@ -233,6 +233,7 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
     }
     spec = {
       targetGroupARN = aws_alb_target_group.pdex.arn
+      targetType     = "ip"
       serviceRef = {
         name = "pdex-service-dev"
         port = 80
