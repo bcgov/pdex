@@ -118,12 +118,12 @@ jobs:
           kubectl cluster-info
           kubectl get nodes || echo "Warning: Cannot list nodes yet, cluster may still be initializing"
 
-      - name: TGB register
-        run: |
-          set -euo pipefail
+      # - name: TGB register
+      #   run: |
+      #     set -euo pipefail
           
-          # Reconcile the TargetGroupBinding and register your pod IPs in the target group 
-          kubectl -n kube-system apply -f aws/dev-load-balancer.yaml
+      #     # Reconcile the TargetGroupBinding and register your pod IPs in the target group 
+      #     kubectl -n kube-system apply -f aws/dev-load-balancer.yaml
 
       - name: Deploy to EKS using DEV ECR image
         env:

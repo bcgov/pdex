@@ -40,3 +40,39 @@ resource "helm_release" "secrets_store_csi_driver" {
 
   depends_on = [aws_eks_cluster.pdex-cluster]
 }
+
+resource "helm_release" "aws_load_balancer_controller" {
+  name       = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  version    = "1.7.2"
+
+  set = [
+    {
+      name  = "clusterName"
+      value = aws_eks_cluster.pdex-cluster.name
+    },
+    {
+      name  = "region"
+      value = var.aws_region
+    },
+    {
+      name  = "vpcId"
+      value = data.aws_vpc.main.id
+    },
+    {
+      name  = "serviceAccount.name"
+      value = "aws-load-balancer-controller"
+    },
+    {
+      name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+      value = aws_iam_role.alb_role.arn
+    }
+  ]
+
+  depends_on = [
+    aws_eks_cluster.pdex-cluster,
+    aws_iam_role_policy_attachment.alb_attachment
+  ]
+}
