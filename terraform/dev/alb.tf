@@ -196,7 +196,7 @@ resource "aws_alb_target_group" "pdex" {
   tags = var.common_tags
 }
 
-resource "aws_lb_listener_rule" "host_based_weighted_routing" {
+resource "aws_lb_listener_rule" "forward_all_traffic" {
   listener_arn = aws_lb_listener.https_listener.arn
   priority     = 100
 
@@ -206,15 +206,13 @@ resource "aws_lb_listener_rule" "host_based_weighted_routing" {
   }
 
   condition {
-    host_header {
-      values = ["pdex.*"]
+    path_pattern {
+      values = ["/*"]
     }
   }
+}
 
-  # condition {
-  #   http_header {
-  #     http_header_name = "Pdex-Source"
-  #     values = [var.source_token]
-  #   }
-  # }  
+output "pdex_target_group_arn" {
+  value       = aws_alb_target_group.pdex.arn
+  description = "ARN of the PDEX target group for Kubernetes Ingress"
 }
