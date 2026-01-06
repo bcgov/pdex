@@ -19,7 +19,6 @@ resource "aws_security_group" "alb_sg" {
 }
 
 
-
 # resource "aws_alb_target_group" "cer" {
 #   name                 = "cer-target-group"
 #   port                 = 80
@@ -215,4 +214,28 @@ resource "aws_lb_listener_rule" "forward_all_traffic" {
 output "pdex_target_group_arn" {
   value       = aws_alb_target_group.pdex.arn
   description = "ARN of the PDEX target group for Kubernetes Ingress"
+}
+
+output "alb_security_group_id" {
+  value       = aws_security_group.alb_sg.id
+  description = "Security Group ID of the ALB for TargetGroupBinding"
+}
+
+resource "kubernetes_manifest" "pdex_alb_tgb" {
+  manifest = {
+    apiVersion = "elbv2.k8s.aws/v1beta1"
+    kind       = "TargetGroupBinding"
+    metadata = {
+      name      = "pdex-alb-tgb"
+      namespace = "default"
+    }
+    spec = {
+      targetGroupARN = aws_alb_target_group.pdex.arn
+      serviceRef = {
+        name = "pdex-service-dev"
+        port = 80
+      }
+    }
+  }
+
 }
