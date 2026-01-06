@@ -131,35 +131,3 @@ spec:
             name: pdex-service-dev
             port:
               number: 80
----
-#The TargetGroupBinding controller deployment to reconcile the TargetGroupBinding and register your pod IPs in the target group
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: aws-load-balancer-controller
-  namespace: kube-system
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::814738839437:role/AWSLoadBalancerControllerIAMRole-Dev
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: aws-load-balancer-controller
-  namespace: kube-system
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: aws-load-balancer-controller
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: aws-load-balancer-controller
-    spec:
-      serviceAccountName: aws-load-balancer-controller
-      containers:
-      - name: controller
-        image: public.ecr.aws/eks/aws-load-balancer-controller:v2.7.2
-        args:
-        - --cluster-name=pdex-cluster
-        - --ingress-class=alb
