@@ -18,6 +18,8 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
+
+
 resource "aws_alb_target_group" "cer" {
   name                 = "cer-target-group"
   port                 = 80
@@ -32,7 +34,7 @@ resource "aws_alb_target_group" "cer" {
     protocol            = "HTTP"
     matcher             = "200"
     timeout             = "5"
-    path                = "/index.php"
+    path                = "/index.html"
     unhealthy_threshold = "2"
   }
     
@@ -76,6 +78,17 @@ resource "aws_lb_listener" "https_listener" {
   }
 }
 
+# Perimeter health probe: fixed 200 at /bcgovhealthcheck
+resource "aws_lb_listener_rule" "health_fixed_200" {
+  listener_arn = aws_lb_listener.https_listener.arn
+  priority     = 10
+  action {
+    type = "fixed-response"
+    fixed_response { status_code = "200" content_type = "text/plain" message_body = "OK" }
+  }
+  condition { path_pattern { values = ["/bcgovhealthcheck"] } }
+}
+
 resource "aws_lb_listener_rule" "healthcheck_fixed_response" {
   listener_arn = aws_lb_listener.https_listener.arn
   priority     = 10
@@ -92,7 +105,7 @@ resource "aws_lb_listener_rule" "healthcheck_fixed_response" {
 
   condition {
     path_pattern {
-      values = ["/up"]
+      values = ["/bcgovhealthcheck"]
     }
   }
 }
@@ -141,7 +154,7 @@ resource "aws_alb_target_group" "cdq" {
     protocol            = "HTTP"
     matcher             = "200"
     timeout             = "5"
-    path                = "/index.php"
+    path                = "/index.html"
     unhealthy_threshold = "2"
   }
     

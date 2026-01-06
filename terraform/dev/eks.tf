@@ -247,16 +247,3 @@ resource "aws_iam_role_policy" "ses_mailer_policy" {
   }
   EOF
 }
-
-data "aws_security_group" "eks_node_sg" {
-  id = aws_eks_cluster.pdex-cluster.vpc_config[0].cluster_security_group_id
-}
-
-resource "aws_security_group_rule" "allow_alb" {
-  type                     = "ingress"
-  from_port                = 80
-  to_port                  = 80
-  protocol                 = "tcp"
-  security_group_id        = data.aws_security_group.eks_node_sg.id
-  source_security_group_id = aws_security_group.alb_sg.id
-}
