@@ -216,3 +216,22 @@ output "pdex_target_group_arn" {
   value       = aws_alb_target_group.pdex.arn
   description = "ARN of the PDEX target group for Kubernetes Ingress"
 }
+
+resource "kubernetes_manifest" "pdex_alb_tgb" {
+  manifest = {
+    apiVersion = "elbv2.k8s.aws/v1beta1"
+    kind       = "TargetGroupBinding"
+    metadata = {
+      name      = "pdex-alb-tgb"
+      namespace = "default"
+    }
+    spec = {
+      targetGroupARN = aws_alb_target_group.pdex.arn
+      serviceRef = {
+        name = kubernetes_service_v1.pdex-service-dev.metadata[0].name
+        port = 80
+      }
+
+    }
+  }
+}
