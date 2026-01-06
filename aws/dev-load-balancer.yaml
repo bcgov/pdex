@@ -65,5 +65,16 @@ spec:
         image: public.ecr.aws/eks/aws-load-balancer-controller:v2.7.2
         args:
         - --cluster-name=pdex-cluster
-        - --ingress-class=alb
         - --aws-vpc-id=vpc-0beb5c99b7f010268
+        - --disable-ingress-class-annotation=true
+        - --disable-ingress-group-name-annotation=true
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 61779
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 61779
+          initialDelaySeconds: 10
