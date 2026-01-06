@@ -131,3 +131,22 @@ spec:
             name: pdex-service-dev
             port:
               number: 80
+---
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: pdex-alb-tgb
+  namespace: default
+spec:
+  targetGroupARN: arn:aws:elasticloadbalancing:ca-central-1:814738839437:targetgroup/pdex-target-group/444d956cd91cd437
+  serviceRef:
+    name: pdex-service-dev
+    port: 80
+  networking:
+    ingress:
+      - from:
+          - securityGroup:
+              groupID: alb-https-sg 
+        ports:
+          - protocol: TCP
+            port: 80
