@@ -205,8 +205,8 @@ resource "aws_lb_listener_rule" "forward_all_traffic" {
   }
 
   condition {
-    path_pattern {
-      values = ["/*"]
+    host_header {
+      values = ["app.*"]
     }
   }
 }
