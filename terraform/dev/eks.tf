@@ -253,5 +253,8 @@ resource "aws_eks_pod_identity_association" "alb_controller" {
   namespace         = "kube-system"
   service_account   = "aws-load-balancer-controller"
   role_arn          = aws_iam_role.alb_role.arn   # same role you built for the controller
-  depends_on        = [helm_release.aws_load_balancer_controller]
+  depends_on = [
+    aws_eks_addon.pod-identity-addon,
+    helm_release.aws_load_balancer_controller
+  ]
 }
