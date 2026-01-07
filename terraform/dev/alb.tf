@@ -184,7 +184,7 @@ resource "aws_alb_target_group" "pdex" {
     protocol            = "HTTP"
     matcher             = "200"
     timeout             = "5"
-    path                = "/index.php"
+    path                = "/system-status.md"
     unhealthy_threshold = "2"
   }
     
