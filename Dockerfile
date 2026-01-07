@@ -128,13 +128,13 @@ RUN apt-get -yq update --fix-missing \
 WORKDIR /var/www/html/
 
 RUN mkdir -p storage && mkdir -p bootstrap/cache && chmod -R ug+rwx storage bootstrap/cache \
-    && cd /var/www && chown -R root:root html && chmod -R ug+rw html \
+    && cd /var/www && chown -R www-data:www-data html && chmod -R ug+rw html \
     && chmod 754 /var/www/html/artisan \
     && chmod 755 /var/www/html/probe-check.sh \
     && cd /var/www/html/public && chmod 644 mix-manifest.json \
-    && mkdir /.npm && mkdir /.npm/_cache && chown -R root:0 "/.npm" \
-    && mkdir -p /.config/psysh && chown -R root:root /.config && chmod -R 775 /.config \
-    && mkdir -p /.composer && chown -R root:root /.composer && chmod -R 755 /.composer \
+    && mkdir /.npm && mkdir /.npm/_cache && chown -R www-data:0 "/.npm" \
+    && mkdir -p /.config/psysh && chown -R www-data:www-data /.config && chmod -R 775 /.config \
+    && mkdir -p /.composer && chown -R www-data:www-data /.composer && chmod -R 755 /.composer \
     && echo "<?php return ['runtimeDir' => '/tmp', 'configDir' => '/tmp', 'dataDir' => '/tmp'];" >> /.config/psysh/config.php \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
