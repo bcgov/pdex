@@ -69,6 +69,13 @@ fi
 echo "ENV file content preview:"
 cat .env || echo ".env file not found or not accessible"
 
+chown -R www-data:www-data \
+      /var/www/html/storage \
+      /var/www/html/bootstrap/cache 2>/dev/null || echo "Warning: Could not change ownership (read-only filesystem)"
+chmod -R 775 \
+      /var/www/html/storage \
+      /var/www/html/bootstrap/cache 2>/dev/null || echo "Warning: Could not change permissions (read-only filesystem)"
+
 echo "ENV_ARG: ${ENV_ARG}"
 
 echo "Install composer"

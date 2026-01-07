@@ -145,6 +145,7 @@ RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions 
     && chmod -R 775 bootstrap/cache storage/ \
     && npm config set cache /.npm/_cache --global
 
+
 #composer install
 RUN composer install && npm install --prefix /var/www/html/ && npm run --prefix /var/www/html/ ${DEVENV}
 
