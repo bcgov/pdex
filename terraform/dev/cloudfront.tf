@@ -17,7 +17,7 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
       "TLSv1.2"]
     }
 
-    domain_name = var.cloudfront_origin_domain
+    domain_name = "app.f2da56-dev.stratus.cloud.gov.bc.ca"
     origin_id   = random_integer.cf_origin_id.result
         
     custom_header {

@@ -121,8 +121,8 @@ data "aws_security_group" "eks_node_sg" {
 
 resource "aws_security_group_rule" "allow_alb" {
   type                     = "ingress"
-  from_port                = 80
-  to_port                  = 80
+  from_port                = 8080
+  to_port                  = 8080
   protocol                 = "tcp"
   security_group_id        = data.aws_security_group.eks_node_sg.id
   source_security_group_id = aws_security_group.alb_sg.id
@@ -184,7 +184,7 @@ resource "aws_alb_target_group" "pdex" {
     protocol            = "HTTP"
     matcher             = "200"
     timeout             = "5"
-    path                = "/index.php"
+    path                = "/system-status.md"
     unhealthy_threshold = "2"
   }
     
@@ -205,8 +205,8 @@ resource "aws_lb_listener_rule" "forward_all_traffic" {
   }
 
   condition {
-    path_pattern {
-      values = ["/*"]
+    host_header {
+      values = ["app.*"]
     }
   }
 }
@@ -233,6 +233,7 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
     }
     spec = {
       targetGroupARN = aws_alb_target_group.pdex.arn
+      targetType     = "ip"
       serviceRef = {
         name = "pdex-service-dev"
         port = 80
