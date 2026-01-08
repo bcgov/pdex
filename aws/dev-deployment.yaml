@@ -49,19 +49,19 @@ spec:
         - |
           set -euo pipefail
           apk add --no-cache jq >/dev/null
-          echo "Processing secrets from Kubernetes Secret..."
-          # Convert all secret files to .env format
-          cd /vault/secrets2
-          rm -f /tmp/secrets.env
-          for file in *; do
-            if [ -f "$file" ]; then
-              echo "${file}=$(cat $file)" >> /tmp/secrets.env
-            fi
-          done
-          echo "Secrets processed successfully. Generated .env file:"
-          wc -l /tmp/secrets.env
-          echo "First 3 lines:"
-          head -n 3 /tmp/secrets.env
+          # echo "Processing secrets from Kubernetes Secret..."
+          # # Convert all secret files to .env format
+          # cd /vault/secrets2
+          # rm -f /tmp/secrets.env
+          # for file in *; do
+          #   if [ -f "$file" ]; then
+          #     echo "${file}=$(cat $file)" >> /tmp/secrets.env
+          #   fi
+          # done
+          # echo "Secrets processed successfully. Generated .env file:"
+          # wc -l /tmp/secrets.env
+          # echo "First 3 lines:"
+          # head -n 3 /tmp/secrets.env
           
           ######
 
@@ -97,11 +97,11 @@ spec:
 
 
         volumeMounts:
-        - name: pdex-secrets
-          mountPath: /vault/secrets2
-          readOnly: true
-        - name: secrets-temp
-          mountPath: /tmp
+        # - name: pdex-secrets
+        #   mountPath: /vault/secrets2
+        #   readOnly: true
+        # - name: secrets-temp
+        #   mountPath: /tmp
 
         - name: sm-secret
           mountPath: /vault/secrets
@@ -145,12 +145,12 @@ spec:
         #   timeoutSeconds: 5
 
         volumeMounts:
-        - name: pdex-secrets
-          mountPath: /vault/secrets2
-          readOnly: true
-        - name: secrets-temp
-          mountPath: /tmp
-          readOnly: false
+        # - name: pdex-secrets
+        #   mountPath: /vault/secrets2
+        #   readOnly: true
+        # - name: secrets-temp
+        #   mountPath: /tmp
+        #   readOnly: false
 
         - name: dotenv-out
           mountPath: /secrets
@@ -161,11 +161,11 @@ spec:
 
       serviceAccountName: pdex-secret-manager-sa
       volumes:
-      - name: pdex-secrets
-        secret:
-          secretName: pdex-secrets
-      - name: secrets-temp
-        emptyDir: {}
+      # - name: pdex-secrets
+      #   secret:
+      #     secretName: pdex-secrets
+      # - name: secrets-temp
+      #   emptyDir: {}
 
       - name: sm-secret
         emptyDir: {}
