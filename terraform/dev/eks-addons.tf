@@ -41,6 +41,17 @@ resource "helm_release" "secrets_store_csi_driver" {
   depends_on = [aws_eks_cluster.pdex-cluster]
 }
 
+resource "helm_release" "secrets_csi_driver_aws_provider" {
+  name = "secrets-store-csi-driver-provider-aws"
+
+  repository = "https://aws.github.io/secrets-store-csi-driver-provider-aws"
+  chart      = "secrets-store-csi-driver-provider-aws"
+  namespace  = "kube-system"
+  version    = "0.3.8"
+
+  depends_on = [helm_release.secrets_store_csi_driver]
+}
+
 resource "helm_release" "aws_load_balancer_controller" {
   name       = "aws-load-balancer-controller"
   namespace  = "kube-system"
