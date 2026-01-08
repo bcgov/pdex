@@ -210,3 +210,5 @@ kind: ServiceAccount
 metadata:
   name: pdex-secret-manager-sa
   namespace: default
+  annotations:
+    eks.amazonaws.com/pod-identity-association: "true"
