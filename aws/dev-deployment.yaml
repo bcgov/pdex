@@ -43,10 +43,12 @@ spec:
           mountPath: /secrets
 
       - name: secrets-init
-        image: busybox:latest
+        image: public.ecr.aws/docker/library/alpine:3.19
         command: ['sh', '-c']
         args:
         - |
+          set -euo pipefail
+          apk add --no-cache jq >/dev/null
           echo "Processing secrets from Kubernetes Secret..."
           # Convert all secret files to .env format
           cd /vault/secrets2
