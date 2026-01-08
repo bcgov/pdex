@@ -136,7 +136,7 @@ spec:
           mountPath: /vault/secrets
           readOnly: true
 
-      serviceAccountName: app-irsa-sa
+      serviceAccountName: pdex-sa-dev
       volumes:
       - name: pdex-secrets
         secret:
@@ -203,11 +203,3 @@ spec:
       - objectName: "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz"
         objectType: "secretsmanager"
         objectAlias: "secrets.json"
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: app-irsa-sa
-  namespace: default
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::814738839437:role/GitHubActionsPDEXDevRole
