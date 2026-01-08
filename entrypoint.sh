@@ -19,10 +19,10 @@ ENV_SRC=""
 if [ -f /tmp/secrets.env ]; then
   ENV_SRC="/tmp/secrets.env"
   echo "Found processed secrets in /tmp/secrets.env"
-elif [ -f /vault/secrets2/secrets.env ]; then
-  ENV_SRC="/vault/secrets2/secrets.env"
-elif [ -f /vault/secrets2/test-secrets.env ]; then
-  ENV_SRC="/vault/secrets2/test-secrets.env"
+elif [ -f /vault/secrets/secrets.env ]; then
+  ENV_SRC="/vault/secrets/secrets.env"
+elif [ -f /vault/secrets/test-secrets.env ]; then
+  ENV_SRC="/vault/secrets/test-secrets.env"
 fi
 
 if [ -n "$ENV_SRC" ]; then
@@ -61,7 +61,7 @@ if [ -n "$ENV_SRC" ]; then
     cd /var/www/html
   fi
 else
-  echo "No secrets env file found in /vault/secrets2"
+  echo "No secrets env file found in /vault/secrets"
   cd /var/www/html
 fi
 
