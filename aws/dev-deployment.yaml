@@ -28,7 +28,7 @@ spec:
         - |
           echo "Processing secrets from Kubernetes Secret..."
           # Convert all secret files to .env format
-          cd /vault/secrets
+          cd /vault/secrets2
           rm -f /tmp/secrets.env
           for file in *; do
             if [ -f "$file" ]; then
@@ -39,12 +39,53 @@ spec:
           wc -l /tmp/secrets.env
           echo "First 3 lines:"
           head -n 3 /tmp/secrets.env
+          
+          ######
+
+          echo "Processing secrets from Secrets Manager JSON..."
+          set -eu
+
+          src="/vault/secrets/secrets.json"
+          out="/secrets/.env"
+
+          if [ ! -f "$src" ]; then
+            echo "ERROR: $src not found"
+            ls -la /vault/secrets || true
+            exit 1
+          fi
+
+          mkdir -p /secrets
+          rm -f "$out"
+
+          # Convert JSON object to KEY=VALUE lines.
+          # - values are coerced to strings
+          # - internal newlines are escaped as \n
+          jq -r '
+            to_entries
+            | map("\(.key)=\(.value|tostring|gsub("\r";"")|gsub("\n";"\\n"))")
+            | .[]
+          ' "$src" > "$out"
+
+          chmod 600 "$out" || true
+
+          echo "Generated $out"
+          echo "Line count:"; wc -l "$out"
+          echo "First 3 lines:"; head -n 3 "$out"
+
+
         volumeMounts:
         - name: pdex-secrets
-          mountPath: /vault/secrets
+          mountPath: /vault/secrets2
           readOnly: true
         - name: secrets-temp
           mountPath: /tmp
+
+        - name: sm-csi
+          mountPath: /vault/secrets
+          readOnly: true
+        - name: dotenv-out
+          mountPath: /secrets
+
 
       containers:
       - name: pdex
@@ -82,11 +123,16 @@ spec:
 
         volumeMounts:
         - name: pdex-secrets
-          mountPath: /vault/secrets
+          mountPath: /vault/secrets2
           readOnly: true
         - name: secrets-temp
           mountPath: /tmp
           readOnly: false
+
+        - name: dotenv-out
+          mountPath: /secrets
+          readOnly: true
+
 
       volumes:
       - name: pdex-secrets
@@ -95,19 +141,29 @@ spec:
       - name: secrets-temp
         emptyDir: {}
 
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: pdex-service-dev
-# spec:
-#   selector:
-#     app: pdex
-#   ports:
-#     - protocol: TCP
-#       port: 80
-#       targetPort: 8080
-#   type: ClusterIP
+      - name: sm-csi
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: secrets-json-spc
+      - name: dotenv-out
+        emptyDir: {}
+
+---
+# needed to receive traffic from the ALB. It must match the serviceRef name in alb.tf
+apiVersion: v1
+kind: Service
+metadata:
+  name: pdex-service-dev
+spec:
+  selector:
+    app: pdex
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
 
 # ---
 # apiVersion: networking.k8s.io/v1
@@ -131,3 +187,16 @@ spec:
 #             name: pdex-service-dev
 #             port:
 #               number: 80
+
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: secrets-json-spc
+  namespace: default
+spec:
+  provider: aws
+  parameters:
+    objects: |
+      - objectName: "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz"
+        objectType: "secretsmanager"
+        objectAlias: "secrets.json"
