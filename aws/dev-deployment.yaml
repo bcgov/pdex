@@ -136,7 +136,7 @@ spec:
           mountPath: /vault/secrets
           readOnly: true
 
-      serviceAccountName: pdex-sa-dev
+      serviceAccountName: pdex-secret-manager-sa
       volumes:
       - name: pdex-secrets
         secret:
@@ -199,7 +199,16 @@ metadata:
 spec:
   provider: aws
   parameters:
+    region: ca-central-1
     objects: |
       - objectName: "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz"
         objectType: "secretsmanager"
-        objectAlias: "secrets.json"
+        objectAlias: "secrets.json" 
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pdex-secret-manager-sa
+  namespace: default
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::814738839437:role/pdex-secrets-dev
