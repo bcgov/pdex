@@ -235,7 +235,7 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
       targetGroupARN = aws_alb_target_group.pdex.arn
       targetType     = "ip"
       serviceRef = {
-        name = "pdex-service-dev"
+        name = "pdex-service-dev" # name of the Kubernetes Service to associate with found in dev-deployment.yaml
         port = 80
       }
     }

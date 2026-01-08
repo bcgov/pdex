@@ -28,7 +28,7 @@ spec:
         - |
           echo "Processing secrets from Kubernetes Secret..."
           # Convert all secret files to .env format
-          cd /vault/secrets
+          cd /vault/secrets2
           rm -f /tmp/secrets.env
           for file in *; do
             if [ -f "$file" ]; then
@@ -39,12 +39,53 @@ spec:
           wc -l /tmp/secrets.env
           echo "First 3 lines:"
           head -n 3 /tmp/secrets.env
+          
+          ######
+
+          echo "Processing secrets from Secrets Manager JSON..."
+          set -eu
+
+          src="/vault/secrets/secrets.json"
+          out="/secrets/.env"
+
+          if [ ! -f "$src" ]; then
+            echo "ERROR: $src not found"
+            ls -la /vault/secrets || true
+            exit 1
+          fi
+
+          mkdir -p /secrets
+          rm -f "$out"
+
+          # Convert JSON object to KEY=VALUE lines.
+          # - values are coerced to strings
+          # - internal newlines are escaped as \n
+          jq -r '
+            to_entries
+            | map("\(.key)=\(.value|tostring|gsub("\r";"")|gsub("\n";"\\n"))")
+            | .[]
+          ' "$src" > "$out"
+
+          chmod 600 "$out" || true
+
+          echo "Generated $out"
+          echo "Line count:"; wc -l "$out"
+          echo "First 3 lines:"; head -n 3 "$out"
+
+
         volumeMounts:
         - name: pdex-secrets
-          mountPath: /vault/secrets
+          mountPath: /vault/secrets2
           readOnly: true
         - name: secrets-temp
           mountPath: /tmp
+
+        - name: sm-csi
+          mountPath: /vault/secrets
+          readOnly: true
+        - name: dotenv-out
+          mountPath: /secrets
+
 
       containers:
       - name: pdex
@@ -82,12 +123,20 @@ spec:
 
         volumeMounts:
         - name: pdex-secrets
-          mountPath: /vault/secrets
+          mountPath: /vault/secrets2
           readOnly: true
         - name: secrets-temp
           mountPath: /tmp
           readOnly: false
 
+        - name: dotenv-out
+          mountPath: /secrets
+          readOnly: true
+        - name: sm-csi
+          mountPath: /vault/secrets
+          readOnly: true
+
+      serviceAccountName: pdex-secret-manager-sa
       volumes:
       - name: pdex-secrets
         secret:
@@ -95,7 +144,17 @@ spec:
       - name: secrets-temp
         emptyDir: {}
 
+      - name: sm-csi
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: secrets-json-spc
+      - name: dotenv-out
+        emptyDir: {}
+
 ---
+# needed to receive traffic from the ALB. It must match the serviceRef name in alb.tf
 apiVersion: v1
 kind: Service
 metadata:
@@ -109,25 +168,47 @@ spec:
       targetPort: 8080
   type: ClusterIP
 
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: pdex-ingress-dev
+#   annotations:
+#     alb.ingress.kubernetes.io/scheme: internal
+#     alb.ingress.kubernetes.io/target-type: ip
+#     alb.ingress.kubernetes.io/load-balancer-name: default
+#     kubernetes.io/ingress.class: alb
+# spec:
+#   rules:
+#   - host: dev.pdex.gov.bc.ca
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: pdex-service-dev
+#             port:
+#               number: 80
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
 metadata:
-  name: pdex-ingress-dev
-  annotations:
-    alb.ingress.kubernetes.io/scheme: internal
-    alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/load-balancer-name: default
-    kubernetes.io/ingress.class: alb
+  name: secrets-json-spc
+  namespace: default
 spec:
-  rules:
-  - host: dev.pdex.gov.bc.ca
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: pdex-service-dev
-            port:
-              number: 80
+  provider: aws
+  parameters:
+    region: ca-central-1
+    objects: |
+      - objectName: "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz"
+        objectType: "secretsmanager"
+        objectAlias: "secrets.json" 
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pdex-secret-manager-sa
+  namespace: default
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::814738839437:role/pdex-secrets-dev

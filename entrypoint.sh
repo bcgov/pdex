@@ -19,10 +19,10 @@ ENV_SRC=""
 if [ -f /tmp/secrets.env ]; then
   ENV_SRC="/tmp/secrets.env"
   echo "Found processed secrets in /tmp/secrets.env"
-elif [ -f /vault/secrets/secrets.env ]; then
-  ENV_SRC="/vault/secrets/secrets.env"
-elif [ -f /vault/secrets/test-secrets.env ]; then
-  ENV_SRC="/vault/secrets/test-secrets.env"
+elif [ -f /vault/secrets2/secrets.env ]; then
+  ENV_SRC="/vault/secrets2/secrets.env"
+elif [ -f /vault/secrets2/test-secrets.env ]; then
+  ENV_SRC="/vault/secrets2/test-secrets.env"
 fi
 
 if [ -n "$ENV_SRC" ]; then
@@ -61,13 +61,20 @@ if [ -n "$ENV_SRC" ]; then
     cd /var/www/html
   fi
 else
-  echo "No secrets env file found in /vault/secrets"
+  echo "No secrets env file found in /vault/secrets2"
   cd /var/www/html
 fi
 
 # cat .env
 echo "ENV file content preview:"
 cat .env || echo ".env file not found or not accessible"
+
+chown -R www-data:www-data \
+      /var/www/html/storage \
+      /var/www/html/bootstrap/cache 2>/dev/null || echo "Warning: Could not change ownership (read-only filesystem)"
+chmod -R 775 \
+      /var/www/html/storage \
+      /var/www/html/bootstrap/cache 2>/dev/null || echo "Warning: Could not change permissions (read-only filesystem)"
 
 echo "ENV_ARG: ${ENV_ARG}"
 
