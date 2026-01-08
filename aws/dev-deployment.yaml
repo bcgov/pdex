@@ -132,6 +132,9 @@ spec:
         - name: dotenv-out
           mountPath: /secrets
           readOnly: true
+        - name: sm-csi
+          mountPath: /vault/secrets
+          readOnly: true
 
 
       volumes:
