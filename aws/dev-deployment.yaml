@@ -21,6 +21,27 @@ spec:
         operator: "Exists"
 
       initContainers:
+      - name: secrets-manager-fetch
+        image: public.ecr.aws/aws-cli/aws-cli:2.17.38
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c']
+        args:
+        - |
+          set -euo pipefail
+          mkdir -p /secrets
+          echo "Fetching secrets from AWS Secrets Manager..."
+          aws secretsmanager get-secret-value \
+            --secret-id arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz \
+            --query SecretString \
+            --output text > /secrets/secrets.json
+          chmod 600 /secrets/secrets.json
+        env:
+        - name: AWS_REGION
+          value: ca-central-1
+        volumeMounts:
+        - name: sm-secret
+          mountPath: /secrets
+
       - name: secrets-init
         image: busybox:latest
         command: ['sh', '-c']
@@ -80,7 +101,7 @@ spec:
         - name: secrets-temp
           mountPath: /tmp
 
-        - name: sm-csi
+        - name: sm-secret
           mountPath: /vault/secrets
           readOnly: true
         - name: dotenv-out
@@ -132,7 +153,7 @@ spec:
         - name: dotenv-out
           mountPath: /secrets
           readOnly: true
-        - name: sm-csi
+        - name: sm-secret
           mountPath: /vault/secrets
           readOnly: true
 
@@ -144,12 +165,8 @@ spec:
       - name: secrets-temp
         emptyDir: {}
 
-      - name: sm-csi
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: secrets-json-spc
+      - name: sm-secret
+        emptyDir: {}
       - name: dotenv-out
         emptyDir: {}
 
@@ -191,24 +208,8 @@ spec:
 #             port:
 #               number: 80
 ---
-apiVersion: secrets-store.csi.x-k8s.io/v1
-kind: SecretProviderClass
-metadata:
-  name: secrets-json-spc
-  namespace: default
-spec:
-  provider: aws
-  parameters:
-    region: ca-central-1
-    objects: |
-      - objectName: "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz"
-        objectType: "secretsmanager"
-        objectAlias: "secrets.json" 
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pdex-secret-manager-sa
   namespace: default
-  annotations:
-    eks.amazonaws.com/pod-identity-association: "true"

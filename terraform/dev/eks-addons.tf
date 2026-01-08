@@ -20,38 +20,6 @@ provider "helm" {
   }
 }
 
-resource "helm_release" "secrets_store_csi_driver" {
-  name       = "csi-secrets-store"
-  namespace  = "kube-system"
-  repository = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
-  chart      = "secrets-store-csi-driver"
-  version    = "1.4.6"
-
-  set = [
-    {
-        name  = "syncSecret.enabled"
-        value = "true"
-    },
-    {
-        name  = "enableSecretRotation"
-        value = "true"
-    }
-  ]
-
-  depends_on = [aws_eks_cluster.pdex-cluster]
-}
-
-resource "helm_release" "secrets_csi_driver_aws_provider" {
-  name = "secrets-store-csi-driver-provider-aws"
-
-  repository = "https://aws.github.io/secrets-store-csi-driver-provider-aws"
-  chart      = "secrets-store-csi-driver-provider-aws"
-  namespace  = "kube-system"
-  version    = "0.3.8"
-
-  depends_on = [helm_release.secrets_store_csi_driver]
-}
-
 resource "helm_release" "aws_load_balancer_controller" {
   name       = "aws-load-balancer-controller"
   namespace  = "kube-system"
