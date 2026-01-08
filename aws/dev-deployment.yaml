@@ -210,5 +210,3 @@ kind: ServiceAccount
 metadata:
   name: pdex-secret-manager-sa
   namespace: default
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::814738839437:role/pdex-secrets-dev
