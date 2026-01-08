@@ -12,7 +12,7 @@ resource "helm_release" "secrets_csi_driver" {
     value = true
   }]
 
-  depends_on = [helm_release.efs_csi_driver]
+  depends_on = [aws_eks_addon.aws-efs-csi-driver]
 }
 
 resource "helm_release" "secrets_csi_driver_aws_provider" {
