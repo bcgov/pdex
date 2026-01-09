@@ -72,7 +72,7 @@ spec:
           # - internal newlines are escaped as \n
           jq -r '
             to_entries
-            | map(\(.key) + "=" + (\(.value|tostring|gsub("\r";"")) | @json))
+            | map(.key + "=" + ((.value | tostring | gsub("\r";"")) | @json))
             | .[]
           ' "$src" > "$out"
 
