@@ -79,8 +79,6 @@ spec:
           chmod 600 "$out" || true
 
           echo "Generated $out"
-          echo "Line count:"; wc -l "$out"
-          echo "First 3 lines:"; head -n 3 "$out"
 
 
         volumeMounts:

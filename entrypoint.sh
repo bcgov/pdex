@@ -16,13 +16,11 @@ ENV_DST="/var/www/html/.env"
 ENV_SRC=""
 
 # Check for processed secrets first (from init container)
-if [ -f /tmp/secrets.env ]; then
-  ENV_SRC="/tmp/secrets.env"
-  echo "Found processed secrets in /tmp/secrets.env"
-elif [ -f /vault/secrets/secrets.env ]; then
-  ENV_SRC="/vault/secrets/secrets.env"
-elif [ -f /vault/secrets/test-secrets.env ]; then
-  ENV_SRC="/vault/secrets/test-secrets.env"
+if [ -f /secrets/.env ]; then
+  ENV_SRC="/secrets/.env"
+  echo "Found processed secrets in /secrets/.env"
+else
+  echo "No processed secrets found in /secrets/.env"
 fi
 
 if [ -n "$ENV_SRC" ]; then
@@ -65,9 +63,8 @@ else
   cd /var/www/html
 fi
 
-# cat .env
 echo "ENV file content preview:"
-cat .env || echo ".env file not found or not accessible"
+head -n 3 /var/www/html/.env || echo "No .env file present"
 
 chown -R www-data:www-data \
       /var/www/html/storage \
