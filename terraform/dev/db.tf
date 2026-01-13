@@ -61,18 +61,8 @@ resource "aws_rds_cluster_instance" "postgres-pdex" {
 
 resource "aws_security_group" "pdex_rds_proxy_sg" {
   name        = "pdex-rds-proxy-sg"
-  description = "Allow app tier access to RDS proxy"
+  description = "Allow access to RDS proxy"
   vpc_id      = data.aws_vpc.main.id
-
-  ingress {
-    description     = "Postgres from app tier"
-    security_group_id        = aws_security_group.pdex_rds_proxy_sg.id   # PROXY_SG
-    source_security_group_id = aws_security_group.eks_nodes_sg.id        # NODE_SG
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [data.aws_security_group.app.id]
-  }
 
   egress {
     from_port   = 0
@@ -83,6 +73,29 @@ resource "aws_security_group" "pdex_rds_proxy_sg" {
 
   tags = var.common_tags
 }
+
+# Allow Postgres FROM app SG -> proxy SG
+resource "aws_security_group_rule" "proxy_ingress_from_app_sg" {
+  type                     = "ingress"
+  description              = "Postgres from app tier"
+  security_group_id        = aws_security_group.pdex_rds_proxy_sg.id
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  source_security_group_id = data.aws_security_group.app.id
+}
+
+# Allow Postgres FROM EKS nodes SG -> proxy SG (your CLI rule)
+resource "aws_security_group_rule" "proxy_ingress_from_eks_nodes" {
+  type                     = "ingress"
+  description              = "Postgres from EKS nodes"
+  security_group_id        = aws_security_group.pdex_rds_proxy_sg.id
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.eks_nodes_sg.id
+}
+
 
 resource "aws_appautoscaling_target" "rds_cluster_read_replica" {
   max_capacity       = 4
