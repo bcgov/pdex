@@ -11,7 +11,7 @@ data "aws_subnets" "private" {
   filter {
     name   = "tag:Name"
     # use environment_name variable to build the subnet name filter
-    values = ["${var.environment_name}-App-*"]
+    values = ["${var.environment_name}-*"]
   }
 }
 
