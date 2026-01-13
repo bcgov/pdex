@@ -67,6 +67,37 @@ resource "aws_rds_cluster_instance" "postgres-pdex" {
   engine_version     = aws_rds_cluster.postgres-pdex.engine_version
 }
 
+resource "aws_security_group" "pdex_rds_proxy_sg" {
+  name        = "pdex-rds-proxy-sg"
+  description = "Allow app tier access to RDS proxy"
+  vpc_id      = data.aws_vpc.main.id
+
+  ingress {
+    description     = "Postgres from app tier"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [data.aws_security_group.app.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = var.common_tags
+}
+
+resource "aws_appautoscaling_target" "rds_cluster_read_replica" {
+  max_capacity       = 4
+  min_capacity       = 1
+  resource_id        = "cluster:${aws_rds_cluster.postgres-pdex.id}"
+  scalable_dimension = "rds:cluster:ReadReplicaCount"
+  service_namespace  = "rds"
+}
+
 # add auto scaling policy, target metric average connections 100 with min 1 and max 4 instances
 resource "aws_appautoscaling_policy" "rds_pdex_connections_scaling_policy" {
   name               = "rds-pdex-connections-scaling-policy"
