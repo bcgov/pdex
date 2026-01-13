@@ -64,17 +64,17 @@ variable "github_actions_role_arn" {
 variable "pdex_rds_secret_arn" {
   description = "ARN of the Secrets Manager secret containing RDS credentials"
   type        = string
-  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-rds-creds*"
+  default     = "pdex-rds-creds"
 }
 
 variable "pdex_rds_envpref_secret_arn" {
   description = "ARN of the environment-prefixed Secrets Manager secret containing RDS credentials"
   type        = string
-  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env*"
+  default     = "secrets.env-bV4LPz"
 }
 
 variable "pdex_opensearch_secret_arn" {
   description = "ARN of the Secrets Manager secret containing OpenSearch master credentials"
   type        = string
-  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-opensearch-creds"
+  default     = "pdex-opensearch-creds"
 }
