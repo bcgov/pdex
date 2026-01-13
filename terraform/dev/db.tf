@@ -136,7 +136,6 @@ resource "aws_db_proxy" "pdex" {
 
 # Default Target Group for the Proxy
 resource "aws_db_proxy_default_target_group" "pdex" {
-  name               = "default"
   db_proxy_name        = aws_db_proxy.pdex.name
 
   connection_pool_config {
