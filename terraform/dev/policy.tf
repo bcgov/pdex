@@ -33,15 +33,6 @@ resource "aws_iam_role_policy_attachment" "alb_attachment" {
 # RDS Proxy: role used by RDS to read secrets
 ############################################
 
-# (Optional but recommended) look up the secrets by name so you don't hardcode ARNs
-data "aws_secretsmanager_secret" "pdex_rds_creds" {
-  name = "pdex-rds-creds"
-}
-
-data "aws_secretsmanager_secret" "pdex_rds_creds_envpref" {
-  name = "secrets.env-bV4LPz-pdex-rds-creds"
-}
-
 resource "aws_iam_policy" "pdex_rds_proxy_secrets_policy" {
   name = "pdex-cluster-pdex-secrets"
 
@@ -55,8 +46,8 @@ resource "aws_iam_policy" "pdex_rds_proxy_secrets_policy" {
           "secretsmanager:DescribeSecret"
         ]
         Resource = [
-          data.aws_secretsmanager_secret.pdex_rds_creds.arn,
-          data.aws_secretsmanager_secret.pdex_rds_creds_envpref.arn
+          var.pdex_rds_secret_arn,
+          var.pdex_rds_envpref_secret_arn
         ]
       }
     ]

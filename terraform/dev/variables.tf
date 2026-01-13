@@ -60,3 +60,24 @@ variable "github_actions_role_arn" {
   description = "ARN of the GitHub Actions IAM role for EKS access"
   type        = string
 }
+
+variable "pdex_rds_master_username" {
+  description = "Master username for the Aurora cluster"
+  type        = string
+}
+
+variable "pdex_rds_master_password" {
+  description = "Master password for the Aurora cluster"
+  type        = string
+  sensitive   = true
+}
+
+variable "pdex_rds_secret_arn" {
+  description = "ARN of the Secrets Manager secret containing RDS credentials"
+  type        = string
+}
+
+variable "pdex_rds_envpref_secret_arn" {
+  description = "ARN of the environment-prefixed Secrets Manager secret containing RDS credentials"
+  type        = string
+}

@@ -1,21 +1,3 @@
-# rds
-data "aws_secretsmanager_secret" "pdex_rds_proxy_creds" {
-  name = "secrets.env-bV4LPz-pdex-rds-creds"
-}
-
-data "aws_iam_role" "pdex_rds_proxy_role" {
-  name = "pdex-cluster-pdex-secrets"
-}
-
-# create this manually
-data "aws_secretsmanager_secret_version" "creds" {
-  secret_id = "pdex-rds-creds"
-}
-
-data "aws_secretsmanager_secret_version" "opensearch_creds" {
-  secret_id = "pdex-opensearch-creds"
-}
-
 resource "aws_db_subnet_group" "data_subnet" {
   name                   = "data-subnet"
   subnet_ids             = data.aws_subnets.data.ids
@@ -28,8 +10,8 @@ resource "aws_rds_cluster" "postgres-pdex" {
   engine                  = "aurora-postgresql"
   engine_version          = "16.8"
   engine_mode             = "provisioned"
-  master_username         = local.db_creds.username
-  master_password         = local.db_creds.password
+  master_username         = var.pdex_rds_master_username
+  master_password         = var.pdex_rds_master_password
   backup_retention_period = 35
   preferred_backup_window = "07:00-09:00"
   preferred_maintenance_window = "sun:06:00-sun:06:30"
@@ -46,17 +28,6 @@ resource "aws_rds_cluster" "postgres-pdex" {
   }
 
   tags = var.common_tags
-}
-
-
-locals {
-  db_creds = jsondecode(
-    data.aws_secretsmanager_secret_version.creds.secret_string
-  )
-  opensearch_creds = jsondecode(
-    data.aws_secretsmanager_secret_version.opensearch_creds.secret_string
-  )
-
 }
   
 resource "aws_rds_cluster_instance" "postgres-pdex" {
@@ -137,7 +108,7 @@ resource "aws_appautoscaling_policy" "rds_pdex_cpu_scaling_policy" {
 resource "aws_db_proxy" "pdex" {
   name                   = "pdex-rds-proxy"
   engine_family          = "POSTGRESQL"
-  role_arn               = data.aws_iam_role.pdex_rds_proxy_role.arn
+  role_arn               = aws_iam_role.pdex_rds_proxy_secrets_role.arn
   vpc_subnet_ids         = data.aws_subnets.app.ids
   vpc_security_group_ids = [aws_security_group.pdex_rds_proxy_sg.id]
 
@@ -146,7 +117,7 @@ resource "aws_db_proxy" "pdex" {
 
   auth {
     auth_scheme               = "SECRETS"
-    secret_arn                = data.aws_secretsmanager_secret.pdex_rds_proxy_creds.arn
+    secret_arn                = var.pdex_rds_envpref_secret_arn
     iam_auth                  = "DISABLED"
     client_password_auth_type = "POSTGRES_MD5"
   }
