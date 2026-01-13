@@ -76,14 +76,6 @@ resource "aws_iam_role" "pdex_rds_proxy_secrets_role" {
             "sts:AssumeRole",
             "sts:TagSession"
         ]
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:GetSecretValue",
-          "secretsmanager:DescribeSecret"
-        ]
-        Resource = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz*"
       }
     ]
   })
