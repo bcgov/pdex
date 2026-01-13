@@ -66,6 +66,16 @@ resource "aws_iam_role" "pdex_rds_proxy_secrets_role" {
           Service = "rds.amazonaws.com"
         }
         Action = "sts:AssumeRole"
+      },
+      {
+        Effect = "Allow",
+        Principal = {
+            Service = "pods.eks.amazonaws.com"
+        },
+        Action = [
+            "sts:AssumeRole",
+            "sts:TagSession"
+        ]
       }
     ]
   })

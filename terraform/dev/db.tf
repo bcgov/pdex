@@ -87,7 +87,7 @@ resource "aws_appautoscaling_policy" "rds_pdex_connections_scaling_policy" {
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
-      predefined_metric_type = "RDSReaderAverageCConnections"
+      predefined_metric_type = "RDSReaderAverageDatabaseConnections"
     }
     target_value = 100.0
     scale_in_cooldown  = 300
