@@ -60,3 +60,21 @@ variable "github_actions_role_arn" {
   description = "ARN of the GitHub Actions IAM role for EKS access"
   type        = string
 }
+
+variable "pdex_rds_secret_arn" {
+  description = "ARN of the Secrets Manager secret containing RDS credentials"
+  type        = string
+  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-rds-creds"
+}
+
+variable "pdex_rds_envpref_secret_arn" {
+  description = "ARN of the environment-prefixed Secrets Manager secret containing RDS credentials"
+  type        = string
+  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz"
+}
+
+variable "pdex_opensearch_secret_arn" {
+  description = "ARN of the Secrets Manager secret containing OpenSearch master credentials"
+  type        = string
+  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-opensearch-creds"
+}

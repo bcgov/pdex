@@ -1,6 +1,14 @@
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+data "aws_secretsmanager_secret_version" "pdex_opensearch_master" {
+	secret_id = var.pdex_opensearch_secret_arn
+}
+
+locals {
+	opensearch_creds = jsondecode(data.aws_secretsmanager_secret_version.pdex_opensearch_master.secret_string)
+}
+
 resource "aws_iam_service_linked_role" "es" {
 	aws_service_name = "es.amazonaws.com"
 }
