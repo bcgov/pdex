@@ -130,17 +130,27 @@ resource "aws_db_proxy" "pdex" {
     client_password_auth_type = "POSTGRES_MD5"
   }
 
-  # attach to the rds cluster
-  db_proxy_target_group {
+  debug_logging = false 
+}
+
+
+# Default Target Group for the Proxy
+resource "aws_db_proxy_default_target_group" "pdex" {
     name               = "default"
     db_cluster_identifier = aws_rds_cluster.postgres-pdex.id
-    connection_pool_config {
-      max_connections_percent       = 100
-      max_idle_connections_percent  = 50
-      connection_borrow_timeout     = 120
-      session_pinning_filters       = []
-    }
-  }
 
-  debug_logging = false 
+  connection_pool_config {
+    max_connections_percent       = 100
+    max_idle_connections_percent  = 50
+    connection_borrow_timeout     = 120
+    session_pinning_filters       = []
+  }
+}
+
+# Attach an RDS instance to the proxy target group
+resource "aws_db_proxy_target" "pdex" {
+  db_proxy_name         = aws_db_proxy.pdex.name
+  target_group_name     = aws_db_proxy_default_target_group.pdex.name
+  rds_resource_id       = aws_db_instance.pdex.resource_id
+  target_type           = "RDS_INSTANCE"
 }
