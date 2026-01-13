@@ -55,6 +55,21 @@ resource "aws_iam_policy" "pdex_rds_proxy_secrets_policy" {
 }
 
 resource "aws_iam_role" "pdex_rds_proxy_secrets_role" {
+  name = "${aws_eks_cluster.pdex-cluster.name}-rds-proxy-secrets"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = { Service = "rds.amazonaws.com" }
+        Action   = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "pdex_pods_secrets_role" {
   name = "${aws_eks_cluster.pdex-cluster.name}-pdex-secrets"
 
   assume_role_policy = jsonencode({
@@ -62,20 +77,8 @@ resource "aws_iam_role" "pdex_rds_proxy_secrets_role" {
     Statement = [
       {
         Effect = "Allow"
-        Principal = {
-          Service = "rds.amazonaws.com"
-        }
-        Action = "sts:AssumeRole"
-      },
-      {
-        Effect = "Allow",
-        Principal = {
-            Service = "pods.eks.amazonaws.com"
-        },
-        Action = [
-            "sts:AssumeRole",
-            "sts:TagSession"
-        ]
+        Principal = { Service = "pods.eks.amazonaws.com" }
+        Action   = ["sts:AssumeRole", "sts:TagSession"]
       }
     ]
   })
@@ -89,14 +92,14 @@ resource "aws_iam_role_policy_attachment" "pdex_rds_proxy_secrets_attach" {
 
 resource "aws_iam_role_policy_attachment" "pdex_secrets" {
   policy_arn = aws_iam_policy.pdex_rds_proxy_secrets_policy.arn
-  role       = aws_iam_role.pdex_rds_proxy_secrets_role.name
+  role       = aws_iam_role.pdex_pods_secrets_role.name
 }
 
 resource "aws_eks_pod_identity_association" "pdex_secrets" {
   cluster_name    = aws_eks_cluster.pdex-cluster.name
   namespace       = "default"
   service_account = "pdex-secret-manager-sa"
-  role_arn        = aws_iam_role.pdex_rds_proxy_secrets_role.arn
+  role_arn        = aws_iam_role.pdex_pods_secrets_role.arn
   
   depends_on = [
     aws_eks_addon.pod-identity-addon,
@@ -105,5 +108,5 @@ resource "aws_eks_pod_identity_association" "pdex_secrets" {
 }
 
 output "pdex_secrets_role_arn" {
-  value = aws_iam_role.pdex_rds_proxy_secrets_role.arn
+  value = aws_iam_role.pdex_pods_secrets_role.arn
 }

@@ -66,6 +66,8 @@ resource "aws_security_group" "pdex_rds_proxy_sg" {
 
   ingress {
     description     = "Postgres from app tier"
+    security_group_id        = aws_security_group.pdex_rds_proxy_sg.id   # PROXY_SG
+    source_security_group_id = aws_security_group.eks_nodes_sg.id        # NODE_SG
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
@@ -138,7 +140,7 @@ resource "aws_db_proxy" "pdex" {
 
   auth {
     auth_scheme               = "SECRETS"
-    secret_arn                = var.pdex_rds_envpref_secret_arn
+    secret_arn                = var.pdex_rds_secret_arn
     iam_auth                  = "DISABLED"
     client_password_auth_type = "POSTGRES_MD5"
   }
@@ -150,6 +152,7 @@ resource "aws_db_proxy" "pdex" {
 # Default Target Group for the Proxy
 resource "aws_db_proxy_default_target_group" "pdex" {
   db_proxy_name        = aws_db_proxy.pdex.name
+  database_name        = "pdex-postgres-cluster"
 
   connection_pool_config {
     max_connections_percent       = 100
