@@ -2,6 +2,19 @@ data "aws_secretsmanager_secret_version" "pdex_rds_master" {
   secret_id = var.pdex_rds_secret_arn
 }
 
+data "aws_subnets" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    # use environment_name variable to build the subnet name filter
+    values = ["${var.environment_name}-*"]
+  }
+}
+
 locals {
   db_creds = jsondecode(data.aws_secretsmanager_secret_version.pdex_rds_master.secret_string)
 }
@@ -117,7 +130,7 @@ resource "aws_db_proxy" "pdex" {
   name                   = "pdex-rds-proxy"
   engine_family          = "POSTGRESQL"
   role_arn               = aws_iam_role.pdex_rds_proxy_secrets_role.arn
-  vpc_subnet_ids         = data.aws_subnets.app.ids
+  vpc_subnet_ids         = data.aws_subnets.private.ids
   vpc_security_group_ids = [aws_security_group.pdex_rds_proxy_sg.id]
 
   require_tls          = true
