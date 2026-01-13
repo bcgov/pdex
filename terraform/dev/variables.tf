@@ -81,3 +81,14 @@ variable "pdex_rds_envpref_secret_arn" {
   description = "ARN of the environment-prefixed Secrets Manager secret containing RDS credentials"
   type        = string
 }
+
+variable "pdex_opensearch_master_username" {
+  description = "Master username for the OpenSearch domain"
+  type        = string
+}
+
+variable "pdex_opensearch_master_password" {
+  description = "Master password for the OpenSearch domain"
+  type        = string
+  sensitive   = true
+}
