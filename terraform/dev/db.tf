@@ -93,7 +93,7 @@ resource "aws_security_group_rule" "proxy_ingress_from_eks_nodes" {
   from_port                = 5432
   to_port                  = 5432
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.eks_nodes_sg.id
+  source_security_group_id = data.aws_security_group.eks_node_sg.id
 }
 
 
@@ -165,7 +165,6 @@ resource "aws_db_proxy" "pdex" {
 # Default Target Group for the Proxy
 resource "aws_db_proxy_default_target_group" "pdex" {
   db_proxy_name        = aws_db_proxy.pdex.name
-  database_name        = "pdex-postgres-cluster"
 
   connection_pool_config {
     max_connections_percent       = 100
