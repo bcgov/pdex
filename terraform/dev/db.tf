@@ -1,3 +1,11 @@
+data "aws_secretsmanager_secret_version" "pdex_rds_master" {
+  secret_id = var.pdex_rds_secret_arn
+}
+
+locals {
+  db_creds = jsondecode(data.aws_secretsmanager_secret_version.pdex_rds_master.secret_string)
+}
+
 resource "aws_db_subnet_group" "data_subnet" {
   name                   = "data-subnet"
   subnet_ids             = data.aws_subnets.data.ids
@@ -10,8 +18,8 @@ resource "aws_rds_cluster" "postgres-pdex" {
   engine                  = "aurora-postgresql"
   engine_version          = "16.8"
   engine_mode             = "provisioned"
-  master_username         = var.pdex_rds_master_username
-  master_password         = var.pdex_rds_master_password
+  master_username         = local.db_creds.username
+  master_password         = local.db_creds.password
   backup_retention_period = 35
   preferred_backup_window = "07:00-09:00"
   preferred_maintenance_window = "sun:06:00-sun:06:30"

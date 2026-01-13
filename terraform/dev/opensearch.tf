@@ -1,6 +1,14 @@
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+data "aws_secretsmanager_secret_version" "pdex_opensearch_master" {
+	secret_id = var.pdex_opensearch_secret_arn
+}
+
+locals {
+	opensearch_creds = jsondecode(data.aws_secretsmanager_secret_version.pdex_opensearch_master.secret_string)
+}
+
 resource "aws_iam_service_linked_role" "es" {
 	aws_service_name = "es.amazonaws.com"
 }
@@ -66,8 +74,8 @@ EOF
 		enabled = true
 		internal_user_database_enabled = true
 		master_user_options {
-			master_user_name = var.pdex_opensearch_master_username
-			master_user_password = var.pdex_opensearch_master_password
+			master_user_name = local.opensearch_creds.es_username
+			master_user_password = local.opensearch_creds.es_password
 		}
 	}
 	

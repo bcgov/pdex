@@ -61,17 +61,6 @@ variable "github_actions_role_arn" {
   type        = string
 }
 
-variable "pdex_rds_master_username" {
-  description = "Master username for the Aurora cluster"
-  type        = string
-}
-
-variable "pdex_rds_master_password" {
-  description = "Master password for the Aurora cluster"
-  type        = string
-  sensitive   = true
-}
-
 variable "pdex_rds_secret_arn" {
   description = "ARN of the Secrets Manager secret containing RDS credentials"
   type        = string
@@ -82,13 +71,7 @@ variable "pdex_rds_envpref_secret_arn" {
   type        = string
 }
 
-variable "pdex_opensearch_master_username" {
-  description = "Master username for the OpenSearch domain"
+variable "pdex_opensearch_secret_arn" {
+  description = "ARN of the Secrets Manager secret containing OpenSearch master credentials"
   type        = string
-}
-
-variable "pdex_opensearch_master_password" {
-  description = "Master password for the OpenSearch domain"
-  type        = string
-  sensitive   = true
 }
