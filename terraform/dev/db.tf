@@ -150,6 +150,6 @@ resource "aws_db_proxy_default_target_group" "pdex" {
 resource "aws_db_proxy_target" "pdex" {
   db_proxy_name         = aws_db_proxy.pdex.name
   target_group_name     = aws_db_proxy_default_target_group.pdex.name
-  rds_resource_id       = aws_db_instance.pdex.resource_id
+  rds_resource_id       = aws_rds_cluster.postgres-pdex.id
   target_type           = "RDS_INSTANCE"
 }
