@@ -104,7 +104,7 @@ resource "aws_eks_pod_identity_association" "pdex_secrets" {
   cluster_name    = aws_eks_cluster.pdex-cluster.name
   namespace       = "default"
   service_account = "pdex-secret-manager-sa"
-  role_arn        = aws_iam_role.pdex_secrets.arn
+  role_arn        = aws_iam_role.pdex_rds_proxy_secrets_role.arn
   
   depends_on = [
     aws_eks_addon.pod-identity-addon,
