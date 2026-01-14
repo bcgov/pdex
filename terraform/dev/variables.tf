@@ -60,21 +60,33 @@ variable "github_actions_role_arn" {
   description = "ARN of the GitHub Actions IAM role for EKS access"
   type        = string
 }
-
 variable "pdex_rds_secret_arn" {
-  description = "ARN of the Secrets Manager secret containing RDS credentials"
+  description = "Exact ARN of the RDS credentials secret (no wildcard)"
   type        = string
-  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-rds-creds"
+  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-rds-creds-lqn30S"
 }
 
 variable "pdex_rds_envpref_secret_arn" {
-  description = "ARN of the environment-prefixed Secrets Manager secret containing RDS credentials"
+  description = "Exact ARN of the env-prefixed RDS credentials secret (no wildcard)"
   type        = string
-  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz"
+  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz-pdex-rds-creds-bOK7bC"
 }
+
 
 variable "pdex_opensearch_secret_arn" {
   description = "ARN of the Secrets Manager secret containing OpenSearch master credentials"
   type        = string
   default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-opensearch-creds"
+}
+
+variable "pdex_rds_secret_arn_wildcard" {
+  description = "Wildcard ARN for IAM policy to match the RDS creds secret"
+  type        = string
+  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-rds-creds-*"
+}
+
+variable "pdex_rds_envpref_secret_arn_wildcard" {
+  description = "Wildcard ARN for IAM policy to match env-prefixed RDS creds secrets"
+  type        = string
+  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz-*"
 }
