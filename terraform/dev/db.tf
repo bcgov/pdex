@@ -65,10 +65,11 @@ resource "aws_security_group" "pdex_rds_proxy_sg" {
   vpc_id      = data.aws_vpc.main.id
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["10.13.61.0/24"] # VPC CIDR block found under "Your VPCs" dashboard > IPv4 CIDR
   }
 
   tags = var.common_tags
