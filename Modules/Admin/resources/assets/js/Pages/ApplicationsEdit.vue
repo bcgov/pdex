@@ -1406,16 +1406,36 @@ export default {
     }
 
     // Generate functions for API credentials
+    const SECURE_CHARSET = 'abcdefghijklmnopqrstuvwxyz0123456789';
+
+    function generateSecureRandomString(length) {
+      const cryptoObj = (typeof window !== 'undefined' && window.crypto) || (typeof self !== 'undefined' && self.crypto) || (typeof globalThis !== 'undefined' && globalThis.crypto);
+      if (!cryptoObj || !cryptoObj.getRandomValues) {
+        throw new Error('Secure random number generator not available.');
+      }
+
+      const randomValues = new Uint32Array(length);
+      cryptoObj.getRandomValues(randomValues);
+
+      let result = '';
+      const charsetLength = SECURE_CHARSET.length;
+      for (let i = 0; i < length; i++) {
+        const index = randomValues[i] % charsetLength;
+        result += SECURE_CHARSET.charAt(index);
+      }
+      return result;
+    }
+
     function generateClientId() {
-      form.client_id = 'client_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36);
+      form.client_id = 'client_' + generateSecureRandomString(16) + Date.now().toString(36);
     }
 
     function generateClientSecret() {
-      form.client_secret = 'secret_' + Math.random().toString(36).substr(2, 32) + Date.now().toString(36);
+      form.client_secret = 'secret_' + generateSecureRandomString(32) + Date.now().toString(36);
     }
 
     function generateApiKey() {
-      form.api_key = 'key_' + Math.random().toString(36).substr(2, 24) + Date.now().toString(36);
+      form.api_key = 'key_' + generateSecureRandomString(24) + Date.now().toString(36);
     }
 
     function getSecurityApprovalBadgeColor(status) {
