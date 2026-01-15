@@ -24,5 +24,8 @@
     },
     "dependencies": {
         "date-fns": "^4.1.0"
+    },
+    "overrides": {
+        "elliptic": "^6.6.1"
     }
 }
