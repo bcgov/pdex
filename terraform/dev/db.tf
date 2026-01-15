@@ -69,7 +69,7 @@ resource "aws_security_group" "pdex_rds_proxy_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["10.13.61.0/24"] # VPC CIDR block found under "Your VPCs" dashboard > IPv4 CIDR
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 
   tags = var.common_tags
@@ -103,7 +103,7 @@ resource "aws_appautoscaling_target" "rds_cluster_read_replica" {
   min_capacity       = 1
   resource_id        = "cluster:${aws_rds_cluster.postgres-pdex.id}"
   scalable_dimension = "rds:cluster:ReadReplicaCount"
-  service_namespace  = "rds"
+  # service_namespace  = "rds"
 }
 
 # add auto scaling policy, target metric average connections 100 with min 1 and max 4 instances
@@ -112,7 +112,7 @@ resource "aws_appautoscaling_policy" "rds_pdex_connections_scaling_policy" {
   policy_type       = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.rds_cluster_read_replica.resource_id
   scalable_dimension = aws_appautoscaling_target.rds_cluster_read_replica.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.rds_cluster_read_replica.service_namespace
+  # service_namespace  = aws_appautoscaling_target.rds_cluster_read_replica.service_namespace
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
@@ -130,7 +130,7 @@ resource "aws_appautoscaling_policy" "rds_pdex_cpu_scaling_policy" {
   policy_type       = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.rds_cluster_read_replica.resource_id
   scalable_dimension = aws_appautoscaling_target.rds_cluster_read_replica.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.rds_cluster_read_replica.service_namespace
+  # service_namespace  = aws_appautoscaling_target.rds_cluster_read_replica.service_namespace
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
