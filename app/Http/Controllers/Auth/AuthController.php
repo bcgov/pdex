@@ -166,7 +166,7 @@ class AuthController extends Controller
             } catch (\Exception $e) {
                 Log::error('Failed to get access token', [
                     'error' => $e->getMessage(),
-                    // 'idp_type' => $idpType,
+                    'state' => $state,
                 ]);
                 
                 return Inertia::render('Auth/Login', [
