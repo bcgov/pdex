@@ -26,6 +26,7 @@
         "date-fns": "^4.1.0"
     },
     "overrides": {
-        "elliptic": "^6.6.1"
+        "elliptic": "^6.6.1",
+        "webpack-dev-server": "^5.2.1"
     }
 }
