@@ -11,6 +11,8 @@ use Illuminate\Validation\ValidationException;
 
 class ApplicationController extends Controller
 {
+    private const ERROR_INTERNAL_SERVER = 'Internal Server Error';
+
     /**
      * Get all applications (with permission filtering)
      */
@@ -54,7 +56,7 @@ class ApplicationController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Internal Server Error',
+                'error' => self::ERROR_INTERNAL_SERVER,
                 'message' => 'An error occurred while fetching applications'
             ], 500);
         }
@@ -110,7 +112,7 @@ class ApplicationController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Internal Server Error',
+                'error' => self::ERROR_INTERNAL_SERVER,
                 'message' => 'An error occurred while fetching the application'
             ], 500);
         }
@@ -193,7 +195,7 @@ class ApplicationController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Internal Server Error',
+                'error' => self::ERROR_INTERNAL_SERVER,
                 'message' => 'An error occurred during application registration'
             ], 500);
         }

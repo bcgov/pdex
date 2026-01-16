@@ -13,24 +13,22 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
       http_port              = 80
       https_port             = 443
       origin_protocol_policy = "https-only"
-      origin_ssl_protocols = [
-      "TLSv1.2"]
+      origin_ssl_protocols = ["TLSv1.2"]
     }
 
-    domain_name = "pdex-cer.a55eb5-test.stratus.cloud.gov.bc.ca"
+    domain_name = "app.f2da56-test.stratus.cloud.gov.bc.ca"
     origin_id   = random_integer.cf_origin_id.result
-	
-	#custom_header {
-	#  name = "X-Forwarded-Host"
-	#  value = "careereducation-test.workbc.ca"
-	#}
-	
+        
+    custom_header {
+      name  = "Pdex-Source"
+      value = var.source_token
+    }
   }
 
   enabled         = true
   is_ipv6_enabled = true
-  comment         = "PDEX"
-
+  comment         = "PDEX - TEST"
+  
   default_cache_behavior {
     allowed_methods = [
       "DELETE",
@@ -65,23 +63,21 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
 
   restrictions {
     geo_restriction {
-      restriction_type = "whitelist"
-      locations = ["CA"]
+      restriction_type = "none"
+      locations        = []
     }
   }
 
   tags = var.common_tags
-  
-  #aliases = ["careereducation-test.workbc.ca"]
+
+  aliases = ["test.pdex.gov.bc.ca"]
 
   viewer_certificate {
-    acm_certificate_arn = "arn:aws:acm:us-east-1:318574063652:certificate/ff1d0af0-b95d-4e2c-80c9-c634ae2a0f51"
+    acm_certificate_arn = var.cloudfront_certificate_arn
     ssl_support_method = "sni-only"
   }
 }
 
 output "cloudfront_url" {
-  value = "https://${aws_cloudfront_distribution.pdex-cer[0].domain_name}"
-
+  value = var.cloudfront ? "https://${aws_cloudfront_distribution.pdex-cer[0].domain_name}" : "CloudFront disabled"
 }
-

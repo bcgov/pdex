@@ -84,7 +84,7 @@
             </select>
             <input
               v-else
-              id="current_province"
+              id="current_province_text"
               v-model="currentAddressProxy.province"
               type="text"
               class="form-control"
@@ -218,7 +218,7 @@
             </select>
             <input
               v-else
-              id="mailing_province"
+              id="mailing_province_text"
               v-model="mailingAddressProxy.province"
               type="text"
               class="form-control"

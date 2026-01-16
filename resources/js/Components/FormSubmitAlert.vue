@@ -28,11 +28,10 @@ export default {
     },
     watch: {
         formState: function (newVal, oldVal) {
-            let vm = this;
             if (newVal != null) {
-                vm.showHide = true;
-                setTimeout(function () {
-                    vm.showHide = false;
+                this.showHide = true;
+                setTimeout(() => {
+                    this.showHide = false;
                 }, 2500);
             }
         },

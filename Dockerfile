@@ -28,6 +28,8 @@ EXPOSE 8080 8443 2525
 
 RUN apt-get -yq update --fix-missing \
     && apt-get update && apt-get install -y --no-install-recommends apt-utils \
+    # Apply security updates to base system packages
+    && apt-get upgrade -y \
 #php setup, install extensions, setup configs \
     && apt-get install --no-install-recommends -y \
     libzip-dev \
@@ -147,7 +149,7 @@ RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions 
 
 
 #composer install
-RUN composer install && npm install --prefix /var/www/html/ && npm run --prefix /var/www/html/ ${DEVENV}
+RUN composer install && npm install --prefix /var/www/html/ && npm audit fix --prefix /var/www/html/ || true && npm run --prefix /var/www/html/ ${DEVENV}
 
 
 ENTRYPOINT ["bash", "/sbin/entrypoint.sh"]

@@ -17,6 +17,9 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    private const LOGIN_VIEW = 'Auth/Login';
+    private const OPENID_SCOPES = 'openid profile email';
+
     public function __construct(
         private KeycloakService $keycloakService
     ) {}
@@ -30,7 +33,7 @@ class AuthController extends Controller
             return $this->redirectToDashboard();
         }
 
-        return Inertia::render('Auth/Login', [
+        return Inertia::render(self::LOGIN_VIEW, [
             'loginAttempt' => false,
             'hasAccess' => false,
             'status' => session('status'),
@@ -49,7 +52,7 @@ class AuthController extends Controller
             'clientId' => config('auth.keycloak.client_id'),
             'clientSecret' => config('auth.keycloak.client_secret'),
             'redirectUri' => config('auth.keycloak.redirect_uri'),
-            'scopes' => 'openid profile email',
+            'scopes' => self::OPENID_SCOPES,
         ]);
 
         return $this->loginUser($request, $provider);
@@ -66,7 +69,7 @@ class AuthController extends Controller
             'clientId' => config('auth.keycloak.client_id'),
             'clientSecret' => config('auth.keycloak.client_secret'),
             'redirectUri' => config('auth.keycloak.redirect_uri'),
-            'scopes' => 'openid profile email',
+            'scopes' => self::OPENID_SCOPES,
         ]);
 
         return $this->loginUser($request, $provider, 'idir');
@@ -83,7 +86,7 @@ class AuthController extends Controller
             'clientId' => config('auth.keycloak.client_id'),
             'clientSecret' => config('auth.keycloak.client_secret'),
             'redirectUri' => config('auth.keycloak.redirect_uri'),
-            'scopes' => 'openid profile email',
+            'scopes' => self::OPENID_SCOPES,
         ]);
 
         return $this->loginUser($request, $provider, 'bcsc');
@@ -100,7 +103,7 @@ class AuthController extends Controller
             'clientId' => config('auth.keycloak.client_id'),
             'clientSecret' => config('auth.keycloak.client_secret'),
             'redirectUri' => config('auth.keycloak.redirect_uri'),
-            'scopes' => 'openid profile email',
+            'scopes' => self::OPENID_SCOPES,
         ]);
 
         return $this->loginUser($request, $provider, 'bceid');
@@ -114,7 +117,7 @@ class AuthController extends Controller
         if (!$request->has('code')) {
             // If we don't have an authorization code then get one
             $authUrl = $provider->getAuthorizationUrl([
-                'scope' => 'openid profile email',
+                'scope' => self::OPENID_SCOPES,
             ]);
 
             $request->session()->put('oauth2state', $provider->getState());
@@ -147,7 +150,7 @@ class AuthController extends Controller
             $request->session()->forget('oauth2state');
             // $request->session()->forget($provider->getState());
 
-            return Inertia::render('Auth/Login', [
+            return Inertia::render(self::LOGIN_VIEW, [
                 'loginAttempt' => true,
                 'hasAccess' => false,
                 'status' => 'Authentication failed. Please try again.',
@@ -166,10 +169,10 @@ class AuthController extends Controller
             } catch (\Exception $e) {
                 Log::error('Failed to get access token', [
                     'error' => $e->getMessage(),
-                    // 'idp_type' => $idpType,
+                    'state' => $state,
                 ]);
                 
-                return Inertia::render('Auth/Login', [
+                return Inertia::render(self::LOGIN_VIEW, [
                     'loginAttempt' => true,
                     'hasAccess' => false,
                     'status' => 'Failed to get access token',
@@ -192,7 +195,7 @@ class AuthController extends Controller
                     // 'idp_type' => $idpType,
                 ]);
                 
-                return Inertia::render('Auth/Login', [
+                return Inertia::render(self::LOGIN_VIEW, [
                     'loginAttempt' => true,
                     'hasAccess' => false,
                     'status' => 'Failed to get user information: ' . $e->getMessage(),
@@ -203,7 +206,7 @@ class AuthController extends Controller
             [$user, $idpType] = $this->findOrCreateUser($providerUser, $token, $request);
             
             if (!$user) {
-                return Inertia::render('Auth/Login', [
+                return Inertia::render(self::LOGIN_VIEW, [
                     'loginAttempt' => true,
                     'hasAccess' => false,
                     'status' => 'Access denied. Please contact administrator.',
@@ -337,6 +340,10 @@ class AuthController extends Controller
                 $user->bceid_username = $providerUser['bceid_username'] ?? null;
                 $user->bceid_business_guid = $providerUser['bceid_business_guid'] ?? null;
                 $user->organization = Str::upper($providerUser['bceid_business_name'] ?? '');
+                break;
+                
+            default:
+                Log::warning('Unknown identity provider type', ['idp_type' => $idpType]);
                 break;
         }
         
