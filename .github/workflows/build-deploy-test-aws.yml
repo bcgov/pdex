@@ -2,7 +2,7 @@ name: Build and Deploy PDEX in TEST AWS
 
 on:
   pull_request:
-    branches: [ test-aws ]
+    branches: [ test ]
     types: [ closed ]
 
 permissions:
