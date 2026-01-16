@@ -1,0 +1,158 @@
+name: Build and Deploy PDEX in TEST AWS
+
+on:
+  pull_request:
+    branches: [ test-aws ]
+    types: [ closed ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  checkEnv:
+    name: Check Env variables
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Env Vars
+        run: |
+          echo Git Ref Name: ${{ github.ref_name }}
+
+  build:
+    name: Build on TOOLS and push to TOOLS ECR
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (TOOLS)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_TO_USE_TOOLS }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to TOOLS ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build & push image to TOOLS ECR
+        env:
+          TOOLS_ECR: ${{ secrets.AWS_ECR_URI_TOOLS }}
+        run: |
+          set -euo pipefail
+          TAG=${{ github.sha }}
+          docker build .  --platform linux/amd64 -t ${TOOLS_ECR}:${TAG} --build-arg GITHUB_SHA=${TAG}
+          docker push ${TOOLS_ECR}:${TAG}
+
+  deploy:
+    name: Mirror to TEST ECR and deploy to EKS (TEST)
+    needs: build
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Pull from TOOLS
+      - name: Configure AWS credentials (TOOLS)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_TO_USE_TOOLS }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to TOOLS ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Pull built image from TOOLS
+        env:
+          TOOLS_ECR: ${{ secrets.AWS_ECR_URI_TOOLS }}
+        run: |
+          set -euo pipefail
+          TAG=${{ github.sha }}
+          docker pull ${TOOLS_ECR}:${TAG}
+
+      # Push into TEST
+      - name: Configure AWS credentials (TEST)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_TO_USE_TEST }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to TEST ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Ensure TEST ECR exists
+        env:
+          TEST_ECR: ${{ secrets.AWS_ECR_URI_TEST }}
+        run: |
+          set -euo pipefail
+          REPO_NAME=$(echo ${TEST_ECR} | awk -F'/' '{print $2}')
+          aws ecr describe-repositories --repository-names "${REPO_NAME}" >/dev/null 2>&1 || \
+            aws ecr create-repository --repository-name "${REPO_NAME}"
+
+      - name: Retag & push to TEST ECR
+        env:
+          TOOLS_ECR: ${{ secrets.AWS_ECR_URI_TOOLS }}
+          TEST_ECR: ${{ secrets.AWS_ECR_URI_TEST }}
+        run: |
+          set -euo pipefail
+          TAG=${{ github.sha }}
+          docker tag ${TOOLS_ECR}:${TAG} ${TEST_ECR}:${TAG}
+          docker push ${TEST_ECR}:${TAG}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Update kubeconfig (TEST)
+        run: |
+          set -euo pipefail
+          aws eks update-kubeconfig --name pdex-cluster --region ${{ secrets.AWS_REGION }}
+          
+          # Verify we can connect
+          kubectl cluster-info
+          kubectl get nodes || echo "Warning: Cannot list nodes yet, cluster may still be initializing"
+
+      - name: Deploy to EKS using TEST ECR image
+        env:
+          TEST_ECR: ${{ secrets.AWS_ECR_URI_TEST }}
+        run: |
+          set -euo pipefail
+          TAG=${{ github.sha }}
+
+          export TEST_ECR="${{ secrets.AWS_ECR_URI_TEST }}"
+          export TEST_SECRETS_ECR="${{ secrets.AWS_SM_URI_TEST }}"
+          export TAG="${{ github.sha }}"
+
+          # Render env vars into the manifest
+          envsubst '${TEST_ECR} ${TAG} ${TEST_SECRETS_ECR}' < aws/test-deployment.yaml > aws/test-deployment.rendered.yaml
+
+          # Always apply; this keeps SA/Service/Ingress/Deployment in sync
+          kubectl -n default apply -f aws/test-deployment.rendered.yaml
+
+          # Patch the container image (no --record)
+          kubectl -n default set image deploy/pdex-app-test pdex=${TEST_ECR}:${TAG}
+
+      - name: Wait for rollout
+        run: |
+          set -euo pipefail
+
+          # Wait for rollout
+          kubectl -n default rollout status deploy/pdex-app-test --timeout=10m
+
+          # Wait for pods to be ready
+          kubectl -n default wait --for=condition=ready pod -l app=pdex --timeout=10m || kubectl -n default describe pod -l app=pdex
+
+
+      - name: Docker logout
+        run: |
+          set -euo pipefail
+          docker logout
+
+      - name: Finished AWS Deploy
+        run: echo "FINISHED AWS Deploy TEST PDEX"

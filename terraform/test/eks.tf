@@ -1,4 +1,10 @@
 #Cluster role
+resource "aws_eks_access_entry" "github_actions" {
+  cluster_name  = aws_eks_cluster.pdex-cluster.name
+  principal_arn = "arn:aws:iam::814738839437:role/GitHubActionsPDEXTestRole"
+  type          = "STANDARD"
+}
+
 resource "aws_iam_role" "eks-cluster-role" {
   name = "eks-cluster-role"
   assume_role_policy = jsonencode({
@@ -25,8 +31,8 @@ resource "aws_iam_role_policy_attachment" "eks-cluster-policy" {
 }
 
 #EKS cluster
-resource "aws_eks_cluster" "workbc-cluster" {
-  name = "workbc-cluster"
+resource "aws_eks_cluster" "pdex-cluster" {
+  name = "pdex-cluster"
   access_config {
     authentication_mode = "API_AND_CONFIG_MAP"
   }
@@ -42,22 +48,22 @@ resource "aws_eks_cluster" "workbc-cluster" {
 
 #EKS cluster addons
 resource "aws_eks_addon" "vpc-cni-addon" {
-  cluster_name = aws_eks_cluster.workbc-cluster.name
+  cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "vpc-cni"
 }
 
 resource "aws_eks_addon" "kube-proxy-addon" {
-  cluster_name = aws_eks_cluster.workbc-cluster.name
+  cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "kube-proxy"
 }
 
 resource "aws_eks_addon" "pod-identity-addon" {
-  cluster_name = aws_eks_cluster.workbc-cluster.name
+  cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "eks-pod-identity-agent"
 }
 
 resource "aws_eks_addon" "coredns-addon" {
-  cluster_name = aws_eks_cluster.workbc-cluster.name
+  cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "coredns"
 }
 
@@ -87,7 +93,7 @@ resource "aws_iam_role_policy_attachment" "ec-AmazonEFSCSIDriverPolicy" {
 }
 
 resource "aws_eks_addon" "aws-efs-csi-driver" {
-  cluster_name = aws_eks_cluster.workbc-cluster.name
+  cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "aws-efs-csi-driver"
 
   pod_identity_association {
@@ -130,18 +136,13 @@ resource "aws_iam_role_policy_attachment" "ng-AmazonEC2ContainerRegistryReadOnly
 
 #Node group
 resource "aws_eks_node_group" "eks-ng" {
-  cluster_name    = aws_eks_cluster.workbc-cluster.name
+  cluster_name    = aws_eks_cluster.pdex-cluster.name
   node_group_name = "eks-ng"
   node_role_arn   = aws_iam_role.eks-ng-role.arn
   subnet_ids      = data.aws_subnets.app.ids
-  
-#  launch_template {
-#    id      = aws_launch_template.eks_nodes_lt.id
-#    version = "$Latest"
-#  }
 
   scaling_config {
-    desired_size = 2
+    desired_size = 3
     max_size     = 10
     min_size     = 1
   }
@@ -206,7 +207,7 @@ resource "aws_iam_role_policy" "cluster_auto_scaler" {
   EOF
 }
 
-#SES Mailer role
+#Pod identity role for SES mailer
 resource "aws_iam_role" "ses_mailer_role" {
   name = "ses_mailer_role"
 
@@ -225,7 +226,7 @@ resource "aws_iam_role" "ses_mailer_role" {
   })
 }
 
-#SES Mailer policy
+#Pod identity policy for SES
 resource "aws_iam_role_policy" "ses_mailer_policy" {
   name   = "ses_mailer_policy"
   role   = aws_iam_role.ses_mailer_role.id
@@ -237,12 +238,23 @@ resource "aws_iam_role_policy" "ses_mailer_policy" {
               "Effect": "Allow",
               "Action": [
                   "ses:SendEmail",
-		  "ses:SendRawEmail",
-		  "ses:ListIdentities"
+                  "ses:SendRawEmail",
+                  "ses:ListIdentities"
               ],
               "Resource": "*"
           }
       ]
   }
   EOF
+}
+
+resource "aws_eks_pod_identity_association" "alb_controller" {
+  cluster_name      = aws_eks_cluster.pdex-cluster.name
+  namespace         = "kube-system"
+  service_account   = "aws-load-balancer-controller"
+  role_arn          = aws_iam_role.alb_role.arn   # same role you built for the controller
+  depends_on = [
+    aws_eks_addon.pod-identity-addon,
+    helm_release.aws_load_balancer_controller
+  ]
 }

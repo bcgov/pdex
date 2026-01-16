@@ -10,6 +10,9 @@ class ApplicationApiPermission extends Model
 {
     use HasFactory;
 
+    private const INDIVIDUAL_IDENTIFIER_DESC = 'Associated individual identifier';
+    private const INSTITUTION_IDENTIFIER_DESC = 'Associated institution identifier';
+
     protected $fillable = [
         'application_id',
         'table_name',
@@ -146,7 +149,7 @@ class ApplicationApiPermission extends Model
                 'notes' => 'Additional notes about the individual'
             ],
             'individual_addresses' => [
-                'individual_id' => 'Associated individual identifier',
+                'individual_id' => self::INDIVIDUAL_IDENTIFIER_DESC,
                 'address_type' => 'Type of address (home, mailing, work)',
                 'street_address' => 'Street address line 1',
                 'street_address_2' => 'Street address line 2',
@@ -158,7 +161,7 @@ class ApplicationApiPermission extends Model
                 'status' => 'Address status (active, inactive)'
             ],
             'individual_employments' => [
-                'individual_id' => 'Associated individual identifier',
+                'individual_id' => self::INDIVIDUAL_IDENTIFIER_DESC,
                 'employer_name' => 'Name of employer',
                 'job_title' => 'Job title or position',
                 'industry' => 'Industry sector',
@@ -170,7 +173,7 @@ class ApplicationApiPermission extends Model
                 'status' => 'Employment record status'
             ],
             'individual_identities' => [
-                'individual_id' => 'Associated individual identifier',
+                'individual_id' => self::INDIVIDUAL_IDENTIFIER_DESC,
                 'citizenship' => 'Citizenship status',
                 'ethnicity' => 'Ethnic background',
                 'first_language' => 'First or native language',
@@ -196,7 +199,7 @@ class ApplicationApiPermission extends Model
             ],
             // Institution Staff table
             'institution_staff' => [
-                'institution_id' => 'Associated institution identifier',
+                'institution_id' => self::INSTITUTION_IDENTIFIER_DESC,
                 'first_name' => 'Staff member first name',
                 'last_name' => 'Staff member last name',
                 'email' => 'Staff member email address',
@@ -209,7 +212,7 @@ class ApplicationApiPermission extends Model
             ],
             // Institution Sites table
             'institution_sites' => [
-                'institution_id' => 'Associated institution identifier',
+                'institution_id' => self::INSTITUTION_IDENTIFIER_DESC,
                 'site_name' => 'Name of the site or campus',
                 'address' => 'Site physical address',
                 'city' => 'Site city',
@@ -222,7 +225,7 @@ class ApplicationApiPermission extends Model
             ],
             // Programs table
             'programs' => [
-                'institution_id' => 'Associated institution identifier',
+                'institution_id' => self::INSTITUTION_IDENTIFIER_DESC,
                 'program_name' => 'Name of the program',
                 'program_code' => 'Unique program code',
                 'program_type' => 'Type of program (degree, diploma, certificate)',

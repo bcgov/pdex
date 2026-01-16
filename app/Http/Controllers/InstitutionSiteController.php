@@ -12,6 +12,8 @@ use Inertia\Response;
 
 class InstitutionSiteController extends Controller
 {
+    private const PHONE_REGEX = 'regex:/^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/';
+
     /**
      * Create a new controller instance.
      */
@@ -96,7 +98,7 @@ class InstitutionSiteController extends Controller
             'primary_phone' => [
                 'required',
                 'string',
-                'regex:/^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/',
+                self::PHONE_REGEX,
                 'max:20'
             ],
             'primary_email' => 'required|email|max:255',
@@ -111,7 +113,7 @@ class InstitutionSiteController extends Controller
             'contact_phone' => [
                 'required',
                 'string',
-                'regex:/^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/',
+                self::PHONE_REGEX,
                 'max:20'
             ],
             'address_line_1' => 'required|string|max:255',
@@ -215,7 +217,7 @@ class InstitutionSiteController extends Controller
                 'sometimes',
                 'required',
                 'string',
-                'regex:/^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/',
+                self::PHONE_REGEX,
                 'max:20'
             ],
             'primary_email' => 'sometimes|required|email|max:255',
@@ -231,7 +233,7 @@ class InstitutionSiteController extends Controller
                 'sometimes',
                 'required',
                 'string',
-                'regex:/^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/',
+                self::PHONE_REGEX,
                 'max:20'
             ],
             'address_line_1' => 'sometimes|required|string|max:255',
