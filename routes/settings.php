@@ -5,14 +5,14 @@ use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-const SETTINGS_PROFILE_PATH = 'settings/profile';
-
 Route::middleware('auth')->group(function () {
-    Route::redirect('settings', '/' . SETTINGS_PROFILE_PATH);
+    $profilePath = 'settings/profile';
+    
+    Route::redirect('settings', '/' . $profilePath);
 
-    Route::get(SETTINGS_PROFILE_PATH, [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch(SETTINGS_PROFILE_PATH, [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete(SETTINGS_PROFILE_PATH, [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get($profilePath, [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch($profilePath, [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete($profilePath, [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('settings/password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::put('settings/password', [PasswordController::class, 'update'])->name('password.update');
