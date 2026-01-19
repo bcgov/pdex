@@ -76,7 +76,7 @@ jobs:
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
         env:
           TF_INPUT: "0" # Disable interactive input
-          TF_VAR_vpc_id: "vpc-0beb5c99b7f010268"
+          TF_VAR_vpc_id: "vpc-050ad6ac9429648dc"
           TF_VAR_environment_name: "Test"
           TF_VAR_certificate_arn: "arn:aws:acm:ca-central-1:634503648219:certificate/6be85c83-ddc5-4676-a415-c8041b678097"
           TF_VAR_source_token: ${{ secrets.AWS_HEADER_TOKEN_TEST }}
