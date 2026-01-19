@@ -26,6 +26,8 @@ resource "helm_release" "aws_load_balancer_controller" {
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
   version    = "1.7.2"
+  wait       = true
+  timeout    = 600
 
   set = [
     {
@@ -50,4 +52,10 @@ resource "helm_release" "aws_load_balancer_controller" {
     aws_eks_cluster.pdex-cluster,
     aws_iam_role_policy_attachment.alb_attachment
   ]
+}
+
+# Wait for the AWS Load Balancer Controller CRDs to be registered
+resource "time_sleep" "wait_for_alb_controller_crds" {
+  depends_on = [helm_release.aws_load_balancer_controller]
+  create_duration = "30s"
 }

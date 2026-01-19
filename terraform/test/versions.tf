@@ -1,4 +1,4 @@
-# Without this, Terraform can pull an older Helm provider that doesn’t support that block style
+# Without this, Terraform can pull an older Helm provider that doesn't support that block style
 terraform {
   required_providers {
     aws = {
@@ -11,6 +11,10 @@ terraform {
     helm = {
       source  = "hashicorp/helm"
       version = ">= 2.10.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.9.0"
     }
   }
 }

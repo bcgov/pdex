@@ -222,18 +222,8 @@ output "alb_security_group_id" {
 }
 
 # Note: This resource requires the EKS cluster to be fully operational
-# If you get "no client config" errors, comment this out for initial apply
-# and apply it in a second terraform apply after the cluster is ready
-resource "kubernetes_manifest" "pdex_alb_tgb" {
-  
-  # depends_on = [
-  #   helm_release.aws_load_balancer_controller,
-  #   aws_eks_cluster.pdex-cluster
-  # ]
-  depends_on = [
-    helm_release.aws_load_balancer_controller
-  ]
-  
+# and the AWS Load Balancer Controller CRDs to be installed
+resource "kubernetes_manifest" "pdex_alb_tgb" {  
   manifest = {
     apiVersion = "elbv2.k8s.aws/v1beta1"
     kind       = "TargetGroupBinding"
@@ -250,5 +240,9 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
       }
     }
   }
+
+  # Allow Terraform to manage the resource even if status fields are set
+  computed_fields = ["status"]
+  depends_on = [helm_release.aws_load_balancer_controller]
 
 }
