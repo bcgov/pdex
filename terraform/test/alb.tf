@@ -229,8 +229,7 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
   
   depends_on = [
     helm_release.aws_load_balancer_controller,
-    aws_eks_cluster.pdex-cluster,
-    aws_eks_node_group.pdex-ng
+    aws_eks_cluster.pdex-cluster
   ]
   
   manifest = {
