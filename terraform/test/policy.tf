@@ -48,7 +48,7 @@ resource "aws_iam_policy" "pdex_rds_proxy_secrets_policy" {
         Resource = [
           var.pdex_rds_secret_arn_wildcard,
           var.pdex_rds_envpref_secret_arn_wildcard,
-          "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz*"
+          "arn:aws:secretsmanager:ca-central-1:634503648219:secret:secrets.env-bV4LPz*"
         ]
       }
     ]

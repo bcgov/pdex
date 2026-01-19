@@ -1,7 +1,7 @@
 #Cluster role
 resource "aws_eks_access_entry" "github_actions" {
   cluster_name  = aws_eks_cluster.pdex-cluster.name
-  principal_arn = "arn:aws:iam::814738839437:role/GitHubActionsPDEXTestRole"
+  principal_arn = "arn:aws:iam::634503648219:role/GitHubActionsPDEXTestRole"
   type          = "STANDARD"
 }
 
