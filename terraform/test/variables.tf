@@ -28,6 +28,12 @@ variable "common_tags" {
   }
 }
 
+variable "create_target_group_binding" {
+  description = "Set to true to create the TargetGroupBinding (requires EKS cluster and ALB controller to be ready)"
+  type        = bool
+  default     = false
+}
+
 variable "cloudfront" {
   description = "enable or disable the cloudfront distribution creation"
   type        = bool
