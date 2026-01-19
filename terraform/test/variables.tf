@@ -31,6 +31,7 @@ variable "common_tags" {
 variable "cloudfront" {
   description = "enable or disable the cloudfront distribution creation"
   type        = bool
+  default     = true
 }
 
 variable "cloudfront_origin_domain" {

@@ -225,7 +225,7 @@ output "alb_security_group_id" {
 # If you get "no client config" errors, comment this out for initial apply
 # and apply it in a second terraform apply after the cluster is ready
 resource "kubernetes_manifest" "pdex_alb_tgb" {
-  count = 0  # Set to 1 once EKS cluster is operational
+  count = 1  # Set to 0 initially, 1 once EKS cluster is operational
   
   depends_on = [
     helm_release.aws_load_balancer_controller,
