@@ -248,7 +248,4 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
     }
   }
 
-  # Allow Terraform to manage the resource even if status fields are set
-  computed_fields = ["status"]
-
 }
