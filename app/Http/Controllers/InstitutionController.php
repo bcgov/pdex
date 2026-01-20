@@ -55,8 +55,8 @@ class InstitutionController extends Controller
                             ->paginate($perPage)
                             ->withQueryString();
 
-        // Return JSON for API requests
-        if ($request->expectsJson()) {
+        // Return JSON for API requests (but not Inertia requests)
+        if ($request->expectsJson() && !$request->header('X-Inertia')) {
             return response()->json([
                 'institutions' => $institutions,
                 'filters' => [
@@ -95,7 +95,7 @@ class InstitutionController extends Controller
     {
         $this->authorize('view', $institution);
         
-        if (request()->expectsJson()) {
+        if (request()->expectsJson() && !request()->header('X-Inertia')) {
             return response()->json($institution);
         }
 
@@ -255,8 +255,8 @@ class InstitutionController extends Controller
 
         $institution = Institution::create($validated);
 
-        // Return JSON for API requests
-        if ($request->expectsJson()) {
+        // Return JSON for API requests (but not Inertia requests)
+        if ($request->expectsJson() && !$request->header('X-Inertia')) {
             return response()->json([
                 'message' => 'Institution created successfully',
                 'institution' => $institution
@@ -284,8 +284,8 @@ class InstitutionController extends Controller
 
         $institution->update($validated);
 
-        // Return JSON for API requests
-        if ($request->expectsJson()) {
+        // Return JSON for API requests (but not Inertia requests)
+        if ($request->expectsJson() && !$request->header('X-Inertia')) {
             return response()->json([
                 'message' => 'Institution updated successfully',
                 'institution' => $institution->fresh()
@@ -360,8 +360,8 @@ class InstitutionController extends Controller
 
         $institution->delete();
 
-        // Return JSON for API requests
-        if (request()->expectsJson()) {
+        // Return JSON for API requests (but not Inertia requests)
+        if (request()->expectsJson() && !request()->header('X-Inertia')) {
             return response()->json([
                 'message' => 'Institution deleted successfully'
             ]);

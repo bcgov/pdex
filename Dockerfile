@@ -3,11 +3,9 @@ ARG DEBIAN_VERSION=20.04
 ARG APACHE_OPENIDC_VERSION=2.4.10
 ARG TZ=America/Vancouver
 ARG CA_HOSTS_LIST
-ARG USER_ID
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DEVENV=prod
 # set entrypoint variables
-ENV USER_NAME=${USER_ID}
 ENV USER_HOME=/var/www/html
 ENV PSYSH_CONFIG_DIR=/tmp
 
@@ -28,9 +26,10 @@ COPY / /var/www/html/
 
 EXPOSE 8080 8443 2525
 
-#RUN useradd -u 1000 -ms /bin/bash ${USER_ID}
 RUN apt-get -yq update --fix-missing \
     && apt-get update && apt-get install -y --no-install-recommends apt-utils \
+    # Apply security updates to base system packages
+    && apt-get upgrade -y \
 #php setup, install extensions, setup configs \
     && apt-get install --no-install-recommends -y \
     libzip-dev \
@@ -131,13 +130,13 @@ RUN apt-get -yq update --fix-missing \
 WORKDIR /var/www/html/
 
 RUN mkdir -p storage && mkdir -p bootstrap/cache && chmod -R ug+rwx storage bootstrap/cache \
-    && cd /var/www && chown -R 1001:root html && chmod -R ug+rw html \
+    && cd /var/www && chown -R www-data:www-data html && chmod -R ug+rw html \
     && chmod 754 /var/www/html/artisan \
     && chmod 755 /var/www/html/probe-check.sh \
     && cd /var/www/html/public && chmod 644 mix-manifest.json \
-    && mkdir /.npm && mkdir /.npm/_cache && chown -R 1001:0 "/.npm" \
-    && mkdir -p /.config/psysh && chown -R 1001:root /.config && chmod -R 775 /.config \
-    && mkdir -p /.composer && chown -R 1001:root /.composer && chmod -R 755 /.composer \
+    && mkdir /.npm && mkdir /.npm/_cache && chown -R www-data:0 "/.npm" \
+    && mkdir -p /.config/psysh && chown -R www-data:www-data /.config && chmod -R 775 /.config \
+    && mkdir -p /.composer && chown -R www-data:www-data /.composer && chmod -R 755 /.composer \
     && echo "<?php return ['runtimeDir' => '/tmp', 'configDir' => '/tmp', 'dataDir' => '/tmp'];" >> /.config/psysh/config.php \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
@@ -148,13 +147,9 @@ RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions 
     && chmod -R 775 bootstrap/cache storage/ \
     && npm config set cache /.npm/_cache --global
 
+
 #composer install
-RUN composer install && npm install --prefix /var/www/html/ && npm run --prefix /var/www/html/ ${DEVENV}
+RUN composer install && npm install --prefix /var/www/html/ && npm audit fix --prefix /var/www/html/ || true && npm run --prefix /var/www/html/ ${DEVENV}
 
 
-# Switch to non-root user for OpenShift compatibility
-USER 1001
-
-ENTRYPOINT ["/sbin/entrypoint.sh"]
-# Start!
-CMD ["apache2-foreground"]
+ENTRYPOINT ["bash", "/sbin/entrypoint.sh"]

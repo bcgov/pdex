@@ -1,0 +1,22 @@
+# terraform.tfvars.example
+# Copy this to terraform.tfvars and fill in the values
+
+vpc_id = "vpc-0beb5c99b7f010268"
+environment_name = "Test"
+
+# ACM certificate for ALB HTTPS listener (ca-central-1)
+certificate_arn = "arn:aws:acm:ca-central-1:814738839437:certificate/b885894d-c4c1-4742-bc0d-88a8136eac68"
+
+# Source token for PDEX header validation (store securely, use from GitHub secrets)
+source_token = "your-secret-token-here"
+
+# CloudFront settings (optional, disabled by default in test)
+cloudfront = false
+cloudfront_origin_domain = ""
+cloudfront_certificate_arn = ""
+
+# Tags
+common_tags = {
+  Application = "pdex.gov.bc.ca"
+  Environment = "test"
+}

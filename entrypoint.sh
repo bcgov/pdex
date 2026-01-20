@@ -8,24 +8,36 @@ echo "APACHE_REMOTE_IP_TRUSTED_PROXY: ${APACHE_REMOTE_IP_TRUSTED_PROXY}"
 echo "APACHE_REMOTE_IP_INTERNAL_PROXY: ${APACHE_REMOTE_IP_INTERNAL_PROXY}"
 
 echo "Setup TZ"
+export TZ="${TZ:-America/Vancouver}"
 php -r "date_default_timezone_set('${TZ}');"
-php -r "echo date_default_timezone_get();"
+php -r "echo date_default_timezone_get() . PHP_EOL;"
 
-if [ -f /vault/secrets/secrets.env ]; then
-    touch .env && cp -rf /vault/secrets/secrets.env /var/www/html/.env
-    chmod 644 /var/www/html/.env
+ENV_DST="/var/www/html/.env"
+ENV_SRC=""
+
+# Check for processed secrets first (from init container)
+if [ -f /secrets/.env ]; then
+  ENV_SRC="/secrets/.env"
+  echo "Found processed secrets in /secrets/.env"
+else
+  echo "No processed secrets found in /secrets/.env"
 fi
-if [ -f /vault/secrets/test-secrets.env ]; then
-    touch .env && cp -rf /vault/secrets/test-secrets.env /var/www/html/.env
-    chmod 644 /var/www/html/.env
-fi
+
+cp "$ENV_SRC" "$ENV_DST" || echo "Cannot copy env file (read-only filesystem)"
+
+echo "Set permissions"
+chown -R www-data:www-data \
+      "$ENV_DST" \
+      /var/www/html/storage \
+      /var/www/html/bootstrap/cache 2>/dev/null || echo "Warning: Could not change ownership (read-only filesystem)"
+chmod -R 775 \
+      /var/www/html/storage \
+      /var/www/html/bootstrap/cache 2>/dev/null || echo "Warning: Could not change permissions (read-only filesystem)"
+
 echo "ENV_ARG: ${ENV_ARG}"
 
 echo "Install composer"
 composer dump-autoload
-
-echo "Starting apache in the background:"
-/usr/sbin/apache2ctl start
 
 echo "Run migration"
 php artisan migrate --force
@@ -37,9 +49,7 @@ echo "Clear our midnight queue"
 php artisan queue:clear --queue=midnight --force
 
 echo "Generate API documentation"
-php artisan l5-swagger:generate
+php artisan l5-swagger:generate || echo "Warning: API documentation generation failed, continuing..."
 
-# Keep the script running to prevent the container from exiting
-while :; do
-sleep 300
-done
+echo "Starting apache foreground"
+exec apache2-foreground

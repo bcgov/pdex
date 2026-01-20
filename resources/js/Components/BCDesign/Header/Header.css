@@ -7,7 +7,6 @@
   border-bottom-style: solid;
   border-bottom-width: var(--layout-border-width-small);
   width: 100%;
-  border-bottom: 1px solid rgb(217, 217, 217);
 }
 
 .bcds-header > .bcds-header--container {
