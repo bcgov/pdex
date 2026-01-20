@@ -54,8 +54,3 @@ resource "helm_release" "aws_load_balancer_controller" {
   ]
 }
 
-# Wait for the AWS Load Balancer Controller CRDs to be registered
-resource "time_sleep" "wait_for_alb_controller_crds" {
-  depends_on = [helm_release.aws_load_balancer_controller]
-  create_duration = "30s"
-}
