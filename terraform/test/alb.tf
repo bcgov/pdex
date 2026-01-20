@@ -221,15 +221,8 @@ output "alb_security_group_id" {
   description = "Security Group ID of the ALB for TargetGroupBinding"
 }
 
-# Note: This resource requires the EKS cluster to be fully operational
-# and the AWS Load Balancer Controller CRDs to be installed
-# Set create_target_group_binding = true after initial infrastructure is created
 resource "kubernetes_manifest" "pdex_alb_tgb" {
-  count = var.create_target_group_binding ? 1 : 0
-  
-  depends_on = [
-    time_sleep.wait_for_alb_controller_crds
-  ]
+  depends_on = [helm_release.aws_load_balancer_controller]
   
   manifest = {
     apiVersion = "elbv2.k8s.aws/v1beta1"
