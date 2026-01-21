@@ -31,7 +31,7 @@ spec:
           mkdir -p /secrets
           echo "Fetching secrets from AWS Secrets Manager..."
           aws secretsmanager get-secret-value \
-            --secret-id arn:aws:secretsmanager:ca-central-1:634503648219:secret:secrets.env-bV4LPz \
+            --secret-id arn:aws:secretsmanager:ca-central-1:634503648219:secret:secrets.env-613JvC \
             --query SecretString \
             --output text > /secrets/secrets.json
           chmod 600 /secrets/secrets.json
