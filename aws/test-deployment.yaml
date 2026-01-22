@@ -132,7 +132,7 @@ spec:
     app: pdex
   ports:
     - protocol: TCP
-      port: 80
+      port: 8080
       targetPort: 8080
   type: ClusterIP
 ---
@@ -156,7 +156,7 @@ spec:
           service:
             name: pdex-service-test
             port:
-              number: 80
+              number: 8080
 ---
 apiVersion: v1
 kind: ServiceAccount
