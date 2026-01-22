@@ -172,7 +172,7 @@ resource "aws_security_group_rule" "allow_alb" {
 
 resource "aws_alb_target_group" "pdex" {
   name                 = "pdex-target-group"
-  port                 = 8080
+  port                 = 80
   protocol             = "HTTP"
   vpc_id               = data.aws_vpc.main.id
   target_type          = "ip"
