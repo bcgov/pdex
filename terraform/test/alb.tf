@@ -236,9 +236,18 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
       targetType     = "ip"
       serviceRef = {
         name = "pdex-service-test" # name of the Kubernetes Service to associate with found in test-deployment.yaml
-        port = 8080
+        port = 80
       }
     }
   }
+
+  # Force replacement if targetGroupARN changes (immutable field)
+  lifecycle {
+    replace_triggered_by = [
+      aws_alb_target_group.pdex.arn
+    ]
+  }
+
+  computed_fields = ["status"]
 
 }
