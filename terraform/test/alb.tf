@@ -222,12 +222,8 @@ output "alb_security_group_id" {
 }
 
 resource "kubernetes_manifest" "pdex_alb_tgb" {
-  count = var.create_target_group_binding ? 1 : 0
+  depends_on = [helm_release.aws_load_balancer_controller]
 
-  depends_on = [
-    time_sleep.wait_for_alb_controller_crds
-  ]
-  
   manifest = {
     apiVersion = "elbv2.k8s.aws/v1beta1"
     kind       = "TargetGroupBinding"
@@ -240,10 +236,9 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
       targetType     = "ip"
       serviceRef = {
         name = "pdex-service-test" # name of the Kubernetes Service to associate with found in test-deployment.yaml
-        port = 80
+        port = 8080
       }
     }
   }
 
-  computed_fields = ["status"]
 }
