@@ -241,4 +241,10 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
     }
   }
 
+  # field_manager {
+  #   force_conflicts = true
+  # }
+
+  # computed_fields = ["status"]
+
 }
