@@ -26,6 +26,8 @@ resource "helm_release" "aws_load_balancer_controller" {
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
   version    = "1.7.2"
+  wait       = true
+  timeout    = 600
 
   set = [
     {
@@ -51,3 +53,9 @@ resource "helm_release" "aws_load_balancer_controller" {
     aws_iam_role_policy_attachment.alb_attachment
   ]
 }
+
+resource "time_sleep" "wait_for_alb_controller_crds" {
+  create_duration = "30s"
+  depends_on      = [helm_release.aws_load_balancer_controller]
+}
+

@@ -28,9 +28,16 @@ variable "common_tags" {
   }
 }
 
+variable "create_target_group_binding" {
+  description = "Set to true to create the TargetGroupBinding (requires EKS cluster and ALB controller to be ready)"
+  type        = bool
+  default     = false
+}
+
 variable "cloudfront" {
   description = "enable or disable the cloudfront distribution creation"
   type        = bool
+  default     = true
 }
 
 variable "cloudfront_origin_domain" {
@@ -63,30 +70,30 @@ variable "github_actions_role_arn" {
 variable "pdex_rds_secret_arn" {
   description = "Exact ARN of the RDS credentials secret (no wildcard)"
   type        = string
-  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-rds-creds-lqn30S"
+  default     = "arn:aws:secretsmanager:ca-central-1:634503648219:secret:pdex-rds-creds-VvQjNt"
 }
 
 variable "pdex_rds_envpref_secret_arn" {
   description = "Exact ARN of the env-prefixed RDS credentials secret (no wildcard)"
   type        = string
-  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz-pdex-rds-creds-bOK7bC"
+  default     = "arn:aws:secretsmanager:ca-central-1:634503648219:secret:secrets.env-bV4LPz-pdex-rds-creds-5aNZoG"
 }
 
 
 variable "pdex_opensearch_secret_arn" {
   description = "ARN of the Secrets Manager secret containing OpenSearch master credentials"
   type        = string
-  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-opensearch-creds"
+  default     = "arn:aws:secretsmanager:ca-central-1:634503648219:secret:pdex-opensearch-creds"
 }
 
 variable "pdex_rds_secret_arn_wildcard" {
   description = "Wildcard ARN for IAM policy to match the RDS creds secret"
   type        = string
-  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:pdex-rds-creds-*"
+  default     = "arn:aws:secretsmanager:ca-central-1:634503648219:secret:pdex-rds-creds-*"
 }
 
 variable "pdex_rds_envpref_secret_arn_wildcard" {
   description = "Wildcard ARN for IAM policy to match env-prefixed RDS creds secrets"
   type        = string
-  default     = "arn:aws:secretsmanager:ca-central-1:814738839437:secret:secrets.env-bV4LPz-*"
+  default     = "arn:aws:secretsmanager:ca-central-1:634503648219:secret:secrets.env-bV4LPz-*"
 }

@@ -5,7 +5,16 @@ metadata:
   labels:
     app: pdex
 spec:
-  replicas: 1
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    type: "Resource"
+    resource: 
+      name: "cpu"
+      target: 
+        type: "Utilization"
+        averageUtilization: 60
+      
   selector:
     matchLabels:
       app: pdex
@@ -153,28 +162,28 @@ spec:
       targetPort: 8080
   type: ClusterIP
 
-# ---
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
-# metadata:
-#   name: pdex-ingress-dev
-#   annotations:
-#     alb.ingress.kubernetes.io/scheme: internal
-#     alb.ingress.kubernetes.io/target-type: ip
-#     alb.ingress.kubernetes.io/load-balancer-name: default
-#     kubernetes.io/ingress.class: alb
-# spec:
-#   rules:
-#   - host: dev.pdex.gov.bc.ca
-#     http:
-#       paths:
-#       - path: /
-#         pathType: Prefix
-#         backend:
-#           service:
-#             name: pdex-service-dev
-#             port:
-#               number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pdex-ingress-dev
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/load-balancer-name: default
+    kubernetes.io/ingress.class: alb
+spec:
+  rules:
+  - host: dev.pdex.gov.bc.ca
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pdex-service-dev
+            port:
+              number: 80
 ---
 apiVersion: v1
 kind: ServiceAccount
