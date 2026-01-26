@@ -57,6 +57,12 @@ resource "aws_wafv2_web_acl" "pdex_cloudfront" {
     statement {
       ip_set_reference_statement {
         arn = aws_wafv2_ip_set.bcgov_networks[0].arn
+        
+        ip_set_forwarded_ip_config {
+            header_name       = "X-Forwarded-For"
+            fallback_behavior = "NO_MATCH"
+            position          = "FIRST"
+        }
       }
     }
 
