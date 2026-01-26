@@ -52,6 +52,7 @@ resource "helm_release" "aws_load_balancer_controller" {
   ]
 }
 
+# need metrics server for HPA to work
 resource "helm_release" "metrics_server" {
   name       = "metrics-server"
   namespace  = "kube-system"
