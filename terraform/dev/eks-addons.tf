@@ -62,16 +62,15 @@ resource "helm_release" "metrics_server" {
   timeout    = 600
 
   # EKS commonly needs these kubelet flags to avoid metrics not available
-  set = [
-    {
-      name  = "args[0]"
-      value = "--kubelet-insecure-tls"
-    },
-    {
-      name  = "args[1]"
-      value = "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname"
-    }
-  ]
+  set {
+    name  = "args[0]"
+    value = "--kubelet-insecure-tls"
+  }
+  
+  set {
+    name  = "args[1]"
+    value = "--kubelet-preferred-address-types=InternalIP\\,ExternalIP\\,Hostname"
+  }
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
