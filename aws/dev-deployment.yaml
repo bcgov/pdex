@@ -103,25 +103,25 @@ spec:
             cpu: 1000m
             memory: 1Gi
           requests:
-            cpu: 250m
-            memory: 512Mi
+            cpu: 650m
+            memory: 600Mi
 
-        # readinessProbe:
-        #   httpGet:
-        #     path: /up
-        #     port: 8080
-        #   initialDelaySeconds: 10
-        #   periodSeconds: 10
-        #   timeoutSeconds: 3
-        #   failureThreshold: 6
+        readinessProbe:
+          httpGet:
+            path: /up
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 6
 
-        # livenessProbe:
-        #   httpGet:
-        #     path: /up
-        #     port: 8080
-        #   initialDelaySeconds: 30
-        #   periodSeconds: 15
-        #   timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /up
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 5
 
         volumeMounts:
         - name: dotenv-out
@@ -219,7 +219,7 @@ spec:
     kind: Deployment
     name: pdex-app-dev
   updatePolicy:
-    updateMode: "Auto"
+    updateMode: "Off" # That keeps recommendations but stops pod mutations. (No HPA/VPA fighting.)
   resourcePolicy:
     containerPolicies:
     - containerName: pdex
