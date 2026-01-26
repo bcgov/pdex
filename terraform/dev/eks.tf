@@ -258,3 +258,11 @@ resource "aws_eks_pod_identity_association" "alb_controller" {
     helm_release.aws_load_balancer_controller
   ]
 }
+
+# Pod Identity Association for Cluster Autoscaler
+resource "aws_eks_pod_identity_association" "cluster_autoscaler" {
+  cluster_name    = aws_eks_cluster.pdex-cluster.name
+  namespace       = "kube-system"
+  service_account = "cluster-autoscaler"
+  role_arn        = aws_iam_role.cluster_auto_scaler_role.arn
+}
