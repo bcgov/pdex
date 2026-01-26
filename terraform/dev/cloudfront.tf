@@ -45,6 +45,8 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
 
     forwarded_values {
       query_string = true
+      
+      headers = ["X-Forwarded-For"]
 
       cookies {
         forward = "all"
