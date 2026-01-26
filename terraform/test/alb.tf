@@ -236,7 +236,7 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
       targetType     = "ip"
       serviceRef = {
         name = "pdex-service-test" # name of the Kubernetes Service to associate with found in test-deployment.yaml
-        port = 8080
+        port = 80
       }
     }
   }
