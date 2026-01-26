@@ -5,16 +5,7 @@ metadata:
   labels:
     app: pdex
 spec:
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-    type: "Resource"
-    resource: 
-      name: "cpu"
-      target: 
-        type: "Utilization"
-        averageUtilization: 60
-      
+  replicas: 1
   selector:
     matchLabels:
       app: pdex
@@ -190,3 +181,51 @@ kind: ServiceAccount
 metadata:
   name: pdex-secret-manager-sa
   namespace: default
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: pdex-hpa-dev
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pdex-app-dev
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: pdex-vpa-dev
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pdex-app-dev
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: pdex
+      minAllowed:
+        cpu: 100m
+        memory: 256Mi
+      maxAllowed:
+        cpu: 2000m
+        memory: 2Gi

@@ -79,24 +79,13 @@ resource "helm_release" "metrics_server" {
   ]
 }
 resource "helm_release" "vpa" {
-  name       = "vertical-pod-autoscaler"
+  name       = "vpa"
   namespace  = "kube-system"
-  repository = "https://kubernetes.github.io/autoscaler"
-  chart      = "vertical-pod-autoscaler"
-  version    = "0.13.2" # pick a stable version; you can bump later
+  repository = "https://charts.fairwinds.com/stable"
+  chart      = "vpa"
+  version    = "4.5.0"
   wait       = true
   timeout    = 600
-
-  set = [
-    {
-      name  = "installCRDs"
-      value = "true"
-    },
-    {
-      name  = "updatePolicy"
-      value = "Auto"
-    }
-  ]
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
