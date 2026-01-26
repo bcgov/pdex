@@ -39,26 +39,30 @@ resource "aws_wafv2_web_acl" "pdex_cloudfront" {
   scope       = "CLOUDFRONT"
 
   default_action {
-    block {}
+    allow {}
   }
 
   rule {
-    name     = "AllowBCGovNetworks"
+    name     = "BlockNonBCGovNetworks"
     priority = 1
 
     action {
-      allow {}
+      block {}
     }
 
     statement {
-      ip_set_reference_statement {
-        arn = aws_wafv2_ip_set.bcgov_networks[0].arn
+      not_statement {
+        statement {
+          ip_set_reference_statement {
+            arn = aws_wafv2_ip_set.bcgov_networks[0].arn
+          }
+        }
       }
     }
 
     visibility_config {
       cloudwatch_metrics_enabled = true
-      metric_name                = "AllowBCGovNetworks"
+      metric_name                = "BlockNonBCGovNetworks"
       sampled_requests_enabled   = true
     }
   }
