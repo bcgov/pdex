@@ -12,6 +12,7 @@ resource "aws_security_group" "alb_sg" {
     // for PROD use "0.0.0.0/0"
     cidr_blocks = [
       "142.16.0.0/12",
+      "142.28.0.0/12",
       "142.32.0.0/12"
       ]
   }
