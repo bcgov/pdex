@@ -162,6 +162,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internal
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/load-balancer-name: default
+    alb.ingress.kubernetes.io/inbound-cidrs: 142.22.0.0/12,142.32.0.0/12,142.35.0.0/12
     kubernetes.io/ingress.class: alb
 spec:
   rules:
