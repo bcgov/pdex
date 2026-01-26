@@ -7,7 +7,14 @@ resource "aws_security_group" "alb_sg" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    
+    // Restrict ALB inbound CIDR blocks to only BCGov network ranges
+    // for PROD use "0.0.0.0/0"
+    cidr_blocks = [
+      "142.22.0.0/12",
+      "142.32.0.0/12",
+      "142.35.0.0/12"
+      ]
   }
 
   egress {
