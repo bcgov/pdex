@@ -103,8 +103,25 @@ spec:
             cpu: 1000m
             memory: 1Gi
           requests:
-            cpu: 250m
-            memory: 512Mi
+            cpu: 650m
+            memory: 600Mi
+
+        readinessProbe:
+          httpGet:
+            path: /up
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 6
+
+        livenessProbe:
+          httpGet:
+            path: /up
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 5
 
         volumeMounts:
         - name: dotenv-out
@@ -163,3 +180,51 @@ kind: ServiceAccount
 metadata:
   name: pdex-secret-manager-sa
   namespace: default
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: pdex-hpa-test
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pdex-app-test
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: pdex-vpa-test
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pdex-app-test
+  updatePolicy:
+    updateMode: "Off" # That keeps recommendations but stops pod mutations. (No HPA/VPA fighting.)
+  resourcePolicy:
+    containerPolicies:
+    - containerName: pdex
+      minAllowed:
+        cpu: 100m
+        memory: 256Mi
+      maxAllowed:
+        cpu: 2000m
+        memory: 2Gi
