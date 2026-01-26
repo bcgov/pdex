@@ -207,6 +207,14 @@ resource "aws_iam_role_policy" "cluster_auto_scaler" {
   EOF
 }
 
+# Pod Identity Association for Cluster Autoscaler
+resource "aws_eks_pod_identity_association" "cluster_autoscaler" {
+  cluster_name    = aws_eks_cluster.pdex-cluster.name
+  namespace       = "kube-system"
+  service_account = "cluster-autoscaler"
+  role_arn        = aws_iam_role.cluster_auto_scaler_role.arn
+}
+
 #Pod identity role for SES mailer
 resource "aws_iam_role" "ses_mailer_role" {
   name = "ses_mailer_role"

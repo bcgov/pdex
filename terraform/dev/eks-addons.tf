@@ -127,6 +127,6 @@ resource "helm_release" "cluster_autoscaler" {
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
-    aws_iam_role_policy.cluster_auto_scaler
+    aws_eks_pod_identity_association.cluster_autoscaler
   ]
 }
