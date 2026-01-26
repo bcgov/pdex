@@ -51,3 +51,44 @@ resource "helm_release" "aws_load_balancer_controller" {
     aws_iam_role_policy_attachment.alb_attachment
   ]
 }
+
+resource "helm_release" "metrics_server" {
+  name       = "metrics-server"
+  namespace  = "kube-system"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+  version    = "3.12.1" # pick a stable version; you can bump later
+  wait       = true
+  timeout    = 600
+
+  # EKS commonly needs these kubelet flags to avoid metrics not available
+  set = [
+    {
+      name  = "args[0]"
+      value = "--kubelet-insecure-tls"
+    },
+    {
+      name  = "args[1]"
+      value = "--kubelet-preferred-address-types=InternalIP\\,ExternalIP\\,Hostname"
+    }
+  ]
+
+  depends_on = [
+    aws_eks_cluster.pdex-cluster,
+    aws_eks_addon.coredns-addon
+  ]
+}
+resource "helm_release" "vpa" {
+  name       = "vpa"
+  namespace  = "kube-system"
+  repository = "https://charts.fairwinds.com/stable"
+  chart      = "vpa"
+  version    = "4.5.0"
+  wait       = true
+  timeout    = 600
+
+  depends_on = [
+    aws_eks_cluster.pdex-cluster,
+    aws_eks_addon.coredns-addon
+  ]
+}

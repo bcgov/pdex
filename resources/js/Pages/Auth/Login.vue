@@ -117,7 +117,7 @@ export default {
                         <!-- BCSC Login -->
                         <a href="/bcsc-login" class="btn btn-primary btn-lg px-5 py-3 shadow-sm">
                             <i class="bi bi-mortarboard me-2"></i>
-                            Sign In as Learner (BC Services Card)
+                            Sign In as Learner (BC Services Card Account)
                         </a>
                         
                         <!-- BCeID Login -->
@@ -141,7 +141,7 @@ export default {
                                     <i class="bi bi-mortarboard fs-4"></i>
                                 </div>
                                 <h6 class="fw-semibold mb-2">Learners</h6>
-                                <small class="text-muted">BC Services Card authentication for learner portal access</small>
+                                <small class="text-muted">BC Services Card Account authentication for learner portal access</small>
                             </div>
                         </div>
                         <div class="col-md-4">

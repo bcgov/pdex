@@ -153,31 +153,79 @@ spec:
       targetPort: 8080
   type: ClusterIP
 
-# ---
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
-# metadata:
-#   name: pdex-ingress-dev
-#   annotations:
-#     alb.ingress.kubernetes.io/scheme: internal
-#     alb.ingress.kubernetes.io/target-type: ip
-#     alb.ingress.kubernetes.io/load-balancer-name: default
-#     kubernetes.io/ingress.class: alb
-# spec:
-#   rules:
-#   - host: dev.pdex.gov.bc.ca
-#     http:
-#       paths:
-#       - path: /
-#         pathType: Prefix
-#         backend:
-#           service:
-#             name: pdex-service-dev
-#             port:
-#               number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pdex-ingress-dev
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/load-balancer-name: default
+    kubernetes.io/ingress.class: alb
+spec:
+  rules:
+  - host: dev.pdex.gov.bc.ca
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pdex-service-dev
+            port:
+              number: 80
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pdex-secret-manager-sa
   namespace: default
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: pdex-hpa-dev
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pdex-app-dev
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: pdex-vpa-dev
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pdex-app-dev
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: pdex
+      minAllowed:
+        cpu: 100m
+        memory: 256Mi
+      maxAllowed:
+        cpu: 2000m
+        memory: 2Gi
