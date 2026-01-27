@@ -4,7 +4,7 @@ resource "aws_wafv2_web_acl" "pdex_cloudfront" {
   count    = var.cloudfront ? 1 : 0
   provider = aws.us-east-1  # WAF for CloudFront must be in us-east-1
   
-  name        = "pdex-cloudfront-dev"
+  name        = "pdex-cloudfront-test"
   description = "WAF for PDEX CloudFront - Allow Canada traffic only"
   scope       = "CLOUDFRONT"
 
