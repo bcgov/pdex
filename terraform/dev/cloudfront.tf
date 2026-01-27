@@ -28,6 +28,7 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
   enabled         = true
   is_ipv6_enabled = true
   comment         = "PDEX - Dev"
+  web_acl_id      = var.cloudfront ? aws_wafv2_web_acl.pdex_cloudfront[0].arn : null
   
   default_cache_behavior {
     allowed_methods = [
@@ -44,6 +45,8 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
 
     forwarded_values {
       query_string = true
+      
+      headers = ["X-Forwarded-For"]
 
       cookies {
         forward = "all"
