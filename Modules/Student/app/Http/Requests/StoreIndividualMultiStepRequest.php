@@ -44,7 +44,8 @@ class StoreIndividualMultiStepRequest extends FormRequest
             // 'phone_number' => 'nullable|string|max:255',
             // 'alternate_phone_number' => 'nullable|string|max:255',
             'date_of_birth' => 'nullable|date|before:today',
-            'gender' => 'nullable|string|max:255',
+            'gender' => 'nullable|string|in:man,woman,non-binary,unknown',
+            'sex' => 'nullable|string|in:male,female,indeterminate,unknown',
             // 'preferred_pronouns' => 'nullable|string|max:255',
             // 'disability_status' => 'boolean',
             // 'accommodation_needs' => 'nullable|string|required_if:disability_status,true',
@@ -113,9 +114,9 @@ class StoreIndividualMultiStepRequest extends FormRequest
             // 'identity.is_visible_minority' => 'boolean',
             // 'identity.receives_indigenous_support_services' => 'boolean',
             // 'identity.receives_minority_support_services' => 'boolean',
-                'racial_identity' => 'nullable|array',
-                'racial_identity.*' => 'string|max:255',
-                'racial_identity_other_text' => 'nullable|string|max:200',
+                // 'racial_identity' => 'nullable|array',
+                // 'racial_identity.*' => 'string|max:255',
+                // 'racial_identity_other_text' => 'nullable|string|max:200',
             // 'metadata' => 'nullable|array',
         ];
     }
@@ -158,9 +159,9 @@ class StoreIndividualMultiStepRequest extends FormRequest
             // // Identity validation messages
             // 'identity.indigenous_group.required_if' => 'Indigenous group is required when Indigenous status is selected.',
             // 'identity.years_in_country.min' => 'Years in country must be a positive number.',
-            'identity.racial_identity' => 'nullable|array',
-            'identity.racial_identity.*' => 'string|max:255',
-            'identity.racial_identity_other_text' => 'nullable|string|max:200',
+            // 'identity.racial_identity' => 'nullable|array',
+            // 'identity.racial_identity.*' => 'string|max:255',
+            // 'identity.racial_identity_other_text' => 'nullable|string|max:200',
 
             // 'accommodation_needs.required_if' => 'Accommodation details are required when requesting accessibility support.',
         ];

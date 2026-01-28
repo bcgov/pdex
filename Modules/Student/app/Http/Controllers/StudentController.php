@@ -54,7 +54,8 @@ class StudentController extends Controller
                 'offline_start_time',
                 'offline_end_time',
                 'info_label', 
-                'info_url'
+                'info_url',
+                'profile_integration_ready',
             ])
             ->get()
             ->map(function ($app) {
@@ -93,6 +94,7 @@ class StudentController extends Controller
                     'alert_message' => $app->status === 'offline' 
                         ? $app->offline_alert_message 
                         : $app->active_alert_message,
+                    'profile_integration_ready' => $app->profile_integration_ready,
                     'data_permission_groups' => array_values($permissionGroups),
                     'profile_complete' => $this->checkProfileCompleteness($app),
                     'missing_data_message' => $this->getMissingDataMessage($app),
@@ -574,7 +576,9 @@ class StudentController extends Controller
             'countries' => $countries,
             'individual' => $individual,
         ]);
-    }    /**
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreIndividualMultiStepRequest $request)

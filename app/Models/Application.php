@@ -44,6 +44,7 @@ class Application extends Model
         'client_id',
         'client_secret',
         'approval_notes',
+        'profile_integration_ready',
     ];
 
     protected $casts = [

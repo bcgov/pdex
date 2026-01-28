@@ -54,6 +54,7 @@ class ApplicationUpdateRequest extends FormRequest
             'data_permissions.*.can_read' => 'boolean',
             'data_permissions.*.can_write' => 'boolean',
             'data_permissions.*.is_required' => 'nullable|boolean',
+            'profile_integration_ready' => 'boolean',
         ];
     }
 
