@@ -36,6 +36,7 @@ class Individual extends Model
         'notes',
         'email_verified_at',
         'last_login_at',
+        'sex',
     ];
     // Relationships for addresses, employments, and identities
     public function addresses()

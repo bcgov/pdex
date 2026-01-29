@@ -60,7 +60,7 @@
                 <p class="card-text text-muted">{{ app.description }}</p>
 
                 <!-- Data Permissions Display -->
-                <div v-if="app.data_permission_groups && app.data_permission_groups.length > 0" class="mb-3">
+                <div v-if="app.profile_integration_ready == true && app.data_permission_groups && app.data_permission_groups.length > 0" class="mb-3">
                   <div class="small text-muted mb-2">
                     <i class="bi bi-shield-check me-1"></i>
                     <strong>Data Access Permissions:</strong>
@@ -124,7 +124,7 @@
                       <i class="bi bi-box-arrow-up-right ms-2"></i>
                     </a>
                   </div>
-
+                  
                   <!-- Profile Incomplete but has permissions - Show Modal Launch Button -->
                   <div v-else-if="app.status === 'active' && !app.profile_complete && app.has_permissions" class="d-flex align-items-center">
                     <a 
@@ -472,7 +472,7 @@ const redirectToApp = (appId) => {
   if (!app) return
   
   // If application has permissions, show modal instead of direct redirect
-  if (app.has_permissions) {
+  if (app.profile_integration_ready == true && app.has_permissions) {
     selectedApp.value = app
     prepareFormData(app)
     showModal.value = true
@@ -503,11 +503,11 @@ const prepareFormData = (app) => {
   form.permission_selections = selections
   
   // Debug: log the app data and what fields we're getting
-  console.log('App data:', app)
-  console.log('Permission selections initialized:', selections)
-  console.log('Required fields:', getRequiredFields(app))
-  console.log('Optional fields:', getOptionalFields(app))
-  console.log('Profile data:', props.profileData)
+  // console.log('App data:', app)
+  // console.log('Permission selections initialized:', selections)
+  // console.log('Required fields:', getRequiredFields(app))
+  // console.log('Optional fields:', getOptionalFields(app))
+  // console.log('Profile data:', props.profileData)
 }
 
 const closeModal = () => {
@@ -633,6 +633,7 @@ const hasProfileValue = (field) => {
     'preferred_name': 'general',
     'date_of_birth': 'general',
     'gender': 'general',
+    'sex': 'general',
     'preferred_pronouns': 'general',
     'phone': 'general',
     'phone_number': 'general',
@@ -815,9 +816,9 @@ const getFieldLabel = (field) => {
 const launchApplication = async () => {
   if (!canSubmit()) return
   
-  console.log('Launching application:', selectedApp.value.id)
-  console.log('Permission selections:', permissionSelections.value)
-  console.log('Profile data available:', props.profileData)
+  // console.log('Launching application:', selectedApp.value.id)
+  // console.log('Permission selections:', permissionSelections.value)
+  // console.log('Profile data available:', props.profileData)
   
   // Update form data before submission
   form.permission_selections = permissionSelections.value
@@ -825,8 +826,8 @@ const launchApplication = async () => {
   // Submit form using Inertia
   form.post(`/student/launch-application/${selectedApp.value.id}`, {
     onSuccess: (page) => {
-      console.log('Success response:', page)
-      console.log('selectedApp:', selectedApp)
+      // console.log('Success response:', page)
+      // console.log('selectedApp:', selectedApp)
       
       // Check for launch URL in flash data or redirect directly to gateway
       const launchUrl = page.props.flash?.launch_url || `/gateway/${selectedApp.value.id}`
