@@ -305,12 +305,12 @@ class AuthController extends Controller
         $user = new User();
         $user->guid = Str::orderedUuid()->getHex();
         $user->name = Str::upper($providerUser['name'] ?? '');
-        $user->first_name = Str::upper($providerUser['given_name'] ?? '');
+        $user->first_name = Str::upper($providerUser['given_names'] ?? '');
         $user->last_name = Str::upper($providerUser['family_name'] ?? '');
         $user->email = Str::lower($providerUser['email'] ?? '');
         $user->display_name = Str::upper($providerUser['display_name'] ?? '');
         $user->family_name = Str::upper($providerUser['family_name'] ?? '');
-        $user->given_name = Str::upper($providerUser['given_name'] ?? '');
+        $user->given_name = Str::upper($providerUser['given_names'] ?? '');
 
         $user->identity_provider = $idpType;
         $user->keycloak_id = $providerUser['sub'];
@@ -328,6 +328,7 @@ class AuthController extends Controller
             case 'bcsc':
                 // default bcsc user to active state
                 $user->is_active = true;
+
                 break;
                 
             case 'idir':
@@ -351,6 +352,11 @@ class AuthController extends Controller
 
         // Assign default role based on IDP type
         $this->assignDefaultRole($user, $idpType);
+
+        // Create student profile for BCSC users
+        if ($idpType === 'bcsc') {
+            $this->createStudentProfile($user, $providerUser);
+        }
 
         Log::info('New user created', [
             'user_id' => $user->id,
@@ -515,5 +521,32 @@ class AuthController extends Controller
         // Default dashboard for other cases
         return redirect()->route('login')
             ->withErrors(['error' => 'Could not access dashboard. Please contact an administrator. Error #0082940']);
+    }
+
+    /**
+     * Create student profile for newly registered BCSC users
+     */
+    private function createStudentProfile(User $user, array $providerUser): void
+    {
+        try {
+            $individual = \App\Models\Individual::create([
+                'user_guid' => $user->guid,
+                'first_name' => Str::upper($providerUser['given_names'] ?? ''),
+                'last_name' => Str::upper($providerUser['family_name'] ?? ''),
+                'email_address' => Str::lower($providerUser['email'] ?? ''),
+                'date_of_birth' => $providerUser['birthdate'] ?? null,
+                'sex' => $providerUser['gender'] ?? null,
+            ]);
+
+            Log::info('Student profile created during user registration', [
+                'individual_guid' => $individual->guid,
+                'user_guid' => $user->guid,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to create student profile during registration', [
+                'user_guid' => $user->guid,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }
