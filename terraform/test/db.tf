@@ -146,7 +146,7 @@ resource "aws_db_proxy" "pdex" {
   name                   = "pdex-rds-proxy"
   engine_family          = "POSTGRESQL"
   role_arn               = aws_iam_role.pdex_rds_proxy_secrets_role.arn
-  vpc_subnet_ids         = data.aws_subnets.private.ids
+  vpc_subnet_ids         = data.aws_subnets.data.ids
   vpc_security_group_ids = [aws_security_group.pdex_rds_proxy_sg.id]
 
   require_tls          = true
