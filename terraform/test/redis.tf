@@ -27,5 +27,5 @@ resource "aws_elasticache_cluster" "replica" {
 
 resource "aws_elasticache_subnet_group" "default" {
 	name		=	"redis-subnet-group-pdex"
-	subnet_ids	=	data.aws_subnets.app.ids
+	subnet_ids	=	data.aws_subnets.data.ids
 }
