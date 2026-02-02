@@ -1,4 +1,20 @@
 # cloudfront.tf
+data "aws_cloudfront_cache_policy" "caching_optimized" {
+  name = "Managed-CachingOptimized"
+}
+
+data "aws_cloudfront_cache_policy" "caching_disabled" {
+  name = "Managed-CachingDisabled"
+}
+
+data "aws_cloudfront_origin_request_policy" "all_viewer_except_host" {
+  name = "Managed-AllViewerExceptHostHeader"
+}
+
+data "aws_cloudfront_origin_request_policy" "cors_custom_origin" {
+  name = "Managed-CORS-CustomOrigin"
+}
+
 resource "random_integer" "cf_origin_id" {
   min = 1
   max = 100
@@ -30,32 +46,52 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
   comment         = "PDEX - TEST"
   
   default_cache_behavior {
-    allowed_methods = [
-      "DELETE",
-      "GET",
-      "HEAD",
-      "OPTIONS",
-      "PATCH",
-      "POST",
-    "PUT"]
-    cached_methods = ["GET", "HEAD"]
-
+    allowed_methods  = ["DELETE","GET","HEAD","OPTIONS","PATCH","POST","PUT"]
+    cached_methods   = ["GET","HEAD"]
     target_origin_id = random_integer.cf_origin_id.result
 
-    forwarded_values {
-      query_string = true
+    viewer_protocol_policy = "redirect-to-https"
 
-      cookies {
-        forward = "all"
-      }
-    }
+    # Dynamic app traffic: don't cache
+    cache_policy_id          = data.aws_cloudfront_cache_policy.caching_disabled.id
+
+    # Forward what the app might need (cookies, headers, querystrings)
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer_except_host.id
+
+    # Keep your CORS headers policy if you need it
+    response_headers_policy_id = "60669652-455b-4ae9-85a4-c4c02393f86c"
+  }
+
+  ordered_cache_behavior {
+    path_pattern     = "/js/*"
+    target_origin_id = random_integer.cf_origin_id.result
 
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
-	
-    # SimpleCORS
+
+    # Static content: cache it
+    cache_policy_id          = data.aws_cloudfront_cache_policy.caching_optimized.id
+
+    # Forward only what is necessary for caching
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_custom_origin.id
+
+    # Keep your CORS headers policy if you need it
+    response_headers_policy_id = "60669652-455b-4ae9-85a4-c4c02393f86c"
+  }
+
+  
+  ordered_cache_behavior {
+    path_pattern     = "/css/*"
+    target_origin_id = random_integer.cf_origin_id.result
+
+    viewer_protocol_policy = "redirect-to-https"
+
+    # Static content: cache it
+    cache_policy_id          = data.aws_cloudfront_cache_policy.caching_optimized.id
+
+    # Forward only what is necessary for caching
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_custom_origin.id
+
+    # Keep your CORS headers policy if you need it
     response_headers_policy_id = "60669652-455b-4ae9-85a4-c4c02393f86c"
   }
 
