@@ -51,6 +51,16 @@ resource "aws_eks_addon" "vpc-cni-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "vpc-cni"
   addon_version = "v1.21.1-eksbuild.3"
+  
+  //enable prefix delegation
+  // prevents CNI continue to consume IPs aggressively
+  configuration_values = jsonencode({
+    env = {
+      ENABLE_PREFIX_DELEGATION = "true"
+      WARM_ENI_TARGET          = "0"
+      WARM_PREFIX_TARGET       = "1"
+    }
+  })
 }
 
 resource "aws_eks_addon" "kube-proxy-addon" {
