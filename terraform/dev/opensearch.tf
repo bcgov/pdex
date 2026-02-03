@@ -26,7 +26,7 @@ resource "aws_elasticsearch_domain" "pdex-jb-cluster" {
 	
 	vpc_options {
 		subnet_ids = [
-			sort(data.aws_subnets.app.ids)[0]
+			sort(data.aws_subnets.data.ids)[0]
 		]
 
 		security_group_ids = [aws_security_group.allow_tls.id]

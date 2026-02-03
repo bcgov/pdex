@@ -44,7 +44,7 @@ resource "aws_rds_cluster" "postgres-pdex" {
   final_snapshot_identifier = "pdex-finalsnapshot"
   
   serverlessv2_scaling_configuration {
-    max_capacity = 2.0
+    max_capacity = 10.0
     min_capacity = 1.0
   }
 
@@ -99,7 +99,7 @@ resource "aws_security_group_rule" "proxy_ingress_from_eks_nodes" {
 
 
 resource "aws_appautoscaling_target" "rds_cluster_read_replica" {
-  max_capacity       = 4
+  max_capacity       = 10
   min_capacity       = 1
   resource_id        = "cluster:${aws_rds_cluster.postgres-pdex.id}"
   scalable_dimension = "rds:cluster:ReadReplicaCount"
@@ -146,7 +146,7 @@ resource "aws_db_proxy" "pdex" {
   name                   = "pdex-rds-proxy"
   engine_family          = "POSTGRESQL"
   role_arn               = aws_iam_role.pdex_rds_proxy_secrets_role.arn
-  vpc_subnet_ids         = data.aws_subnets.private.ids
+  vpc_subnet_ids         = data.aws_subnets.data.ids
   vpc_security_group_ids = [aws_security_group.pdex_rds_proxy_sg.id]
 
   require_tls          = true
