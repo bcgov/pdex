@@ -50,21 +50,25 @@ resource "aws_eks_cluster" "pdex-cluster" {
 resource "aws_eks_addon" "vpc-cni-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "vpc-cni"
+  addon_version = "v1.21.1-eksbuild.3"
 }
 
 resource "aws_eks_addon" "kube-proxy-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "kube-proxy"
+  addon_version = "v1.34.1-eksbuild.2"
 }
 
 resource "aws_eks_addon" "pod-identity-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "eks-pod-identity-agent"
+  addon_version = "v1.3.10-eksbuild.2"
 }
 
 resource "aws_eks_addon" "coredns-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "coredns"
+  addon_version = "v1.13.1-eksbuild.1"
 }
 
 #EFS CSI role
@@ -95,6 +99,7 @@ resource "aws_iam_role_policy_attachment" "ec-AmazonEFSCSIDriverPolicy" {
 resource "aws_eks_addon" "aws-efs-csi-driver" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "aws-efs-csi-driver"
+  addon_version = "v2.3.0-eksbuild.1"
 
   pod_identity_association {
     role_arn = aws_iam_role.efs-csi-role.arn
