@@ -150,7 +150,7 @@ resource "aws_db_proxy" "pdex" {
   vpc_security_group_ids = [aws_security_group.pdex_rds_proxy_sg.id]
 
   require_tls          = true
-  idle_client_timeout  = 1800 # 30 minutes
+  idle_client_timeout  = 300 # 5 minutes before disconnect connections
 
   auth {
     auth_scheme               = "SECRETS"
