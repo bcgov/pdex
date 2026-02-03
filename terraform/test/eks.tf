@@ -156,6 +156,8 @@ resource "aws_eks_node_group" "eks-ng" {
     max_unavailable = 1
   }
 
+  instance_types = ["t3.xlarge"] # 4vCPU, 16GB RAM, instead of t3.medium 2vCPU 4GB RAM
+
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
   depends_on = [
