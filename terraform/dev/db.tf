@@ -100,7 +100,7 @@ resource "aws_security_group_rule" "proxy_ingress_from_eks_nodes" {
 
 resource "aws_appautoscaling_target" "rds_cluster_read_replica" {
   max_capacity       = 10
-  min_capacity       = 1
+  min_capacity       = 0
   resource_id        = "cluster:${aws_rds_cluster.postgres-pdex.id}"
   scalable_dimension = "rds:cluster:ReadReplicaCount"
   service_namespace  = "rds"
