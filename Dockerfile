@@ -162,4 +162,3 @@ RUN npm audit fix --prefix /var/www/html/ || true
 RUN npm run --prefix /var/www/html/ ${DEVENV}
 
 ENTRYPOINT ["sh", "/sbin/entrypoint.sh"]
-CMD ["sh", "-c", "php-fpm & apache2-foreground"]

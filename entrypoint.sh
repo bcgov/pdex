@@ -51,8 +51,8 @@ php artisan queue:clear --queue=midnight --force
 echo "Generate API documentation"
 php artisan l5-swagger:generate || echo "Warning: API documentation generation failed, continuing..."
 
-#echo "Starting PHP-FPM"
-#php-fpm83 -D
+echo "Starting PHP-FPM"
+php-fpm83 -D
 
-#echo "Starting apache foreground"
-#exec httpd -DFOREGROUND
+echo "Starting apache foreground"
+exec /usr/sbin/httpd -D FOREGROUND
