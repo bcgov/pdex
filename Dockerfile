@@ -16,7 +16,10 @@ RUN apk add --no-cache \
 
 # ---- Composer ----
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# RUN curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN test -f /usr/bin/php || ln -s /usr/bin/php83 /usr/bin/php \
+    && curl -sS https://getcomposer.org/installer | php83 -- --install-dir=/usr/local/bin --filename=composer \
+    && chmod +x /usr/local/bin/composer
 
 # ---- Copy app ----
 COPY . /var/www/html
