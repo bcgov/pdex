@@ -98,9 +98,9 @@ RUN apk add --no-cache --update \
     && sed -i '/LoadModule headers_module/s/^#//' /etc/apache2/httpd.conf \
     && sed -i '/LoadModule mpm_event_module/s/^#//' /etc/apache2/httpd.conf \
     && sed -i '/#LoadModule mpm_prefork/s/^/#/' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule mime_module/s/^/#/' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule mime_module/s/^/#/' /etc/apache2/httpd.conf \
     && sed -i '/#LoadModule lbmethod_byrequests_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '#/LoadModule proxy_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule proxy_module/s/^#//' /etc/apache2/httpd.conf \
     && sed -i '#/LoadModule proxy_balancer_module/s/^#//' /etc/apache2/httpd.conf \
     && sed -i '/LoadModule proxy_fcgi_module/s/^#//' /etc/apache2/httpd.conf \
     && sed -i '/LoadModule rewrite_module/s/^#//' /etc/apache2/httpd.conf \
