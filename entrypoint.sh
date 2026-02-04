@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 echo "Start entrypoint file"
@@ -26,7 +26,7 @@ fi
 cp "$ENV_SRC" "$ENV_DST" || echo "Cannot copy env file (read-only filesystem)"
 
 echo "Set permissions"
-chown -R www-data:www-data \
+chown -R apache:apache \
       "$ENV_DST" \
       /var/www/html/storage \
       /var/www/html/bootstrap/cache 2>/dev/null || echo "Warning: Could not change ownership (read-only filesystem)"
@@ -51,5 +51,8 @@ php artisan queue:clear --queue=midnight --force
 echo "Generate API documentation"
 php artisan l5-swagger:generate || echo "Warning: API documentation generation failed, continuing..."
 
+echo "Starting PHP-FPM"
+php-fpm83 -D
+
 echo "Starting apache foreground"
-exec apache2-foreground
+exec httpd -DFOREGROUND

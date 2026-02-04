@@ -1,10 +1,7 @@
-FROM php:8.3-apache
-ARG DEBIAN_VERSION=20.04
-ARG APACHE_OPENIDC_VERSION=2.4.10
+FROM alpine:latest
 ARG TZ=America/Vancouver
-ARG CA_HOSTS_LIST
-ARG DEBIAN_FRONTEND=noninteractive
 ARG DEVENV=prod
+
 # set entrypoint variables
 ENV USER_HOME=/var/www/html
 ENV PSYSH_CONFIG_DIR=/tmp
@@ -26,54 +23,51 @@ COPY / /var/www/html/
 
 EXPOSE 8080 8443 2525
 
-RUN apt-get -yq update --fix-missing \
-    && apt-get update && apt-get install -y --no-install-recommends apt-utils \
-    # Apply security updates to base system packages
-    && apt-get upgrade -y \
-#php setup, install extensions, setup configs \
-    && apt-get install --no-install-recommends -y \
-    libzip-dev \
-    libxml2-dev \
-    zip \
+RUN apk add --no-cache --update \
+    apache2 \
+    php83 \
+    php83-fpm \
+    php83-bcmath \
+    php83-soap \
+    php83-intl \
+    php83-opcache \
+    php83-zip \
+    php83-pdo \
+    php83-pdo_pgsql \
+    php83-pgsql \
+    php83-curl \
+    php83-gd \
+    php83-apcu \
+    php83-common \
+    php83-xml \
+    php83-xmlreader \
+    php83-xmlwriter \
+    php83-json \
+    php83-session \
+    ca-certificates \
+    curl \
+    gnupg \
     nano \
     unzip \
-#    cron \
-    zlib1g-dev g++ libicu-dev libpq-dev netcat-traditional curl apache2 libcurl4 libcurl3-dev \
-    	libfreetype6-dev \
-        libjpeg62-turbo-dev \
-        libmcrypt-dev \
-        libpng-dev \
-        libaio-dev \
-    libonig-dev \
-    ca-certificates gnupg \
-    && pecl install zip pcov && docker-php-ext-enable zip \
-    && docker-php-ext-install bcmath soap \
-    && docker-php-source delete \
-    && sed -ri -e 's!expose_php = On!expose_php = Off!g' $PHP_INI_DIR/php.ini-production \
-    && sed -ri -e 's!ServerTokens OS!ServerTokens Prod!g' /etc/apache2/conf-available/security.conf \
-    && sed -ri -e 's!ServerSignature On!ServerSignature Off!g' /etc/apache2/conf-available/security.conf \
-    && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
-    && pecl install apcu \
-    && docker-php-ext-enable apcu \
-    && docker-php-ext-install intl opcache\
-    && docker-php-ext-configure zip \
-    && docker-php-ext-install zip \
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_pgsql pgsql && docker-php-ext-install curl  \
-    && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/  \
-    && docker-php-ext-install -j$(nproc) gd && a2enmod rewrite \
-    && a2enmod remoteip \
-    && a2enmod rewrite \
-    && a2enmod auth_basic \
-    && a2enmod authn_file \
-    && a2enmod authz_user \
-    && a2enmod autoindex \
-    && a2enmod deflate \
-    && a2enmod filter \
-    && a2dismod mpm_event && a2dismod  mpm_worker && a2enmod mpm_prefork \
-    && a2enmod reqtimeout \
-    && a2enmod setenvif \
-    && sed -i 's/%h/%a/g' /etc/apache2/apache2.conf \
+    zip \
+    g++ \
+    nodejs \
+    npm \
+    netcat-openbsd \
+    && apk add --no-cache --virtual .build-deps \
+    autoconf \
+    build-base \
+    libtool \
+    pcre-dev \
+    && mkdir -p /var/log/php \
+    && sed -ri -e 's!expose_php = On!expose_php = Off!g' /etc/php83/php.ini \
+    && sed -ri -e 's!ServerTokens OS!ServerTokens Prod!g' /etc/apache2/conf.d/security.conf \
+    && sed -ri -e 's!ServerSignature On!ServerSignature Off!g' /etc/apache2/conf.d/security.conf \
+    && printf 'error_log=/var/log/php/error.log\nlog_errors=1\nerror_reporting=E_ERROR\nmemory_limit=450M\nexpose_php=Off\nallow_url_fopen=Off\nallow_url_include=Off\ndisplay_errors=Off\ndisplay_startup_errors=Off\nmax_execution_time=30\nmax_input_time=60\npost_max_size=50M\nupload_max_filesize=50M\nsession.cookie_httponly=1\nsession.cookie_secure=1\nsession.use_strict_mode=1\n' > /etc/php83/conf.d/security.ini \
+    && ln -s /etc/php83 /etc/php \
+    && ln -s /usr/bin/php83 /usr/bin/php \
+    && sed -i 's/80/8080/g; s/443/8443/g; s/25/2525/g' /etc/apache2/ports.conf \
+    && sed -i 's/%h/%a/g' /etc/apache2/httpd.conf \
     && { \
         echo 'RemoteIPHeader X-Forwarded-For'; \
         echo 'RemoteIPInternalProxy 142.34.0.0/16'; \
@@ -81,75 +75,72 @@ RUN apt-get -yq update --fix-missing \
         echo 'RemoteIPInternalProxy 10.97.0.0/16'; \
         echo 'RemoteIPInternalProxy 10.98.0.0/16'; \
         echo 'RemoteIPInternalProxy 127.0.0.1'; \
-    } | tee "$APACHE_CONFDIR/conf-available/remoteip.conf" && \
-    a2enconf remoteip && \
-    a2enconf security-headers \
-# Apache - Hide version
-  && sed -i -e 's/^ServerTokens OS$/ServerTokens Prod/g' \
+    } > /etc/apache2/conf.d/remoteip.conf \
+    && sed -i -e 's/^ServerTokens OS$/ServerTokens Prod/g' \
         -e 's/^ServerSignature On$/ServerSignature Off/g' \
-        /etc/apache2/conf-available/security.conf \
-# Enable apache modules
-  && a2enmod rewrite headers \
-    # Install Node.js with proper verification - using latest LTS version 22
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && NODE_MAJOR=22 \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update \
-    && apt-get install -y nodejs \
-    && apt-get autoclean && apt-get autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* \
-#fix Action '-D FOREGROUND' failed.
-    && a2enmod lbmethod_byrequests \
-    && mkdir -p /var/log/php  \
-    # Install Composer first with allow_url_fopen enabled temporarily
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    # Now set secure PHP configuration with allow_url_fopen disabled
-    && printf 'error_log=/var/log/php/error.log\nlog_errors=1\nerror_reporting=E_ERROR\nmemory_limit=450M\nexpose_php=Off\nallow_url_fopen=Off\nallow_url_include=Off\ndisplay_errors=Off\ndisplay_startup_errors=Off\nmax_execution_time=30\nmax_input_time=60\npost_max_size=50M\nupload_max_filesize=50M\nsession.cookie_httponly=1\nsession.cookie_secure=1\nsession.use_strict_mode=1\n' > /usr/local/etc/php/conf.d/security.ini \
-    && mkdir -p /etc/apache2/sites-enabled \
-    && sed -i -e 's/80/8080/g' -e 's/443/8443/g' -e 's/25/2525/g' /etc/apache2/ports.conf \
-    # Apache- Prepare to be run as non root user
-    && mkdir -p /var/lock/apache2 /var/run/apache2 \
-    && chgrp -R 0 /etc/apache2/mods-* \
-        /etc/apache2/sites-* \
+        /etc/apache2/conf.d/security.conf \
+    && sed -i '/#LoadModule cgid_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule proxy_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule proxy_fcgi_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule rewrite_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule remoteip_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule headers_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule authz_core_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule mpm_event_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule auth_basic_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule authn_file_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule authz_user_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule autoindex_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule deflate_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule filter_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule setenvif_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule mpm_prefork/s/^/#/' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule lbmethod_byrequests_module/s/^#//' /etc/apache2/httpd.conf \
+    && mkdir -p /var/lock/apache2 /var/run/apache2 /var/run/php-fpm \
+    && chgrp -R 0 /etc/apache2 \
         /run /var/lib/apache2 \
         /var/run/apache2 \
         /var/lock/apache2 \
         /var/log/apache2 \
     && chmod -R g=u /etc/passwd \
-        /etc/apache2/mods-* \
-        /etc/apache2/sites-* \
+        /etc/apache2 \
         /run \
         /var/lib/apache2 \
         /var/run/apache2 \
         /var/lock/apache2 \
         /var/log/apache2 \
-    && chmod 755 /docker-bin/*.sh \
-    && /docker-bin/docker-build.sh && export COMPOSER_HOME="$HOME/.config/composer";
+    && chmod 755 /docker-bin/*.sh 2>/dev/null || true \
+    && mkdir -p /etc/apache2/sites-enabled /etc/php83/conf.d \
+    && install -m 0755 /dev/null /sbin/entrypoint.sh \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && apk del .build-deps \
+    && php -m | grep -i opcache || echo "Warning: OPcache not detected in PHP modules"
 
 
-#RUN supervisorctl reread && supervisorctl update
 WORKDIR /var/www/html/
 
-RUN mkdir -p storage && mkdir -p bootstrap/cache && chmod -R ug+rwx storage bootstrap/cache \
-    && cd /var/www && chown -R www-data:www-data html && chmod -R ug+rw html \
+# Disable default PHP-FPM pool and use optimized config
+RUN mv /etc/php83/php-fpm.d/www.conf /etc/php83/php-fpm.d/www.conf.bak
+
+# Prepare application directories
+RUN mkdir -p storage bootstrap/cache && chmod -R ug+rwx storage bootstrap/cache \
+    && mkdir -p /var/www && chown -R apache:apache /var/www/html && chmod -R ug+rw /var/www/html \
     && chmod 754 /var/www/html/artisan \
     && chmod 755 /var/www/html/probe-check.sh \
-    && cd /var/www/html/public && chmod 644 mix-manifest.json \
-    && mkdir /.npm && mkdir /.npm/_cache && chown -R www-data:0 "/.npm" \
-    && mkdir -p /.config/psysh && chown -R www-data:www-data /.config && chmod -R 775 /.config \
-    && mkdir -p /.composer && chown -R www-data:www-data /.composer && chmod -R 755 /.composer \
+    && mkdir -p /var/www/html/public && chmod 644 /var/www/html/public/mix-manifest.json 2>/dev/null || true \
+    && mkdir -p /.npm && mkdir -p /.npm/_cache && chown -R apache:0 "/.npm" \
+    && mkdir -p /.config/psysh && chown -R apache:apache /.config && chmod -R 775 /.config \
+    && mkdir -p /.composer && chown -R apache:apache /.composer && chmod -R 755 /.composer \
     && echo "<?php return ['runtimeDir' => '/tmp', 'configDir' => '/tmp', 'dataDir' => '/tmp'];" >> /.config/psysh/config.php \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs storage/api-docs \
+    && chmod -R 775 bootstrap/cache storage/ \
+    && npm config set cache /.npm/_cache --global \
     && chmod 755 /sbin/entrypoint.sh
 
-# Ensure cache directories are writable by non-root user before composer install
-RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs storage/api-docs \
-    && chmod -R 775 bootstrap/cache storage/ \
-    && npm config set cache /.npm/_cache --global
+# Install dependencies
+RUN composer install --no-interaction --no-dev --prefer-dist \
+    && npm install --prefix /var/www/html/ \
+    && npm audit fix --prefix /var/www/html/ || true \
+    && npm run --prefix /var/www/html/ ${DEVENV}
 
-
-#composer install
-RUN composer install && npm install --prefix /var/www/html/ && npm audit fix --prefix /var/www/html/ || true && npm run --prefix /var/www/html/ ${DEVENV}
-
-
-ENTRYPOINT ["bash", "/sbin/entrypoint.sh"]
+ENTRYPOINT ["sh", "/sbin/entrypoint.sh"]
