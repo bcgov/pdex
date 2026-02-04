@@ -94,27 +94,22 @@ for module in proxy_module proxy_fcgi_module; do
   if ! grep -q "^LoadModule ${module}" /etc/apache2/httpd.conf 2>/dev/null; then
     echo "Enabling ${module} in Apache config..."
     sed -i "s/#LoadModule ${module}/LoadModule ${module}/" /etc/apache2/httpd.conf || true
+    # If still not present, add it explicitly
+    if ! grep -q "^LoadModule ${module}" /etc/apache2/httpd.conf 2>/dev/null; then
+      short_name=$(echo $module | sed 's/_module//')
+      echo "LoadModule ${module} modules/mod_${short_name}.so" >> /etc/apache2/httpd.conf
+    fi
   fi
 done
 
 # Verify critical modules are loaded
 echo "Verifying Apache modules..."
-if httpd -M 2>&1 | grep -q rewrite_module; then
-  echo "✓ mod_rewrite enabled"
-else
-  echo "⚠ Warning: mod_rewrite may not be enabled"
-fi
-
-if httpd -M 2>&1 | grep -q proxy_module; then
-  echo "✓ mod_proxy enabled"
-else
-  echo "⚠ Warning: mod_proxy may not be enabled"
-fi
-
-if httpd -M 2>&1 | grep -q proxy_fcgi_module; then
-  echo "✓ mod_proxy_fcgi enabled"
-else
-  echo "⚠ Warning: mod_proxy_fcgi may not be enabled"
-fi
+for check_module in rewrite_module proxy_module proxy_fcgi_module; do
+  if httpd -M 2>&1 | grep -q "${check_module}"; then
+    echo "✓ ${check_module} enabled"
+  else
+    echo "✗ ERROR: ${check_module} NOT enabled"
+  fi
+done
 
 exec httpd -DFOREGROUND

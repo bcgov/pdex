@@ -25,6 +25,7 @@ EXPOSE 8080 8443 2525
 
 RUN apk add --no-cache --update \
     apache2 \
+    apache2-mod-proxy-fcgi \
     php83 \
     php83-fpm \
     php83-bcmath \
