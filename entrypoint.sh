@@ -57,6 +57,15 @@ chmod 755 /var/run/php-fpm
 
 echo "Starting PHP-FPM"
 php-fpm83 -D
+sleep 2
+
+echo "Verifying PHP-FPM is listening"
+if [ -S /var/run/php-fpm/fpm.sock ]; then
+  echo "✓ PHP-FPM socket created: /var/run/php-fpm/fpm.sock"
+else
+  echo "✗ ERROR: PHP-FPM socket not found at /var/run/php-fpm/fpm.sock"
+  exit 1
+fi
 
 echo "Starting apache foreground"
 exec httpd -DFOREGROUND
