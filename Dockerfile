@@ -111,11 +111,14 @@ RUN apk add --no-cache --update \
         /var/log/apache2 \
     && chmod 755 /docker-bin/*.sh 2>/dev/null || true \
     && mkdir -p /etc/apache2/sites-enabled /etc/php83/conf.d \
-    && install -m 0755 /dev/null /sbin/entrypoint.sh \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && apk del .build-deps \
     && php -m | grep -i opcache || echo "Warning: OPcache not detected in PHP modules"
 
+# Create entrypoint script placeholder
+RUN install -m 0755 /dev/null /sbin/entrypoint.sh
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 WORKDIR /var/www/html/
 
@@ -137,10 +140,16 @@ RUN mkdir -p storage bootstrap/cache && chmod -R ug+rwx storage bootstrap/cache 
     && npm config set cache /.npm/_cache --global \
     && chmod 755 /sbin/entrypoint.sh
 
-# Install dependencies
-RUN composer install --no-interaction --no-dev --prefer-dist \
-    && npm install --prefix /var/www/html/ \
-    && npm audit fix --prefix /var/www/html/ || true \
-    && npm run --prefix /var/www/html/ ${DEVENV}
+# Install PHP dependencies
+RUN cd /var/www/html && composer install --no-interaction --no-dev --prefer-dist
+
+# Install Node dependencies
+RUN npm install --prefix /var/www/html/
+
+# Audit and fix npm vulnerabilities
+RUN npm audit fix --prefix /var/www/html/ || true
+
+# Build frontend assets
+RUN npm run --prefix /var/www/html/ ${DEVENV}
 
 ENTRYPOINT ["sh", "/sbin/entrypoint.sh"]
