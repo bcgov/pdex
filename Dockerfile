@@ -45,6 +45,7 @@ RUN apk add --no-cache --update \
     php83-cli \
     php83-tokenizer \
     php83-simplexml \
+    php83-fileinfo \
     php83-xml \
     php83-xmlreader \
     php83-xmlwriter \
