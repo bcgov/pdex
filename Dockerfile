@@ -121,9 +121,6 @@ RUN apk add --no-cache --update \
     && apk del .build-deps \
     && php -m | grep -i opcache || echo "Warning: OPcache not detected in PHP modules"
 
-# Create entrypoint script placeholder
-RUN install -m 0755 /dev/null /sbin/entrypoint.sh
-
 # Install Composer
 RUN test -f /usr/bin/php || ln -s /usr/bin/php83 /usr/bin/php \
     && curl -sS https://getcomposer.org/installer | php83 -- --install-dir=/usr/local/bin --filename=composer \

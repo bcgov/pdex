@@ -55,4 +55,4 @@ echo "Starting PHP-FPM"
 php-fpm83 -D
 
 echo "Starting apache foreground"
-exec /usr/sbin/httpd -D FOREGROUND
+exec httpd -DFOREGROUND
