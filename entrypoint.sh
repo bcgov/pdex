@@ -112,4 +112,22 @@ for check_module in rewrite_module proxy_module proxy_fcgi_module; do
   fi
 done
 
+CONF=/etc/apache2/httpd.conf
+
+# Disable prefork
+sed -i "s|^[[:space:]]*LoadModule[[:space:]]\\+mpm_prefork_module|# LoadModule mpm_prefork_module|g" $CONF
+
+# Disable worker if present (avoid conflicts)
+sed -i "s|^[[:space:]]*LoadModule[[:space:]]\\+mpm_worker_module|# LoadModule mpm_worker_module|g" $CONF
+
+# Enable event (add it if missing)
+grep -q "^LoadModule mpm_event_module" $CONF || echo "LoadModule mpm_event_module modules/mod_mpm_event.so" >> $CONF
+
+httpd -t
+
 exec httpd -DFOREGROUND
+
+
+
+
+
