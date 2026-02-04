@@ -89,11 +89,32 @@ if ! grep -q '^LoadModule rewrite_module' /etc/apache2/httpd.conf 2>/dev/null; t
   sed -i 's/#LoadModule rewrite_module/LoadModule rewrite_module/' /etc/apache2/httpd.conf || true
 fi
 
-# Verify mod_rewrite is now enabled
+# Enable proxy modules if not already enabled
+for module in proxy_module proxy_fcgi_module; do
+  if ! grep -q "^LoadModule ${module}" /etc/apache2/httpd.conf 2>/dev/null; then
+    echo "Enabling ${module} in Apache config..."
+    sed -i "s/#LoadModule ${module}/LoadModule ${module}/" /etc/apache2/httpd.conf || true
+  fi
+done
+
+# Verify critical modules are loaded
+echo "Verifying Apache modules..."
 if httpd -M 2>&1 | grep -q rewrite_module; then
   echo "✓ mod_rewrite enabled"
 else
   echo "⚠ Warning: mod_rewrite may not be enabled"
+fi
+
+if httpd -M 2>&1 | grep -q proxy_module; then
+  echo "✓ mod_proxy enabled"
+else
+  echo "⚠ Warning: mod_proxy may not be enabled"
+fi
+
+if httpd -M 2>&1 | grep -q proxy_fcgi_module; then
+  echo "✓ mod_proxy_fcgi enabled"
+else
+  echo "⚠ Warning: mod_proxy_fcgi may not be enabled"
 fi
 
 exec httpd -DFOREGROUND
