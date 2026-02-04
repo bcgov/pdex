@@ -31,6 +31,9 @@ RUN apk add --no-cache --update \
     php83-soap \
     php83-intl \
     php83-opcache \
+    php83-phar \
+    php83-mbstring \
+    php83-openssl \
     php83-zip \
     php83-pdo \
     php83-pdo_pgsql \
