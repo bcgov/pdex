@@ -68,4 +68,19 @@ else
 fi
 
 echo "Starting apache foreground"
+echo "Ensuring Apache listens on container ports (8080/8443)"
+# Update ports.conf and httpd.conf to expected ports for readiness/liveness probes
+if [ -f /etc/apache2/ports.conf ]; then
+  sed -i 's/^Listen[[:space:]]\+80$/Listen 8080/' /etc/apache2/ports.conf || true
+  sed -i 's/^Listen[[:space:]]\+443$/Listen 8443/' /etc/apache2/ports.conf || true
+fi
+if [ -f /etc/apache2/httpd.conf ]; then
+  sed -i 's/^Listen[[:space:]]\+80$/Listen 8080/' /etc/apache2/httpd.conf || true
+  sed -i 's/^Listen[[:space:]]\+443$/Listen 8443/' /etc/apache2/httpd.conf || true
+fi
+
+# Ensure a global ServerName to suppress warning
+mkdir -p /etc/apache2/conf.d
+echo "ServerName localhost" > /etc/apache2/conf.d/servername.conf
+
 exec httpd -DFOREGROUND
