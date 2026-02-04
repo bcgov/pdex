@@ -51,6 +51,10 @@ php artisan queue:clear --queue=midnight --force
 echo "Generate API documentation"
 php artisan l5-swagger:generate || echo "Warning: API documentation generation failed, continuing..."
 
+echo "Creating PHP-FPM runtime directory"
+mkdir -p /var/run/php-fpm
+chmod 755 /var/run/php-fpm
+
 echo "Starting PHP-FPM"
 php-fpm83 -D
 
