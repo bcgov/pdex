@@ -118,7 +118,9 @@ RUN apk add --no-cache --update \
 RUN install -m 0755 /dev/null /sbin/entrypoint.sh
 
 # Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN test -f /usr/bin/php || ln -s /usr/bin/php83 /usr/bin/php \
+    && curl -sS https://getcomposer.org/installer | php83 -- --install-dir=/usr/local/bin --filename=composer \
+    && chmod +x /usr/local/bin/composer
 
 WORKDIR /var/www/html/
 
