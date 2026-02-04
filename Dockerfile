@@ -6,7 +6,7 @@ WORKDIR /var/www/html
 
 # ---- Packages (Apache + proxy_fcgi + PHP-FPM + common PHP extensions) ----
 RUN apk add --no-cache \
-    apache2 apache2-proxy apache2-ssl \
+    apache2 apache2-proxy apache2-ssl apache2-mpm-event \
     php83 php83-fpm php83-opcache \
     php83-pdo php83-pdo_pgsql \
     php83-mbstring php83-xml php83-json php83-curl php83-ctype php83-tokenizer php83-phar php83-dom php83-session \
