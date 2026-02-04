@@ -25,7 +25,6 @@ EXPOSE 8080 8443 2525
 
 RUN apk add --no-cache --update \
     apache2 \
-    apache2-mod-proxy-fcgi \
     php83 \
     php83-fpm \
     php83-bcmath \
@@ -87,23 +86,26 @@ RUN apk add --no-cache --update \
     && sed -i -e 's/^ServerTokens OS$/ServerTokens Prod/g' \
         -e 's/^ServerSignature On$/ServerSignature Off/g' \
         /etc/apache2/conf.d/security.conf \
-    && sed -i '/#LoadModule cgid_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule proxy_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule proxy_fcgi_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule rewrite_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule remoteip_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule headers_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule authz_core_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule mpm_event_module/s/^#//' /etc/apache2/httpd.conf \
     && sed -i '/#LoadModule auth_basic_module/s/^#//' /etc/apache2/httpd.conf \
     && sed -i '/#LoadModule authn_file_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule authz_core_module/s/^#//' /etc/apache2/httpd.conf \
     && sed -i '/#LoadModule authz_user_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule autoindex_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule deflate_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule filter_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/#LoadModule setenvif_module/s/^#//' /etc/apache2/httpd.conf \
-    && sed -i '/LoadModule mpm_prefork/s/^/#/' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule autoindex_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule cgid_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule deflate_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule dir_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule filter_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule headers_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule mpm_event_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule mpm_prefork/s/^/#/' /etc/apache2/httpd.conf \
+    && sed -i '/#LoadModule mime_module/s/^/#/' /etc/apache2/httpd.conf \
     && sed -i '/#LoadModule lbmethod_byrequests_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '#/LoadModule proxy_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '#/LoadModule proxy_balancer_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule proxy_fcgi_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule rewrite_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule remoteip_module/s/^#//' /etc/apache2/httpd.conf \
+    && sed -i '/LoadModule setenvif_module/s/^#//' /etc/apache2/httpd.conf \
     && mkdir -p /var/lock/apache2 /var/run/apache2 /var/run/php-fpm \
     && chgrp -R 0 /etc/apache2 \
         /run /var/lib/apache2 \
