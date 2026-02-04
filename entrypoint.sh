@@ -112,9 +112,17 @@ for check_module in rewrite_module proxy_module proxy_fcgi_module; do
   fi
 done
 
+echo "=== find module dir ==="
+find /usr -maxdepth 4 -type f -name "mod_mpm_*.so" 2>/dev/null || true
+find /usr -maxdepth 5 -type f -name "mod_proxy*.so" 2>/dev/null || true
+echo
+echo "=== any LoadModule lines currently ==="
+grep -nE "LoadModule (mpm_|proxy_|rewrite_)" /etc/apache2/httpd.conf || true
+
 CONF=/etc/apache2/httpd.conf
 
 # Disable prefork
+echo "Disabled mpm_prefork_module"
 sed -i "s|^[[:space:]]*LoadModule[[:space:]]\\+mpm_prefork_module|# LoadModule mpm_prefork_module|g" $CONF
 
 # Disable worker if present (avoid conflicts)
@@ -122,6 +130,12 @@ sed -i "s|^[[:space:]]*LoadModule[[:space:]]\\+mpm_worker_module|# LoadModule mp
 
 # Enable event (add it if missing)
 grep -q "^LoadModule mpm_event_module" $CONF || echo "LoadModule mpm_event_module modules/mod_mpm_event.so" >> $CONF
+
+echo "List all modules:"
+grep -E "LoadModule (mpm_|proxy_|rewrite_)" /etc/apache2/httpd.conf || true
+echo "End list of modules"
+
+
 
 httpd -t
 
