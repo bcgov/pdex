@@ -6,7 +6,7 @@ WORKDIR /var/www/html
 
 # ---- Packages (Apache + proxy_fcgi + PHP-FPM + common PHP extensions) ----
 RUN apk add --no-cache \
-    apache2 apache2-proxy apache2-ssl apache2-mpm-event \
+    apache2 apache2-proxy apache2-ssl \
     php83 php83-fpm php83-opcache \
     php83-pdo php83-pdo_pgsql \
     php83-mbstring php83-xml php83-json php83-curl php83-ctype php83-tokenizer php83-phar php83-dom php83-session \
@@ -37,6 +37,10 @@ RUN mkdir -p /var/run/php-fpm \
 RUN mkdir -p /etc/apache2/conf.d \
   && echo "ServerName localhost" > /etc/apache2/conf.d/servername.conf
 
+# Make "modules/..." paths work (ServerRoot=/etc/apache2 => /etc/apache2/modules/...)
+RUN rm -rf /etc/apache2/modules \
+ && ln -s /usr/lib/apache2 /etc/apache2/modules
+
 # ---- Apache: PHP handler via proxy_fcgi + socket ----
 RUN cat > /etc/apache2/conf.d/php-fpm.conf <<'EOF'
 DirectoryIndex index.php index.html
@@ -59,32 +63,24 @@ EOF
 RUN set -eux; \
   CONF=/etc/apache2/httpd.conf; \
   \
-  # Ensure Apache uses /etc/apache2 as ServerRoot (more standard)
+  # Use /etc/apache2 as ServerRoot
   sed -i 's|^ServerRoot .*|ServerRoot /etc/apache2|' "$CONF" || true; \
   \
-  # Convert ONLY LoadModule lines that use "modules/mod_*.so" to absolute paths
-  sed -i -E 's|^([[:space:]]*LoadModule[[:space:]]+[^[:space:]]+[[:space:]]+)modules/(mod_[^[:space:]]+\.so)|\1/usr/lib/apache2/\2|g' "$CONF"; \
+  # Ensure modules dir exists as symlink to the real module location
+  rm -rf /etc/apache2/modules; \
+  ln -s /usr/lib/apache2 /etc/apache2/modules; \
   \
-  # Disable prefork/worker, enable event
+  # Disable prefork/worker
   sed -i -E 's|^[[:space:]]*LoadModule[[:space:]]+mpm_prefork_module.*|# &|g' "$CONF"; \
   sed -i -E 's|^[[:space:]]*LoadModule[[:space:]]+mpm_worker_module.*|# &|g' "$CONF"; \
   \
-  # If an event line exists but is commented, uncomment it
+  # Enable event (uncomment if present)
   sed -i -E 's|^[[:space:]]*#[[:space:]]*LoadModule[[:space:]]+mpm_event_module|LoadModule mpm_event_module|g' "$CONF"; \
   \
-  # If no event module line exists at all, add it (absolute path)
+  # If still missing, add it using modules/ path (now valid due to symlink)
   grep -qE '^[[:space:]]*LoadModule[[:space:]]+mpm_event_module' "$CONF" || \
-    echo 'LoadModule mpm_event_module /usr/lib/apache2/mod_mpm_event.so' >> "$CONF"; \
+    echo 'LoadModule mpm_event_module modules/mod_mpm_event.so' >> "$CONF"; \
   \
-  # Ensure required modules are enabled (absolute paths; harmless if already enabled)
-  grep -qE '^[[:space:]]*LoadModule[[:space:]]+rewrite_module' "$CONF" || \
-    echo 'LoadModule rewrite_module /usr/lib/apache2/mod_rewrite.so' >> "$CONF"; \
-  grep -qE '^[[:space:]]*LoadModule[[:space:]]+proxy_module' "$CONF" || \
-    echo 'LoadModule proxy_module /usr/lib/apache2/mod_proxy.so' >> "$CONF"; \
-  grep -qE '^[[:space:]]*LoadModule[[:space:]]+proxy_fcgi_module' "$CONF" || \
-    echo 'LoadModule proxy_fcgi_module /usr/lib/apache2/mod_proxy_fcgi.so' >> "$CONF"; \
-  \
-  # Validate config at build time
   httpd -t
 
 # ---- Permissions (Laravel) ----
