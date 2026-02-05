@@ -43,7 +43,7 @@ RUN rm -rf /etc/apache2/modules \
 
 # ---- Apache: PHP handler via proxy_fcgi + socket ----
 # Copy vhost config
-COPY aws/apache/etc/apache2/sites-available/000-default.conf /etc/apache2/sites-enabled/000-default.conf
+COPY aws/apache/etc/apache2/sites-available/000-default.conf /etc/apache2/conf.d/php-fpm.conf
 
 # ---- Apache: switch to mpm_event + fix module paths ----
 RUN set -eux; \
