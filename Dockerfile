@@ -66,6 +66,8 @@ RUN set -eux; \
   # Use /etc/apache2 as ServerRoot
   sed -i 's|^ServerRoot .*|ServerRoot /etc/apache2|' "$CONF" || true; \
   \
+  # Apache expects logs/ under ServerRoot
+  mkdir -p /etc/apache2/logs; \
   # Ensure modules dir exists as symlink to the real module location
   rm -rf /etc/apache2/modules; \
   ln -s /usr/lib/apache2 /etc/apache2/modules; \
