@@ -89,7 +89,7 @@ RUN sed -i 's/^Listen 80$/Listen 8080/' /etc/apache2/httpd.conf \
  && sed -i 's/^Listen 443$/Listen 8443/' /etc/apache2/conf.d/ssl.conf
 
 # ---- Permissions (Laravel) ----
-RUN chown -R apache:apache /var/www/html \
+RUN mkdir -p /var/www/html/storage && mkdir -p /var/www/html/bootstrap/cache && chown -R apache:apache /var/www/html \
   && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
 
 # ---- Entrypoint (your existing script) ----
