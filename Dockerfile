@@ -80,6 +80,9 @@ RUN set -eux; \
   # Enable event (uncomment if present)
   sed -i -E 's|^[[:space:]]*#[[:space:]]*LoadModule[[:space:]]+mpm_event_module|LoadModule mpm_event_module|g' "$CONF"; \
   \
+  # Enable rewrite module (uncomment if present)
+  sed -i -E 's|^[[:space:]]*#[[:space:]]*LoadModule[[:space:]]+rewrite_module|LoadModule rewrite_module|g' "$CONF"; \
+  \
   # If still missing, add it using modules/ path (now valid due to symlink)
   grep -qE '^[[:space:]]*LoadModule[[:space:]]+mpm_event_module' "$CONF" || \
     echo 'LoadModule mpm_event_module modules/mod_mpm_event.so' >> "$CONF"; \
