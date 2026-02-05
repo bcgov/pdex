@@ -26,13 +26,12 @@ RUN test -f /usr/bin/php || ln -s /usr/bin/php83 /usr/bin/php \
 COPY . /var/www/html
 
 # ---- PHP-FPM config (socket + permissions) ----
-RUN mkdir -p /var/run/php-fpm \
-  && sed -i 's|^;*listen = .*|listen = /var/run/php-fpm/fpm.sock|' /etc/php83/php-fpm.d/www.conf \
-  && sed -i 's|^;*listen.owner = .*|listen.owner = apache|' /etc/php83/php-fpm.d/www.conf \
-  && sed -i 's|^;*listen.group = .*|listen.group = apache|' /etc/php83/php-fpm.d/www.conf \
-  && sed -i 's|^;*listen.mode = .*|listen.mode = 0660|' /etc/php83/php-fpm.d/www.conf \
-  && sed -i 's|^user = .*|user = apache|' /etc/php83/php-fpm.d/www.conf \
-  && sed -i 's|^group = .*|group = apache|' /etc/php83/php-fpm.d/www.conf
+# Copy optimized config and disable default
+RUN mv /etc/php83/php-fpm.d/www.conf /etc/php83/php-fpm.d/www.conf.bak \
+  && mkdir -p /var/run/php-fpm
+
+COPY aws/apache/etc/php83/php-fpm.d/zzz-pdex.conf /etc/php83/php-fpm.d/zzz-pdex.conf
+COPY aws/apache/etc/php83/conf.d/opcache.ini /etc/php83/conf.d/opcache.ini
 
 # ---- Apache: ports + ServerName ----
 RUN mkdir -p /etc/apache2/conf.d \
@@ -43,22 +42,8 @@ RUN rm -rf /etc/apache2/modules \
  && ln -s /usr/lib/apache2 /etc/apache2/modules
 
 # ---- Apache: PHP handler via proxy_fcgi + socket ----
-RUN cat > /etc/apache2/conf.d/php-fpm.conf <<'EOF'
-DirectoryIndex index.php index.html
-
-# Laravel typical docroot is /var/www/html/public
-# If you already set DocumentRoot elsewhere, keep yours and remove the next line.
-DocumentRoot "/var/www/html/public"
-
-<Directory "/var/www/html/public">
-    AllowOverride All
-    Require all granted
-</Directory>
-
-<FilesMatch \.php$>
-    SetHandler "proxy:unix:/var/run/php-fpm/fpm.sock|fcgi://localhost/"
-</FilesMatch>
-EOF
+# Copy vhost config
+COPY aws/apache/etc/apache2/sites-available/000-default.conf /etc/apache2/sites-enabled/000-default.conf
 
 # ---- Apache: switch to mpm_event + fix module paths ----
 RUN set -eux; \
