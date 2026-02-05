@@ -62,7 +62,11 @@ chown -R apache:apache /var/www/html || true
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
 
 echo "Starting PHP-FPM..."
-php-fpm83 --daemonize
+php-fpm83 -D
+
+# ensure socket dir exists (before fpm starts is best)
+mkdir -p /var/run/php-fpm
+chown -R apache:apache /var/run/php-fpm
 
 # Small wait to ensure socket exists
 sleep 1
@@ -71,4 +75,4 @@ echo "Checking Apache config..."
 httpd -t
 
 echo "Starting Apache..."
-exec httpd -DFOREGROUND
+exec httpd -DFOREGROUND -f /etc/apache2/httpd.conf
