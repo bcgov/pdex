@@ -61,12 +61,14 @@ php artisan l5-swagger:generate || echo "Warning: API documentation generation f
 chown -R apache:apache /var/www/html || true
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
 
-echo "Starting PHP-FPM..."
-php-fpm83 -D
 
 # ensure socket dir exists (before fpm starts is best)
 mkdir -p /var/run/php-fpm
 chown -R apache:apache /var/run/php-fpm
+
+echo "Starting PHP-FPM..."
+php-fpm83 -D
+
 
 # Small wait to ensure socket exists
 sleep 1
