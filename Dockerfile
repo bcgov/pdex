@@ -84,6 +84,9 @@ RUN set -eux; \
     echo 'LoadModule mpm_event_module modules/mod_mpm_event.so' >> "$CONF"; \
   \
   httpd -t
+# Apache must listen on the container ports used by k8s probes/service
+RUN sed -i 's/^Listen 80$/Listen 8080/' /etc/apache2/httpd.conf \
+ && sed -i 's/^Listen 443$/Listen 8443/' /etc/apache2/conf.d/ssl.conf
 
 # ---- Permissions (Laravel) ----
 RUN chown -R apache:apache /var/www/html \
