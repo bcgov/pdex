@@ -12,6 +12,7 @@ RUN apk add --no-cache \
     php83-mbstring php83-xml php83-json php83-curl php83-ctype php83-tokenizer php83-phar php83-dom php83-session \
     php83-fileinfo php83-simplexml php83-xmlwriter php83-openssl \
     curl bash ca-certificates tzdata \
+    nodejs npm \
   && update-ca-certificates
 
 # ---- Composer ----
