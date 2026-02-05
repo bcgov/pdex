@@ -84,8 +84,10 @@ RUN mkdir -p /var/www/html/storage/framework/views \
              /var/www/html/storage/framework/sessions \
              /var/www/html/storage/logs \
              /var/www/html/bootstrap/cache \
+             /var/log/php \
  && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache \
- && chown -R apache:apache /var/www/html/storage /var/www/html/bootstrap/cache || true
+ && chmod 755 /var/log/php \
+ && chown -R apache:apache /var/www/html/storage /var/www/html/bootstrap/cache /var/log/php || true
 
 
 # ---- Entrypoint (your existing script) ----
