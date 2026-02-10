@@ -32,11 +32,9 @@
                             <li><hr class="dropdown-divider"></li>
                             <li class="dropdown-item">
                                 <div class="d-grid">
-                                    <form @submit.prevent="submitLogout" style="display: contents;">
-                                        <button type="submit" class="text-start text-muted text-decoration-none btn btn-sm">
-                                            Log Out
-                                        </button>
-                                    </form>
+                                    <a class="text-start text-muted text-decoration-none" :href="$page.props.logoutUrl">
+                                        Log Out
+                                    </a>
                                 </div>
                             </li>
                         </ul>
@@ -49,7 +47,7 @@
 
 <script>
 import NavLink from '@/Components/NavLink.vue'
-import { Link, router } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 
 export default {
     name: 'MinistryHeader',
@@ -76,14 +74,9 @@ export default {
             return false
         }
 
-        const submitLogout = () => {
-            router.post('/ministry/logout')
-        };
-
         return {
             navigationLinks,
-            isActiveRoute,
-            submitLogout
+            isActiveRoute
         }
     }
 }

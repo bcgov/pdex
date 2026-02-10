@@ -31,7 +31,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="adminUserDropdown" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Hello: {{ $page.props.auth.user.name || $page.props.auth.user.user_id }}
+                            {{ $page.props.auth.user.name || $page.props.auth.user.user_id }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminUserDropdown">
                             <li class="dropdown-item px-4">
@@ -40,11 +40,9 @@
                             <li><hr class="dropdown-divider"></li>
                             <li class="dropdown-item">
                                 <div class="d-grid">
-                                    <form @submit.prevent="submitLogout" style="display: contents;">
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm">
-                                            <i class="bi bi-box-arrow-right me-2"></i>Log Out
-                                        </button>
-                                    </form>
+                                    <a class="btn btn-outline-secondary btn-sm" :href="$page.props.logoutUrl">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Log Out
+                                    </a>
                                 </div>
                             </li>
                         </ul>
@@ -57,7 +55,7 @@
 
 <script>
 import NavLink from '@/Components/NavLink.vue'
-import { Link, router } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 
 export default {
     name: 'AdminHeader',
@@ -81,14 +79,9 @@ export default {
             return false
         }
 
-        const submitLogout = () => {
-            router.post('/admin/logout')
-        };
-
         return {
             navigationLinks,
-            isActiveRoute,
-            submitLogout
+            isActiveRoute
         }
     }
 }

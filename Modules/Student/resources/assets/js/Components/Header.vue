@@ -32,11 +32,9 @@
                             <li><hr class="dropdown-divider"></li>
                             <li class="dropdown-item">
                                 <div class="d-grid">
-                                    <form @submit.prevent="submitLogout" style="display: contents;">
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
-                                            <i class="bi bi-box-arrow-right me-2"></i>Log Out
-                                        </button>
-                                    </form>
+                                    <a class="text-start text-muted text-decoration-none" :href="$page.props.logoutUrl">
+                                        Log Out
+                                    </a>
                                 </div>
                             </li>
                         </ul>
@@ -49,7 +47,7 @@
 
 <script>
 import NavLink from '@/Components/NavLink.vue'
-import { Link, router } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 
 export default {
     name: 'StudentHeader',
@@ -74,10 +72,7 @@ export default {
 
         return {
             navigationLinks,
-            isActiveRoute,
-            submitLogout() {
-                router.post('/student/logout')
-            }
+            isActiveRoute
         }
     }
 }
