@@ -40,9 +40,14 @@
                             <li><hr class="dropdown-divider"></li>
                             <li class="dropdown-item">
                                 <div class="d-grid">
-                                    <a class="btn btn-outline-secondary btn-sm" :href="$page.props.logoutUrl">
+                                    <Link 
+                                        href="/admin/logout" 
+                                        method="post" 
+                                        as="button"
+                                        class="btn btn-outline-secondary btn-sm"
+                                    >
                                         <i class="bi bi-box-arrow-right me-2"></i>Log Out
-                                    </a>
+                                    </Link>
                                 </div>
                             </li>
                         </ul>

@@ -1388,7 +1388,7 @@ export default {
         return;
       }
       
-      securityForm.put(`/admin/applications/${props.application.id}/security-approval`, {
+      securityForm.patch(`/admin/applications/${props.application.id}/security-approval`, {
         onSuccess: () => {
           // Handle success
         },
@@ -1405,7 +1405,7 @@ export default {
         return;
       }
       
-      privacyForm.put(`/admin/applications/${props.application.id}/privacy-approval`, {
+      privacyForm.patch(`/admin/applications/${props.application.id}/privacy-approval`, {
         onSuccess: () => {
           // Handle success
         },

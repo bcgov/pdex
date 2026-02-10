@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Admin\Http\Controllers\AdminController;
 use Modules\Admin\Http\Controllers\AdminUserController;
 use Modules\Admin\Http\Controllers\ApplicationController;
+use Modules\Admin\Http\Controllers\AdminLogoutController;
 
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\InstitutionSiteController;
@@ -14,6 +15,8 @@ Route::prefix('admin')->group(function () {
         'middleware' => ['auth', 'admin'],
         'as' => 'admin.',
     ], function () {
+        // Logout route
+        Route::post('logout', [AdminLogoutController::class, 'logout'])->name('logout');
         Route::get('/', [AdminController::class, 'index'])->name('dashboard');
         // Route::get('intake', [AdminController::class, 'intake'])->name('intake.index');
         
