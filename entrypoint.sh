@@ -42,14 +42,19 @@ chmod -R 775 \
 
 echo "ENV_ARG: ${ENV_ARG}"
 
+
+echo "Clear view cache"
+php artisan view:clear
+
+
+echo "Clear cache"
+php artisan cache:clear
+
 echo "Install composer"
 composer dump-autoload
 
 echo "Run migration"
 php artisan migrate --force
-
-echo "Clear cache"
-php artisan cache:clear
 
 echo "Clear our midnight queue"
 php artisan queue:clear --queue=midnight --force

@@ -31,11 +31,11 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="adminUserDropdown" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ $page.props.auth.user.name || $page.props.auth.user.user_id }}
+                            Hello: {{ $page.props.auth.user.name || $page.props.auth.user.user_id }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminUserDropdown">
                             <li class="dropdown-item px-4">
-                                > <div class="fw-medium small text-muted">{{ $page.props.auth.user.email }}</div>
+                                <div class="fw-medium small text-muted">{{ $page.props.auth.user.email }}</div>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li class="dropdown-item">
