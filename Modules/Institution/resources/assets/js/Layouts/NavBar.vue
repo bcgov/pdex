@@ -31,7 +31,7 @@ export default {
             return user.roles.some(role => role.name === 'Institution_User');
         },
         logoutUrl() {
-            return this.$page.props.logoutUrl;
+            return '/institution/logout';
         }
     }
 };

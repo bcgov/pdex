@@ -2,12 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Ministry\Http\Controllers\MinistryController;
+use Modules\Ministry\Http\Controllers\MinistryLogoutController;
 
 Route::prefix('ministry')->group(function () {
     Route::group([
         'middleware' => ['auth', 'ministry_active'],
         'as' => 'ministry.',
     ], function () {
+        // Logout route
+        Route::post('logout', [MinistryLogoutController::class, 'logout'])->name('logout');
         Route::get('/', [MinistryController::class, 'index'])->name('dashboard');
         Route::get('reports', [MinistryController::class, 'reports'])->name('reports.index');
         

@@ -32,7 +32,7 @@ export default {
             return user.roles.some(role => adminRoles.includes(role.name));
         },
         logoutUrl() {
-            return this.$page.props.logoutUrl;
+            return '/admin/logout';
         }
     }
 };

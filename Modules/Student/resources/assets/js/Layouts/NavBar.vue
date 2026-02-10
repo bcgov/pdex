@@ -31,7 +31,7 @@ export default {
             return user.roles.some(role => role.name === 'Student');
         },
         logoutUrl() {
-            return this.$page.props.logoutUrl;
+            return '/student/logout';
         }
     }
 };
