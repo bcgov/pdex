@@ -49,7 +49,7 @@
 
 <script>
 import NavLink from '@/Components/NavLink.vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 
 export default {
     name: 'StudentHeader',
@@ -76,11 +76,7 @@ export default {
             navigationLinks,
             isActiveRoute,
             submitLogout() {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/student/logout';
-                document.body.appendChild(form);
-                form.submit();
+                router.post('/student/logout')
             }
         }
     }

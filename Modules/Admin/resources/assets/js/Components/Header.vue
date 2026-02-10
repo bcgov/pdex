@@ -57,7 +57,7 @@
 
 <script>
 import NavLink from '@/Components/NavLink.vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 
 export default {
     name: 'AdminHeader',
@@ -82,11 +82,7 @@ export default {
         }
 
         const submitLogout = () => {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/admin/logout';
-            document.body.appendChild(form);
-            form.submit();
+            router.post('/admin/logout')
         };
 
         return {

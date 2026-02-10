@@ -49,7 +49,7 @@
 
 <script>
 import NavLink from '@/Components/NavLink.vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
 export default {
@@ -97,11 +97,7 @@ export default {
         }
 
         const submitLogout = () => {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/institution/logout';
-            document.body.appendChild(form);
-            form.submit();
+            router.post('/institution/logout')
         };
 
         return {

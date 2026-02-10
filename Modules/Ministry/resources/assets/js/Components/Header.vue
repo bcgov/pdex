@@ -49,7 +49,7 @@
 
 <script>
 import NavLink from '@/Components/NavLink.vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 
 export default {
     name: 'MinistryHeader',
@@ -77,11 +77,7 @@ export default {
         }
 
         const submitLogout = () => {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/ministry/logout';
-            document.body.appendChild(form);
-            form.submit();
+            router.post('/ministry/logout')
         };
 
         return {
