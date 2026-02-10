@@ -32,14 +32,9 @@
                             <li><hr class="dropdown-divider"></li>
                             <li class="dropdown-item">
                                 <div class="d-grid">
-                                    <Link 
-                                        href="/institution/logout" 
-                                        method="post" 
-                                        as="button"
-                                        class="text-start text-muted text-decoration-none"
-                                    >
+                                    <a class="text-start text-muted text-decoration-none" :href="$page.props.logoutUrl">
                                         Log Out
-                                    </Link>
+                                    </a>
                                 </div>
                             </li>
                         </ul>
