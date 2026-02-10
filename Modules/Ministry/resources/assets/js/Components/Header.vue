@@ -32,14 +32,11 @@
                             <li><hr class="dropdown-divider"></li>
                             <li class="dropdown-item">
                                 <div class="d-grid">
-                                    <Link 
-                                        href="/ministry/logout" 
-                                        method="post" 
-                                        as="button"
-                                        class="text-start text-muted text-decoration-none"
-                                    >
-                                        Log Out
-                                    </Link>
+                                    <form @submit.prevent="submitLogout" style="display: contents;">
+                                        <button type="submit" class="text-start text-muted text-decoration-none btn btn-sm">
+                                            Log Out
+                                        </button>
+                                    </form>
                                 </div>
                             </li>
                         </ul>
@@ -79,9 +76,18 @@ export default {
             return false
         }
 
+        const submitLogout = () => {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/ministry/logout';
+            document.body.appendChild(form);
+            form.submit();
+        };
+
         return {
             navigationLinks,
-            isActiveRoute
+            isActiveRoute,
+            submitLogout
         }
     }
 }

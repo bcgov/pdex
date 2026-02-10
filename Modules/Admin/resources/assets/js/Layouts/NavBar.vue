@@ -19,9 +19,18 @@ export default {
         const showingNavigationDropdown = ref(false);
         const showUserDropdown = ref(false);
         
+        const submitLogout = () => {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/admin/logout';
+            document.body.appendChild(form);
+            form.submit();
+        };
+        
         return {
             showingNavigationDropdown,
-            showUserDropdown
+            showUserDropdown,
+            submitLogout
         };
     },
     computed: {
@@ -158,14 +167,12 @@ export default {
         </nav>
 
         <!-- Direct Logout Button -->
-        <Link 
-            :href="logoutUrl" 
-            method="post" 
-            as="button"
+        <button
+            @click="submitLogout"
             class="bc-nav-link text-sm"
         >
             Logout
-        </Link>
+        </button>
 
         <!-- User Menu -->
         <div class="bc-user-menu">

@@ -40,14 +40,11 @@
                             <li><hr class="dropdown-divider"></li>
                             <li class="dropdown-item">
                                 <div class="d-grid">
-                                    <Link 
-                                        href="/admin/logout" 
-                                        method="post" 
-                                        as="button"
-                                        class="btn btn-outline-secondary btn-sm"
-                                    >
-                                        <i class="bi bi-box-arrow-right me-2"></i>Log Out
-                                    </Link>
+                                    <form @submit.prevent="submitLogout" style="display: contents;">
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Log Out
+                                        </button>
+                                    </form>
                                 </div>
                             </li>
                         </ul>
@@ -84,9 +81,18 @@ export default {
             return false
         }
 
+        const submitLogout = () => {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/admin/logout';
+            document.body.appendChild(form);
+            form.submit();
+        };
+
         return {
             navigationLinks,
-            isActiveRoute
+            isActiveRoute,
+            submitLogout
         }
     }
 }
