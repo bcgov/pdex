@@ -264,6 +264,11 @@ class AuthController extends Controller
             $user = $this->createNewUser($providerUser, $idpType, $token);
         }
 
+        // if ($idpType === 'bcsc') {
+        //     $this->createStudentProfile($user, $providerUser);
+        // }
+
+
         // Update user information and tokens for existing users
         else {
             \Log::info('Updating existing user', [
@@ -538,6 +543,15 @@ class AuthController extends Controller
      */
     private function createStudentProfile(User $user, array $providerUser): void
     {
+        // Check if profile already exists to avoid duplicates
+        $existingProfile = \App\Models\Individual::where('user_guid', $user->guid)->first();
+        if ($existingProfile) {
+            Log::info('Student profile already exists for user, skipping creation', [
+                'user_guid' => $user->guid,
+            ]);
+            return;
+        }
+
         try {
             $individual = \App\Models\Individual::create([
                 'user_guid' => $user->guid,
