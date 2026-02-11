@@ -264,9 +264,9 @@ class AuthController extends Controller
             $user = $this->createNewUser($providerUser, $idpType, $token);
         }
 
-        // if ($idpType === 'bcsc') {
-        //     $this->createStudentProfile($user, $providerUser);
-        // }
+        if ($idpType === 'bcsc') {
+            $this->createStudentProfile($user, $providerUser);
+        }
 
 
         // Update user information and tokens for existing users
@@ -369,9 +369,9 @@ class AuthController extends Controller
         $this->assignDefaultRole($user, $idpType);
 
         // Create student profile for BCSC users
-        if ($idpType === 'bcsc') {
-            $this->createStudentProfile($user, $providerUser);
-        }
+        // if ($idpType === 'bcsc') {
+        //     $this->createStudentProfile($user, $providerUser);
+        // }
 
         Log::info('New user created', [
             'user_id' => $user->id,
