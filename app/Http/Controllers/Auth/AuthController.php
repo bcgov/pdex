@@ -255,12 +255,22 @@ class AuthController extends Controller
 
 
         // If user doesn't exist, create them
-        if (!$user && $this->shouldCreateUser($providerUser)) {
+        // if (!$user && $this->shouldCreateUser($providerUser)) {
+        if (!$user) {
+            \Log::info('Creating new user', [
+                'email' => $providerUser['email'] ?? 'unknown',
+                'idp_type' => $idpType,
+            ]);
             $user = $this->createNewUser($providerUser, $idpType, $token);
         }
 
         // Update user information and tokens for existing users
-        if ($user) {
+        else {
+            \Log::info('Updating existing user', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'idp_type' => $idpType,
+            ]);
             if (isset($providerUser['name'])) {
                 $user->name = $providerUser['name'];
             }
@@ -371,11 +381,11 @@ class AuthController extends Controller
     /**
      * Check if we should create a new user.
      */
-    private function shouldCreateUser(array $providerUser): bool
-    {
-        // Add validation logic here
-        return isset($providerUser['email']) && !empty($providerUser['email']);
-    }
+    // private function shouldCreateUser(array $providerUser): bool
+    // {
+    //     // Add validation logic here
+    //     return isset($providerUser['email']) && !empty($providerUser['email']);
+    // }
 
     /**
      * Assign default role based on identity provider.
