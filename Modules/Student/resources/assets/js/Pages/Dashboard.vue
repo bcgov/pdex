@@ -478,7 +478,7 @@ const redirectToApp = (appId) => {
     showModal.value = true
   } else {
     // Direct redirect for apps without permissions
-    window.open(`/gateway/${appId}`, '_blank')
+    window.open(`/gateway/${app.guid}`, '_blank')
   }
 }
 
@@ -830,11 +830,11 @@ const launchApplication = async () => {
       // console.log('selectedApp:', selectedApp)
       
       // Check for launch URL in flash data or redirect directly to gateway
-      const launchUrl = page.props.flash?.launch_url || `/gateway/${selectedApp.value.id}`
+      const launchUrl = page.props.flash?.launch_url || `/gateway/${selectedApp.value.guid}`
       
       // Redirect to gateway route in same tab to handle the token
       // window.location.href = launchUrl
-      window.open(`/gateway/${selectedApp.value.id}`, '_blank')
+      window.open(`/gateway/${selectedApp.value.guid}`, '_blank')
       closeModal()
 
     },
