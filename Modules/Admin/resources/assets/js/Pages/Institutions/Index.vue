@@ -249,7 +249,7 @@ export default {
     },
     methods: {
         applyFilters() {
-            this.$inertia.get(route('admin.institutions.index'), this.filters, {
+            this.$inertia.get('/admin/institutions', this.filters, {
                 preserveState: true,
                 replace: true
             })
@@ -259,7 +259,7 @@ export default {
         },
         confirmDelete(institution) {
             if (confirm(`Are you sure you want to delete "${institution.legal_operating_name}"?`)) {
-                this.$inertia.delete(route('admin.institutions.destroy', institution.id), {
+                this.$inertia.delete(`/admin/institutions/${institution.id}`, {
                     onSuccess: () => {
                         this.$inertia.reload({ only: ['institutions', 'stats'] })
                     }

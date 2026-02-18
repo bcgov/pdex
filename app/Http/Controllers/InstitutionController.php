@@ -35,7 +35,7 @@ class InstitutionController extends Controller
         $search = $request->get('search');
         $type = $request->get('type');
         $activeStatus = $request->get('active_status');
-        $perPage = $request->get('per_page', 10);
+        $perPage = $request->get('per_page', 50);
 
         // Apply filters
         if ($search) {
