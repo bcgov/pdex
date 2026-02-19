@@ -294,3 +294,51 @@ resource "aws_eks_pod_identity_association" "cluster_autoscaler" {
   service_account = "cluster-autoscaler"
   role_arn        = aws_iam_role.cluster_auto_scaler_role.arn
 }
+
+
+# Security group to attach to Pod ENIs:
+# Option A: reuse the node SG (simple)
+# Option B: create a dedicated pod SG (better control)
+# For now, reuse node SG:
+locals {
+  pod_eni_security_groups = [data.aws_security_group.eks_node_sg.id]
+}
+
+# ENIConfig per AZ (names MUST match AZ when using topology.kubernetes.io/zone)
+resource "kubernetes_manifest" "eni_config_a" {
+  depends_on = [
+    aws_eks_cluster.pdex-cluster,
+    aws_eks_addon.vpc-cni-addon,
+    aws_eks_addon.coredns-addon,
+    helm_release.metrics_server,
+    null_resource.cluster_ready
+  ]
+  manifest = {
+    apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
+    kind       = "ENIConfig"
+    metadata   = { name = "ca-central-1a" }
+    spec = {
+      subnet         = data.aws_subnets.pod_subnets.ids[0]
+      securityGroups = local.pod_eni_security_groups
+    }
+  }
+}
+
+resource "kubernetes_manifest" "eni_config_b" {
+  depends_on = [
+    aws_eks_cluster.pdex-cluster,
+    aws_eks_addon.vpc-cni-addon,
+    aws_eks_addon.coredns-addon,
+    helm_release.metrics_server,
+    null_resource.cluster_ready
+  ]
+  manifest = {
+    apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
+    kind       = "ENIConfig"
+    metadata   = { name = "ca-central-1b" }
+    spec = {
+      subnet         = data.aws_subnets.pod_subnets.ids[1]
+      securityGroups = local.pod_eni_security_groups
+    }
+  }
+}
