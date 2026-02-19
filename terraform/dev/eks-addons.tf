@@ -24,6 +24,8 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.this.token
 
+  # Skip immediate validation - will be checked when resources are deployed
+  skip_credentials_validation = true
 }
 
 provider "helm" {
@@ -31,6 +33,9 @@ provider "helm" {
     host                   = data.aws_eks_cluster.this.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.this.token
+
+    # Skip immediate validation - will be checked when charts are deployed
+    skip_credentials_validation = true
   }
 }
 
@@ -71,7 +76,8 @@ resource "helm_release" "aws_load_balancer_controller" {
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
-    aws_iam_role_policy_attachment.alb_attachment
+    aws_iam_role_policy_attachment.alb_attachment,
+    null_resource.cluster_ready
   ]
 }
 
@@ -99,7 +105,8 @@ resource "helm_release" "metrics_server" {
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
-    aws_eks_addon.coredns-addon
+    aws_eks_addon.coredns-addon,
+    null_resource.cluster_ready
   ]
 }
 
@@ -115,7 +122,8 @@ resource "helm_release" "vpa" {
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
-    aws_eks_addon.coredns-addon
+    aws_eks_addon.coredns-addon,
+    null_resource.cluster_ready
   ]
 }
 
@@ -146,7 +154,8 @@ resource "helm_release" "cluster_autoscaler" {
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
-    aws_eks_pod_identity_association.cluster_autoscaler
+    aws_eks_pod_identity_association.cluster_autoscaler,
+    null_resource.cluster_ready
   ]
 }
 
