@@ -2,12 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Institution\Http\Controllers\InstitutionController;
+use Modules\Institution\Http\Controllers\InstitutionLogoutController;
 
 Route::prefix('institution')->group(function () {
     Route::group([
         'middleware' => ['auth', 'institution_active'],
         'as' => 'institution.',
     ], function () {
+        // Logout route
+        Route::post('logout', [InstitutionLogoutController::class, 'logout'])->name('logout');
         Route::get('/', [InstitutionController::class, 'index'])->name('dashboard');
         Route::get('applications', [InstitutionController::class, 'applications'])->name('applications.index');
         

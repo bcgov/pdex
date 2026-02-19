@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Application;
+use App\Models\Institution;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -24,7 +25,19 @@ class AdminController extends Controller
         $stats = [
             'totalUsers' => $this->getSafeUserCount(),
             'activeUsers' => $this->getSafeActiveUserCount(),
+            'totalInstitutions' => $this->getSafeInstitutionCount(),
+            'activeInstitutions' => $this->getSafeActiveInstitutionCount(),
+            'inactiveInstitutions' => $this->getSafeInactiveInstitutionCount(),
+            'institutionsWithDli' => $this->getInstitutionsWithDliCount(),
+            'institutionTypeBreakdown' => $this->getInstitutionTypeBreakdown(),
+            'totalApplications' => $this->getSafeApplicationCount(),
+            'applicationStatusBreakdown' => $this->getApplicationStatusBreakdown(),
             'pendingApprovals' => $this->getPendingApprovalsCount(),
+            'pendingSecurityApprovals' => $this->getPendingSecurityApprovalsCount(),
+            'pendingPrivacyApprovals' => $this->getPendingPrivacyApprovalsCount(),
+            'offlineApplications' => $this->getOfflineApplicationsCount(),
+            'alertingApplications' => $this->getAlertingApplicationsCount(),
+            'failedJobs' => $this->getFailedJobsCount(),
             'systemAlerts' => $this->getSystemAlertsCount(),
         ];
 
@@ -107,6 +120,163 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return 0;
         }
+    }
+
+    /**
+     * Get count of applications with pending security approvals.
+     */
+    private function getPendingSecurityApprovalsCount(): int
+    {
+        try {
+            return Application::where('security_approval_status', 'pending')->count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get count of applications with pending privacy approvals.
+     */
+    private function getPendingPrivacyApprovalsCount(): int
+    {
+        try {
+            return Application::where('privacy_approval_status', 'pending')->count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get application counts by status.
+     */
+    private function getApplicationStatusBreakdown(): array
+    {
+        try {
+            return Application::selectRaw('status, count(*) as count')
+                ->groupBy('status')
+                ->pluck('count', 'status')
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Get count of applications currently offline.
+     */
+    private function getOfflineApplicationsCount(): int
+    {
+        try {
+            return Application::where('status', 'offline')->count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get count of applications with active alert messages.
+     */
+    private function getAlertingApplicationsCount(): int
+    {
+        try {
+            return Application::whereNotNull('active_alert_message')
+                ->where('active_alert_message', '!=', '')
+                ->count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get total applications count with a safe fallback.
+     */
+    private function getSafeApplicationCount(): int
+    {
+        try {
+            return Application::count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get total institutions count with a safe fallback.
+     */
+    private function getSafeInstitutionCount(): int
+    {
+        try {
+            return Institution::count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get active institutions count with a safe fallback.
+     */
+    private function getSafeActiveInstitutionCount(): int
+    {
+        try {
+            return Institution::where('active_status', true)->count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get inactive institutions count with a safe fallback.
+     */
+    private function getSafeInactiveInstitutionCount(): int
+    {
+        try {
+            return Institution::where('active_status', false)->count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get count of institutions with DLI values.
+     */
+    private function getInstitutionsWithDliCount(): int
+    {
+        try {
+            return Institution::whereNotNull('dli')->count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get institution counts by type.
+     */
+    private function getInstitutionTypeBreakdown(): array
+    {
+        try {
+            return Institution::selectRaw('institution_type, count(*) as count')
+                ->whereNotNull('institution_type')
+                ->groupBy('institution_type')
+                ->pluck('count', 'institution_type')
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Get failed jobs count if table exists.
+     */
+    private function getFailedJobsCount(): int
+    {
+        try {
+            if (DB::getSchemaBuilder()->hasTable('failed_jobs')) {
+                return DB::table('failed_jobs')->count();
+            }
+        } catch (\Exception $e) {
+            return 0;
+        }
+
+        return 0;
     }
 
     /**

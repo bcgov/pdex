@@ -6,6 +6,19 @@ data "aws_eks_cluster_auth" "this" {
   name = aws_eks_cluster.pdex-cluster.name
 }
 
+# Pick the large subnets pods should use
+data "aws_subnets" "pod_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = concat(local.app_subnet_names, local.extended_app_subnet_names)
+  }
+}
+
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.this.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
@@ -125,4 +138,57 @@ resource "helm_release" "cluster_autoscaler" {
     aws_eks_cluster.pdex-cluster,
     aws_eks_pod_identity_association.cluster_autoscaler
   ]
+}
+
+# Security group to attach to Pod ENIs:
+# Option A: reuse the node SG (simple)
+# Option B: create a dedicated pod SG (better control)
+# For now, reuse node SG:
+locals {
+  pod_eni_security_groups = [data.aws_security_group.eks_node_sg.id]
+}
+
+# ENIConfig per AZ (names MUST match AZ when using topology.kubernetes.io/zone)
+resource "kubernetes_manifest" "eni_config_a" {
+  manifest = {
+    apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
+    kind       = "ENIConfig"
+    metadata   = { name = "ca-central-1a" }
+    spec = {
+      subnet         = data.aws_subnets.pod_subnets.ids[0]
+      securityGroups = local.pod_eni_security_groups
+    }
+  }
+}
+
+resource "kubernetes_manifest" "eni_config_b" {
+  manifest = {
+    apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
+    kind       = "ENIConfig"
+    metadata   = { name = "ca-central-1b" }
+    spec = {
+      subnet         = data.aws_subnets.pod_subnets.ids[1]
+      securityGroups = local.pod_eni_security_groups
+    }
+  }
+}
+
+# Update your existing vpc-cni addon to enable custom networking
+resource "aws_eks_addon" "vpc-cni-addon" {
+  cluster_name = aws_eks_cluster.pdex-cluster.name
+  addon_name   = "vpc-cni"
+  addon_version = "v1.21.1-eksbuild.3"
+
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  configuration_values = jsonencode({
+    env = {
+      AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG = "true"
+      ENI_CONFIG_LABEL_DEF               = "topology.kubernetes.io/zone"
+      AWS_VPC_K8S_CNI_EXTERNALSNAT       = "true"
+    }
+  })
+
+  depends_on = [aws_eks_cluster.pdex-cluster]
 }

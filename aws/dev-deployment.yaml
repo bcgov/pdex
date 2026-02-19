@@ -106,6 +106,13 @@ spec:
             cpu: 650m
             memory: 600Mi
 
+        startupProbe:
+          httpGet:
+            path: /up
+            port: 8080
+          periodSeconds: 5
+          failureThreshold: 60   # ~5 minutes warmup
+
         readinessProbe:
           httpGet:
             path: /up
@@ -119,9 +126,10 @@ spec:
           httpGet:
             path: /up
             port: 8080
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 15
           timeoutSeconds: 5
+          failureThreshold: 3
 
         volumeMounts:
         - name: dotenv-out

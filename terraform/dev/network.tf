@@ -7,12 +7,16 @@ data "aws_vpc" "main" {
 data "aws_subnets" "app" {
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
+    # values = [data.aws_vpc.main.id]
+    values = [var.vpc_id]
+
   }
 
   filter {
     name   = "tag:Name"
-    values = local.app_subnet_names
+    # values = local.app_subnet_names
+    values = concat(local.app_subnet_names, local.extended_app_subnet_names)
+
   }
 }
 

@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import BreezeApplicationLogo from '@/Components/ApplicationLogo.vue';
 import BreezeNavLink from '@/Components/NavLink.vue';
 import BreezeResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { Button } from '@/Components/BCDesign/Button';
 
 export default {
@@ -19,9 +19,14 @@ export default {
         const showingNavigationDropdown = ref(false);
         const showUserDropdown = ref(false);
         
+        const submitLogout = () => {
+            router.post('/institution/logout')
+        };
+        
         return {
             showingNavigationDropdown,
-            showUserDropdown
+            showUserDropdown,
+            submitLogout
         };
     },
     computed: {
@@ -31,7 +36,7 @@ export default {
             return user.roles.some(role => role.name === 'Institution_User');
         },
         logoutUrl() {
-            return this.$page.props.logoutUrl;
+            return '/institution/logout';
         }
     }
 };
@@ -157,14 +162,12 @@ export default {
         </nav>
 
         <!-- Direct Logout Button -->
-        <Link 
-            :href="logoutUrl" 
-            method="post" 
-            as="button"
+        <button
+            @click="submitLogout"
             class="bc-nav-link text-sm"
         >
             Logout
-        </Link>
+        </button>
 
         <!-- User Menu -->
         <div class="bc-user-menu">
@@ -192,14 +195,12 @@ export default {
                     </div>
                 </div>
                 <div class="bc-dropdown-divider"></div>
-                <Link 
-                    :href="logoutUrl" 
-                    method="post" 
-                    as="button"
+                <button
+                    @click="submitLogout"
                     class="bc-dropdown-item w-full text-left"
                 >
                     Log Out
-                </Link>
+                </button>
             </div>
         </div>
 

@@ -1358,7 +1358,7 @@ export default {
       const allPermissions = [...dataPermissionsArray, ...apiPermissionsArray];
       
       form.data_permissions = allPermissions;
-      form.put(`/admin/applications/${props.application.id}`, {
+      form.put(`/admin/applications/${props.application.guid}`, {
         onSuccess: () => {
           // Flash message will be handled by the backend redirect
           console.log('Application updated successfully');
@@ -1388,7 +1388,7 @@ export default {
         return;
       }
       
-      securityForm.put(`/admin/applications/${props.application.id}/security-approval`, {
+      securityForm.patch(`/admin/applications/${props.application.guid}/security-approval`, {
         onSuccess: () => {
           // Handle success
         },
@@ -1405,7 +1405,7 @@ export default {
         return;
       }
       
-      privacyForm.put(`/admin/applications/${props.application.id}/privacy-approval`, {
+      privacyForm.patch(`/admin/applications/${props.application.guid}/privacy-approval`, {
         onSuccess: () => {
           // Handle success
         },
