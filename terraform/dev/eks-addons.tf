@@ -33,25 +33,6 @@ provider "helm" {
   }
 }
 
-# Ensure cluster is fully ready before deploying Kubernetes resources
-resource "null_resource" "cluster_ready" {
-  triggers = {
-    cluster_id = aws_eks_cluster.pdex-cluster.id
-  }
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      echo "Waiting for EKS cluster to be active..."
-      aws eks wait cluster-active --name ${aws_eks_cluster.pdex-cluster.name} --region ${var.aws_region}
-      echo "Cluster is active. Updating kubeconfig..."
-      aws eks update-kubeconfig --name ${aws_eks_cluster.pdex-cluster.name} --region ${var.aws_region}
-      echo "Kubeconfig updated successfully."
-    EOT
-  }
-
-  depends_on = [aws_eks_cluster.pdex-cluster]
-}
-
 resource "helm_release" "aws_load_balancer_controller" {
   name       = "aws-load-balancer-controller"
   namespace  = "kube-system"
@@ -158,7 +139,6 @@ resource "helm_release" "cluster_autoscaler" {
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
-    aws_eks_pod_identity_association.cluster_autoscaler,
-    null_resource.cluster_ready
+    aws_eks_pod_identity_association.cluster_autoscaler
   ]
 }
