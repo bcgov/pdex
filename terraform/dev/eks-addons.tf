@@ -2,34 +2,21 @@ data "aws_eks_cluster" "this" {
   name = aws_eks_cluster.pdex-cluster.name
 }
 
-# Pick the large subnets pods should use
-data "aws_subnets" "pod_subnets" {
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
+data "aws_eks_cluster_auth" "this" {
+  name = aws_eks_cluster.pdex-cluster.name
+}
 
-  filter {
-    name   = "tag:Name"
-    values = concat(local.app_subnet_names, local.extended_app_subnet_names)
-  }
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.this.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.this.token
 }
 
 provider "helm" {
   kubernetes = {
     host                   = data.aws_eks_cluster.this.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
-
-    # Use exec-based auth instead of a static token — evaluated lazily at apply time, not plan time
-    exec = {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args = [
-        "eks", "get-token",
-        "--cluster-name", aws_eks_cluster.pdex-cluster.name,
-        "--region", var.aws_region
-      ]
-    }
+    token                  = data.aws_eks_cluster_auth.this.token
   }
 }
 
@@ -61,7 +48,7 @@ resource "helm_release" "aws_load_balancer_controller" {
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
-    aws_iam_role_policy_attachment.alb_attachment,
+    aws_iam_role_policy_attachment.alb_attachment
   ]
 }
 
