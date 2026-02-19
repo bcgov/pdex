@@ -305,26 +305,26 @@ locals {
 }
 
 # ENIConfig per AZ (names MUST match AZ when using topology.kubernetes.io/zone)
-resource "kubernetes_manifest" "eni_config_a" {
-  manifest = {
-    apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
-    kind       = "ENIConfig"
-    metadata   = { name = "ca-central-1a" }
-    spec = {
-      subnet         = data.aws_subnets.pod_subnets.ids[0]
-      securityGroups = local.pod_eni_security_groups
-    }
-  }
-}
+# resource "kubernetes_manifest" "eni_config_a" {
+#   manifest = {
+#     apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
+#     kind       = "ENIConfig"
+#     metadata   = { name = "ca-central-1a" }
+#     spec = {
+#       subnet         = data.aws_subnets.pod_subnets.ids[0]
+#       securityGroups = local.pod_eni_security_groups
+#     }
+#   }
+# }
 
-resource "kubernetes_manifest" "eni_config_b" {
-  manifest = {
-    apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
-    kind       = "ENIConfig"
-    metadata   = { name = "ca-central-1b" }
-    spec = {
-      subnet         = data.aws_subnets.pod_subnets.ids[1]
-      securityGroups = local.pod_eni_security_groups
-    }
-  }
-}
+# resource "kubernetes_manifest" "eni_config_b" {
+#   manifest = {
+#     apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
+#     kind       = "ENIConfig"
+#     metadata   = { name = "ca-central-1b" }
+#     spec = {
+#       subnet         = data.aws_subnets.pod_subnets.ids[1]
+#       securityGroups = local.pod_eni_security_groups
+#     }
+#   }
+# }
