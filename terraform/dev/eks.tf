@@ -53,7 +53,7 @@ resource "aws_eks_cluster" "pdex-cluster" {
 #   addon_version = "v1.21.1-eksbuild.3"
 # }
 
-resource "aws_eks_addon" "vpc_cni" {
+resource "aws_eks_addon" "vpc-cni-addon" {
   cluster_name                = aws_eks_cluster.pdex-cluster.name
   addon_name                  = "vpc-cni"
   resolve_conflicts_on_create = "OVERWRITE"
