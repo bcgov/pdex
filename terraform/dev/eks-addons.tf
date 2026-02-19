@@ -2,10 +2,6 @@ data "aws_eks_cluster" "this" {
   name = aws_eks_cluster.pdex-cluster.name
 }
 
-data "aws_eks_cluster_auth" "this" {
-  name = aws_eks_cluster.pdex-cluster.name
-}
-
 # Pick the large subnets pods should use
 data "aws_subnets" "pod_subnets" {
   filter {
@@ -23,7 +19,17 @@ provider "helm" {
   kubernetes = {
     host                   = data.aws_eks_cluster.this.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
-    token                  = data.aws_eks_cluster_auth.this.token
+
+    # Use exec-based auth instead of a static token — evaluated lazily at apply time, not plan time
+    exec = {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args = [
+        "eks", "get-token",
+        "--cluster-name", aws_eks_cluster.pdex-cluster.name,
+        "--region", var.aws_region
+      ]
+    }
   }
 }
 
