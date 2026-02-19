@@ -62,7 +62,6 @@ resource "helm_release" "aws_load_balancer_controller" {
   depends_on = [
     aws_eks_cluster.pdex-cluster,
     aws_iam_role_policy_attachment.alb_attachment,
-    null_resource.cluster_ready
   ]
 }
 
@@ -90,8 +89,7 @@ resource "helm_release" "metrics_server" {
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
-    aws_eks_addon.coredns-addon,
-    null_resource.cluster_ready
+    aws_eks_addon.coredns-addon
   ]
 }
 
@@ -107,8 +105,7 @@ resource "helm_release" "vpa" {
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
-    aws_eks_addon.coredns-addon,
-    null_resource.cluster_ready
+    aws_eks_addon.coredns-addon
   ]
 }
 
