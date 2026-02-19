@@ -23,9 +23,6 @@ provider "kubernetes" {
   host                   = data.aws_eks_cluster.this.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.this.token
-
-  # Skip immediate validation - will be checked when resources are deployed
-  skip_credentials_validation = true
 }
 
 provider "helm" {
@@ -33,16 +30,23 @@ provider "helm" {
     host                   = data.aws_eks_cluster.this.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.this.token
-
-    # Skip immediate validation - will be checked when charts are deployed
-    skip_credentials_validation = true
   }
 }
 
 # Ensure cluster is fully ready before deploying Kubernetes resources
 resource "null_resource" "cluster_ready" {
+  triggers = {
+    cluster_id = aws_eks_cluster.pdex-cluster.id
+  }
+
   provisioner "local-exec" {
-    command = "aws eks wait cluster-active --name ${aws_eks_cluster.pdex-cluster.name} --region ${var.aws_region}"
+    command = <<-EOT
+      echo "Waiting for EKS cluster to be active..."
+      aws eks wait cluster-active --name ${aws_eks_cluster.pdex-cluster.name} --region ${var.aws_region}
+      echo "Cluster is active. Updating kubeconfig..."
+      aws eks update-kubeconfig --name ${aws_eks_cluster.pdex-cluster.name} --region ${var.aws_region}
+      echo "Kubeconfig updated successfully."
+    EOT
   }
 
   depends_on = [aws_eks_cluster.pdex-cluster]
