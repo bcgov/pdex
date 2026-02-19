@@ -70,7 +70,7 @@ resource "aws_eks_addon" "vpc-cni-addon" {
     }
   })
 
-  depends_on = [aws_eks_cluster.pdex-cluster]
+  #depends_on = [aws_eks_cluster.pdex-cluster]
 }
 
 resource "aws_eks_addon" "kube-proxy-addon" {
