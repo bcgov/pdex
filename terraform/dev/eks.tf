@@ -53,6 +53,24 @@ resource "aws_eks_cluster" "pdex-cluster" {
 #   addon_version = "v1.21.1-eksbuild.3"
 # }
 
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name                = aws_eks_cluster.pdex-cluster.name
+  addon_name                  = "vpc-cni"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+  addon_version = "v1.21.1-eksbuild.3"
+
+  configuration_values = jsonencode({
+    env = {
+      AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG = "true"                        # Pods get IPs from ENIs that live in the ENIConfig subnets
+      ENI_CONFIG_LABEL_DEF               = "topology.kubernetes.io/zone" # how to choose which ENIConfig to use.
+      AWS_VPC_K8S_CNI_EXTERNALSNAT       = "true"                        # Do not do SNAT on the node.
+    }
+  })
+
+  depends_on = [aws_eks_cluster.pdex-cluster]
+}
+
 resource "aws_eks_addon" "kube-proxy-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "kube-proxy"
