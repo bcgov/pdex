@@ -138,14 +138,17 @@
                                     <th>DLI</th>
                                     <th>Sites</th>
                                     <th>Status</th>
-                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="institution in institutions.data" :key="institution.id">
                                     <td>
                                         <div>
-                                            <div class="fw-medium">{{ institution.legal_operating_name }}</div>
+                                            <div class="fw-medium">
+                                                <Link :href="`/admin/institutions/${institution.id}`" class="text-decoration-none">
+                                                    {{ institution.legal_operating_name }}
+                                                </Link>
+                                            </div>
                                             <small class="text-muted">{{ institution.institution_type }}</small>
                                         </div>
                                     </td>
@@ -165,19 +168,6 @@
                                         <span :class="getStatusBadgeClass(institution.active_status)">
                                             {{ institution.active_status ? 'Active' : 'Inactive' }}
                                         </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-sm">
-                                            <Link class="btn btn-outline-primary" :href="`/admin/institutions/${institution.id}`">
-                                                <i class="bi bi-eye"></i>
-                                            </Link>
-                                            <Link v-if="canManageInstitutions" class="btn btn-outline-secondary" :href="`/admin/institutions/${institution.id}/edit`">
-                                                <i class="bi bi-pencil"></i>
-                                            </Link>
-                                            <button v-if="canManageInstitutions" class="btn btn-outline-danger" @click="confirmDelete(institution)">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -210,7 +200,6 @@
 <script>
 import { Head, Link } from '@inertiajs/vue3'
 import Authenticated from '../../Layouts/Authenticated.vue'
-import axios from 'axios'
 
 export default {
     name: 'InstitutionsIndex',
@@ -256,15 +245,6 @@ export default {
         },
         getStatusBadgeClass(isActive) {
             return isActive ? 'badge bg-success' : 'badge bg-secondary'
-        },
-        confirmDelete(institution) {
-            if (confirm(`Are you sure you want to delete "${institution.legal_operating_name}"?`)) {
-                this.$inertia.delete(`/admin/institutions/${institution.id}`, {
-                    onSuccess: () => {
-                        this.$inertia.reload({ only: ['institutions', 'stats'] })
-                    }
-                })
-            }
         }
     }
 }
