@@ -227,7 +227,8 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
     helm_release.aws_load_balancer_controller,
     aws_eks_cluster.pdex-cluster,
     aws_eks_addon.coredns-addon,
-    helm_release.metrics_server
+    helm_release.metrics_server,
+    null_resource.cluster_ready
   ]
   manifest = {
     apiVersion = "elbv2.k8s.aws/v1beta1"

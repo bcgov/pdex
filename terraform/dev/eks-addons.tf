@@ -23,14 +23,27 @@ provider "kubernetes" {
   host                   = data.aws_eks_cluster.this.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.this.token
+
+  # Ensure cluster is ready before attempting Kubernetes operations
+  skip_credentials_validation = false
+  skip_metadata_api_check     = false
 }
 
 provider "helm" {
-  kubernetes = {
+  kubernetes {
     host                   = data.aws_eks_cluster.this.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.this.token
   }
+}
+
+# Ensure cluster is fully ready before deploying Kubernetes resources
+resource "null_resource" "cluster_ready" {
+  provisioner "local-exec" {
+    command = "aws eks wait cluster-active --name ${aws_eks_cluster.pdex-cluster.name} --region ${var.aws_region}"
+  }
+
+  depends_on = [aws_eks_cluster.pdex-cluster]
 }
 
 resource "helm_release" "aws_load_balancer_controller" {
@@ -152,8 +165,10 @@ locals {
 resource "kubernetes_manifest" "eni_config_a" {
   depends_on = [
     aws_eks_cluster.pdex-cluster,
+    aws_eks_addon.vpc-cni-addon,
     aws_eks_addon.coredns-addon,
-    helm_release.metrics_server
+    helm_release.metrics_server,
+    null_resource.cluster_ready
   ]
   manifest = {
     apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
@@ -169,8 +184,10 @@ resource "kubernetes_manifest" "eni_config_a" {
 resource "kubernetes_manifest" "eni_config_b" {
   depends_on = [
     aws_eks_cluster.pdex-cluster,
+    aws_eks_addon.vpc-cni-addon,
     aws_eks_addon.coredns-addon,
-    helm_release.metrics_server
+    helm_release.metrics_server,
+    null_resource.cluster_ready
   ]
   manifest = {
     apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
