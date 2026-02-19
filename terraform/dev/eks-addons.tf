@@ -150,6 +150,11 @@ locals {
 
 # ENIConfig per AZ (names MUST match AZ when using topology.kubernetes.io/zone)
 resource "kubernetes_manifest" "eni_config_a" {
+  depends_on = [
+    aws_eks_cluster.pdex-cluster,
+    aws_eks_addon.coredns-addon,
+    helm_release.metrics_server
+  ]
   manifest = {
     apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
     kind       = "ENIConfig"
@@ -162,6 +167,11 @@ resource "kubernetes_manifest" "eni_config_a" {
 }
 
 resource "kubernetes_manifest" "eni_config_b" {
+  depends_on = [
+    aws_eks_cluster.pdex-cluster,
+    aws_eks_addon.coredns-addon,
+    helm_release.metrics_server
+  ]
   manifest = {
     apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
     kind       = "ENIConfig"
