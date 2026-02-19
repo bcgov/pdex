@@ -47,11 +47,11 @@ resource "aws_eks_cluster" "pdex-cluster" {
 }
 
 #EKS cluster addons
-resource "aws_eks_addon" "vpc-cni-addon" {
-  cluster_name = aws_eks_cluster.pdex-cluster.name
-  addon_name   = "vpc-cni"
-  addon_version = "v1.21.1-eksbuild.3"
-}
+# resource "aws_eks_addon" "vpc-cni-addon" {
+#   cluster_name = aws_eks_cluster.pdex-cluster.name
+#   addon_name   = "vpc-cni"
+#   addon_version = "v1.21.1-eksbuild.3"
+# }
 
 resource "aws_eks_addon" "kube-proxy-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
