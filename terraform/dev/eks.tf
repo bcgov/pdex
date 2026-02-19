@@ -47,10 +47,30 @@ resource "aws_eks_cluster" "pdex-cluster" {
 }
 
 #EKS cluster addons
+# resource "aws_eks_addon" "vpc-cni-addon" {
+#   cluster_name = aws_eks_cluster.pdex-cluster.name
+#   addon_name   = "vpc-cni"
+#   addon_version = "v1.21.1-eksbuild.3"
+# }
+
+# Update your existing vpc-cni addon to enable custom networking
 resource "aws_eks_addon" "vpc-cni-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "vpc-cni"
   addon_version = "v1.21.1-eksbuild.3"
+
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  configuration_values = jsonencode({
+    env = {
+      AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG = "true"
+      ENI_CONFIG_LABEL_DEF               = "topology.kubernetes.io/zone"
+      AWS_VPC_K8S_CNI_EXTERNALSNAT       = "true"
+    }
+  })
+
+  depends_on = [aws_eks_cluster.pdex-cluster]
 }
 
 resource "aws_eks_addon" "kube-proxy-addon" {
