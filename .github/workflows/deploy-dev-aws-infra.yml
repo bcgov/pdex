@@ -150,10 +150,10 @@ jobs:
           # Import Helm releases that already exist in the cluster but are not
           # (yet) tracked in Terraform state. Format: "<namespace>:<release-name>".
           # || true makes each import idempotent — safe to re-run if already imported.
-          terragrunt import helm_release.aws_load_balancer_controller "kube-system:aws-load-balancer-controller" --non-interactive || true
-          terragrunt import helm_release.metrics_server               "kube-system:metrics-server"               --non-interactive || true
-          terragrunt import helm_release.vpa                          "kube-system:vpa"                          --non-interactive || true
-          terragrunt import helm_release.cluster_autoscaler           "kube-system:cluster-autoscaler"           --non-interactive || true
+          terragrunt import helm_release.aws_load_balancer_controller "kube-system/aws-load-balancer-controller" --non-interactive || true
+          terragrunt import helm_release.metrics_server               "kube-system/metrics-server"               --non-interactive || true
+          terragrunt import helm_release.vpa                          "kube-system/vpa"                          --non-interactive || true
+          terragrunt import helm_release.cluster_autoscaler           "kube-system/cluster-autoscaler"           --non-interactive || true
 
       - name: Terragrunt Apply
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
