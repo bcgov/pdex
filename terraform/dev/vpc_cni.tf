@@ -7,10 +7,6 @@
 
 # "Which subnet + security group should I use to create the pod ENI for this node?"
 resource "kubernetes_manifest" "eni_config_a" {
-  triggers = {
-    subnet_id = data.aws_subnets.pod_subnets.ids[0]
-    sg_id     = aws_security_group.alb_sg.id
-  }
 
   depends_on = [null_resource.cluster_ready]
 
@@ -28,10 +24,6 @@ resource "kubernetes_manifest" "eni_config_a" {
 }
 
 resource "kubernetes_manifest" "eni_config_b" {
-  triggers = {
-    subnet_id = data.aws_subnets.pod_subnets.ids[1]
-    sg_id     = aws_security_group.alb_sg.id
-  }
 
   depends_on = [null_resource.cluster_ready]
 
