@@ -164,6 +164,8 @@ jobs:
 
           # Delete the stuck VPA certgen job so the pre-upgrade hook can run cleanly.
           kubectl delete job -n kube-system -l app.kubernetes.io/name=vpa --ignore-not-found=true
+
+      - name: Terragrunt Apply
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
         env:
           TF_INPUT: "0" # Disable interactive input
