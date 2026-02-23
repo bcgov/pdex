@@ -63,6 +63,10 @@ resource "helm_release" "aws_load_balancer_controller" {
     aws_eks_cluster.pdex-cluster,
     aws_iam_role_policy_attachment.alb_attachment
   ]
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # need metrics server for HPA to work
@@ -91,6 +95,10 @@ resource "helm_release" "metrics_server" {
     aws_eks_cluster.pdex-cluster,
     aws_eks_addon.coredns-addon
   ]
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # need VPA for vertical pod autoscaling, this is set for Recommendation only mode
@@ -107,6 +115,10 @@ resource "helm_release" "vpa" {
     aws_eks_cluster.pdex-cluster,
     aws_eks_addon.coredns-addon
   ]
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Cluster Autoscaler Helm Release to see nodes scaling beyond desired count and up to max count
@@ -138,4 +150,8 @@ resource "helm_release" "cluster_autoscaler" {
     aws_eks_cluster.pdex-cluster,
     aws_eks_pod_identity_association.cluster_autoscaler
   ]
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
