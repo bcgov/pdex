@@ -107,13 +107,14 @@ resource "helm_release" "metrics_server" {
 
 # need VPA for vertical pod autoscaling, this is set for Recommendation only mode
 resource "helm_release" "vpa" {
-  name       = "vpa"
-  namespace  = "kube-system"
-  repository = "https://charts.fairwinds.com/stable"
-  chart      = "vpa"
-  version    = "4.5.0"
-  wait       = true
-  timeout    = 1200
+  name             = "vpa"
+  namespace        = "kube-system"
+  repository       = "https://charts.fairwinds.com/stable"
+  chart            = "vpa"
+  version          = "4.5.0"
+  wait             = true
+  timeout          = 1200
+  cleanup_on_fail  = true  # delete stale hook jobs (e.g. vpa-admission-certgen) before retrying
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
