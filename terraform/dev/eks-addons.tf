@@ -39,6 +39,8 @@ resource "helm_release" "aws_load_balancer_controller" {
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
   version    = "1.7.2"
+  wait       = true
+  timeout    = 1200
 
   set = [
     {
@@ -79,7 +81,7 @@ resource "helm_release" "metrics_server" {
   chart      = "metrics-server"
   version    = "3.12.1" # pick a stable version; you can bump later
   wait       = true
-  timeout    = 600
+  timeout    = 1200
 
   # EKS commonly needs these kubelet flags to avoid metrics not available
   set = [
@@ -111,7 +113,7 @@ resource "helm_release" "vpa" {
   chart      = "vpa"
   version    = "4.5.0"
   wait       = true
-  timeout    = 600
+  timeout    = 1200
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
@@ -131,7 +133,7 @@ resource "helm_release" "cluster_autoscaler" {
   chart      = "cluster-autoscaler"
   version    = "9.37.0"
   wait       = true
-  timeout    = 600
+  timeout    = 1200
 
   set = [
     {
