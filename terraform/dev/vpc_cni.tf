@@ -9,7 +9,7 @@
 resource "null_resource" "eni_config_a" {
   triggers = {
     subnet_id = data.aws_subnets.pod_subnets.ids[0]
-    sg_id     = aws_security_group.alb_sg.id
+    sg_id     = data.aws_security_group.data.id
   }
 
   depends_on = [null_resource.cluster_ready]
@@ -24,7 +24,7 @@ metadata:
 spec:
   subnet: ${data.aws_subnets.pod_subnets.ids[0]}
   securityGroups:
-  - ${aws_security_group.alb_sg.id}
+  - ${data.aws_security_group.data.id}
 ENDYAML
 EOT
   }
@@ -33,7 +33,7 @@ EOT
 resource "null_resource" "eni_config_b" {
   triggers = {
     subnet_id = data.aws_subnets.pod_subnets.ids[1]
-    sg_id     = aws_security_group.alb_sg.id
+    sg_id     = data.aws_security_group.data.id
   }
 
   depends_on = [null_resource.cluster_ready]
@@ -48,7 +48,7 @@ metadata:
 spec:
   subnet: ${data.aws_subnets.pod_subnets.ids[1]}
   securityGroups:
-  - ${aws_security_group.alb_sg.id}
+  - ${data.aws_security_group.data.id}
 ENDYAML
 EOT
   }
