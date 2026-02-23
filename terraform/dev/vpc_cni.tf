@@ -6,50 +6,44 @@
 }
 
 # "Which subnet + security group should I use to create the pod ENI for this node?"
-resource "null_resource" "eni_config_a" {
+resource "kubernetes_manifest" "eni_config_a" {
   triggers = {
     subnet_id = data.aws_subnets.pod_subnets.ids[0]
-    sg_id     = data.aws_security_group.web.id
+    sg_id     = data.aws_security_group.alb_sg.id
   }
 
   depends_on = [null_resource.cluster_ready]
 
-  provisioner "local-exec" {
-    command = <<EOT
-kubectl apply -f - <<'ENDYAML'
-apiVersion: crd.k8s.amazonaws.com/v1alpha1
-kind: ENIConfig
-metadata:
-  name: ca-central-1a
-spec:
-  subnet: ${data.aws_subnets.pod_subnets.ids[0]}
-  securityGroups:
-  - ${data.aws_security_group.web.id}
-ENDYAML
-EOT
+  manifest = {
+    apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
+    kind       = "ENIConfig"
+    metadata = {
+      name = "ca-central-1a"
+    }
+    spec = {
+      subnet = data.aws_subnets.pod_subnets.ids[0]
+      securityGroups = [data.aws_security_group.alb_sg.id]
+    }
   }
 }
 
-resource "null_resource" "eni_config_b" {
+resource "kubernetes_manifest" "eni_config_b" {
   triggers = {
     subnet_id = data.aws_subnets.pod_subnets.ids[1]
-    sg_id     = data.aws_security_group.web.id
+    sg_id     = data.aws_security_group.alb_sg.id
   }
 
   depends_on = [null_resource.cluster_ready]
 
-  provisioner "local-exec" {
-    command = <<EOT
-kubectl apply -f - <<'ENDYAML'
-apiVersion: crd.k8s.amazonaws.com/v1alpha1
-kind: ENIConfig
-metadata:
-  name: ca-central-1b
-spec:
-  subnet: ${data.aws_subnets.pod_subnets.ids[1]}
-  securityGroups:
-  - ${data.aws_security_group.web.id}
-ENDYAML
-EOT
+  manifest = {
+    apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
+    kind       = "ENIConfig"
+    metadata = {
+      name = "ca-central-1b"
+    }
+    spec = {
+      subnet = data.aws_subnets.pod_subnets.ids[1]
+      securityGroups = [data.aws_security_group.alb_sg.id]
+    }
   }
 }
