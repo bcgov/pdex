@@ -222,7 +222,7 @@ output "alb_security_group_id" {
 }
 
 resource "kubernetes_manifest" "pdex_alb_tgb" {
-  depends_on = [helm_release.aws_load_balancer_controller, null_resource.cluster_ready]
+  depends_on = [helm_release.aws_load_balancer_controller]
 
   manifest = {
     apiVersion = "elbv2.k8s.aws/v1beta1"
