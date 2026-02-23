@@ -9,7 +9,7 @@
 resource "kubernetes_manifest" "eni_config_a" {
   triggers = {
     subnet_id = data.aws_subnets.pod_subnets.ids[0]
-    sg_id     = data.aws_security_group.alb_sg.id
+    sg_id     = aws_security_group.alb_sg.id
   }
 
   depends_on = [null_resource.cluster_ready]
@@ -22,7 +22,7 @@ resource "kubernetes_manifest" "eni_config_a" {
     }
     spec = {
       subnet = data.aws_subnets.pod_subnets.ids[0]
-      securityGroups = [data.aws_security_group.alb_sg.id]
+      securityGroups = [aws_security_group.alb_sg.id]
     }
   }
 }
@@ -30,7 +30,7 @@ resource "kubernetes_manifest" "eni_config_a" {
 resource "kubernetes_manifest" "eni_config_b" {
   triggers = {
     subnet_id = data.aws_subnets.pod_subnets.ids[1]
-    sg_id     = data.aws_security_group.alb_sg.id
+    sg_id     = aws_security_group.alb_sg.id
   }
 
   depends_on = [null_resource.cluster_ready]
@@ -43,7 +43,7 @@ resource "kubernetes_manifest" "eni_config_b" {
     }
     spec = {
       subnet = data.aws_subnets.pod_subnets.ids[1]
-      securityGroups = [data.aws_security_group.alb_sg.id]
+      securityGroups = [aws_security_group.alb_sg.id]
     }
   }
 }
