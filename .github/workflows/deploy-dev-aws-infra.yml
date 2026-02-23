@@ -143,17 +143,17 @@ jobs:
 
           # Remove stale kubernetes_manifest resources that were replaced with
           # null_resource + kubectl. Safe to ignore if already absent.
-          terragrunt state rm kubernetes_manifest.eni_config_a   --non-interactive || true
-          terragrunt state rm kubernetes_manifest.eni_config_b   --non-interactive || true
-          terragrunt state rm kubernetes_manifest.pdex_alb_tgb   --non-interactive || true
+          terragrunt --non-interactive state rm kubernetes_manifest.eni_config_a || true
+          terragrunt --non-interactive state rm kubernetes_manifest.eni_config_b || true
+          terragrunt --non-interactive state rm kubernetes_manifest.pdex_alb_tgb || true
 
           # Import Helm releases that already exist in the cluster but are not
-          # (yet) tracked in Terraform state. Format: "<namespace>:<release-name>".
+          # (yet) tracked in Terraform state. Format: "<namespace>/<release-name>".
           # || true makes each import idempotent — safe to re-run if already imported.
-          terragrunt import helm_release.aws_load_balancer_controller "kube-system/aws-load-balancer-controller" --non-interactive || true
-          terragrunt import helm_release.metrics_server               "kube-system/metrics-server"               --non-interactive || true
-          terragrunt import helm_release.vpa                          "kube-system/vpa"                          --non-interactive || true
-          terragrunt import helm_release.cluster_autoscaler           "kube-system/cluster-autoscaler"           --non-interactive || true
+          terragrunt --non-interactive import helm_release.aws_load_balancer_controller "kube-system/aws-load-balancer-controller" || true
+          terragrunt --non-interactive import helm_release.metrics_server               "kube-system/metrics-server"               || true
+          terragrunt --non-interactive import helm_release.vpa                          "kube-system/vpa"                          || true
+          terragrunt --non-interactive import helm_release.cluster_autoscaler           "kube-system/cluster-autoscaler"           || true
 
       - name: Terragrunt Apply
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
