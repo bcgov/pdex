@@ -82,6 +82,7 @@ resource "helm_release" "metrics_server" {
   version    = "3.12.1" # pick a stable version; you can bump later
   wait       = true
   timeout    = 1200
+  force_update = true  # override pending-upgrade lock left by a failed run
 
   # EKS commonly needs these kubelet flags to avoid metrics not available
   set = [
@@ -115,6 +116,7 @@ resource "helm_release" "vpa" {
   wait             = true
   timeout          = 1200
   cleanup_on_fail  = true  # delete stale hook jobs (e.g. vpa-admission-certgen) before retrying
+  force_update     = true  # override pending-upgrade lock left by a failed run
 
   depends_on = [
     aws_eks_cluster.pdex-cluster,
@@ -135,6 +137,7 @@ resource "helm_release" "cluster_autoscaler" {
   version    = "9.37.0"
   wait       = true
   timeout    = 1200
+  force_update = true  # override pending-upgrade lock left by a failed run
 
   set = [
     {

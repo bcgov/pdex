@@ -155,7 +155,15 @@ jobs:
           terragrunt --non-interactive import helm_release.vpa                          "kube-system/vpa"                          || true
           terragrunt --non-interactive import helm_release.cluster_autoscaler           "kube-system/cluster-autoscaler"           || true
 
-      - name: Terragrunt Apply
+          # Reset any Helm releases stuck in pending-upgrade/pending-install state
+          # (left over from a previously failed run). helm rollback 0 resets to last good.
+          helm rollback aws-load-balancer-controller -n kube-system || true
+          helm rollback metrics-server               -n kube-system || true
+          helm rollback vpa                          -n kube-system || true
+          helm rollback cluster-autoscaler           -n kube-system || true
+
+          # Delete the stuck VPA certgen job so the pre-upgrade hook can run cleanly.
+          kubectl delete job -n kube-system -l app.kubernetes.io/name=vpa --ignore-not-found=true
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
         env:
           TF_INPUT: "0" # Disable interactive input
