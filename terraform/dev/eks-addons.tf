@@ -65,7 +65,9 @@ resource "helm_release" "aws_load_balancer_controller" {
   ]
 
   lifecycle {
-    ignore_changes = all
+    # Prevent Terraform from upgrading an already-running release.
+    # repository + chart are left un-ignored so the provider can locate the chart during plan.
+    ignore_changes = [version, values, set]
   }
 }
 
@@ -97,7 +99,7 @@ resource "helm_release" "metrics_server" {
   ]
 
   lifecycle {
-    ignore_changes = all
+    ignore_changes = [version, values, set]
   }
 }
 
@@ -117,7 +119,7 @@ resource "helm_release" "vpa" {
   ]
 
   lifecycle {
-    ignore_changes = all
+    ignore_changes = [version, values, set]
   }
 }
 
@@ -152,6 +154,6 @@ resource "helm_release" "cluster_autoscaler" {
   ]
 
   lifecycle {
-    ignore_changes = all
+    ignore_changes = [version, values, set]
   }
 }
