@@ -20,41 +20,9 @@ provider "helm" {
   }
 }
 
-resource "helm_release" "aws_load_balancer_controller" {
-  name       = "aws-load-balancer-controller"
-  namespace  = "kube-system"
-  repository = "https://aws.github.io/eks-charts"
-  chart      = "aws-load-balancer-controller"
-  version    = "1.7.2"
-
-  set = [
-    {
-      name  = "clusterName"
-      value = aws_eks_cluster.pdex-cluster.name
-    },
-    {
-      name  = "region"
-      value = var.aws_region
-    },
-    {
-      name  = "vpcId"
-      value = data.aws_vpc.main.id
-    },
-    {
-      name  = "serviceAccount.name"
-      value = "aws-load-balancer-controller"
-    }
-  ]
-
-  depends_on = [
-    aws_eks_cluster.pdex-cluster,
-    aws_iam_role_policy_attachment.alb_attachment
-  ]
-}
-
 # need metrics server for HPA to work
-resource "helm_release" "metrics_server" {
-  name       = "metrics-server"
+resource "helm_release" "metrics_server2" {
+  name       = "metrics-server2"
   namespace  = "kube-system"
   repository = "https://kubernetes-sigs.github.io/metrics-server/"
   chart      = "metrics-server"
