@@ -221,24 +221,24 @@ output "alb_security_group_id" {
   description = "Security Group ID of the ALB for TargetGroupBinding"
 }
 
-resource "kubernetes_manifest" "pdex_alb_tgb" {
-  depends_on = [helm_release.aws_load_balancer_controller]
+# resource "kubernetes_manifest" "pdex_alb_tgb" {
+#   depends_on = [helm_release.aws_load_balancer_controller]
 
-  manifest = {
-    apiVersion = "elbv2.k8s.aws/v1beta1"
-    kind       = "TargetGroupBinding"
-    metadata = {
-      name      = "pdex-alb-tgb"
-      namespace = "default"
-    }
-    spec = {
-      targetGroupARN = aws_alb_target_group.pdex.arn
-      targetType     = "ip"
-      serviceRef = {
-        name = "pdex-service-dev" # name of the Kubernetes Service to associate with found in dev-deployment.yaml
-        port = 80
-      }
-    }
-  }
+#   manifest = {
+#     apiVersion = "elbv2.k8s.aws/v1beta1"
+#     kind       = "TargetGroupBinding"
+#     metadata = {
+#       name      = "pdex-alb-tgb"
+#       namespace = "default"
+#     }
+#     spec = {
+#       targetGroupARN = aws_alb_target_group.pdex.arn
+#       targetType     = "ip"
+#       serviceRef = {
+#         name = "pdex-service-dev" # name of the Kubernetes Service to associate with found in dev-deployment.yaml
+#         port = 80
+#       }
+#     }
+#   }
 
-}
+# }
