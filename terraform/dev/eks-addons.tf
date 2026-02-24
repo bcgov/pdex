@@ -49,20 +49,20 @@ provider "helm" {
 # }
 
 # need VPA for vertical pod autoscaling, this is set for Recommendation only mode
-resource "helm_release" "vpa" {
-  name       = "vpa"
-  namespace  = "kube-system"
-  repository = "https://charts.fairwinds.com/stable"
-  chart      = "vpa"
-  version    = "4.5.0"
-  wait       = true
-  timeout    = 600
+# resource "helm_release" "vpa" {
+#   name       = "vpa"
+#   namespace  = "kube-system"
+#   repository = "https://charts.fairwinds.com/stable"
+#   chart      = "vpa"
+#   version    = "4.5.0"
+#   wait       = true
+#   timeout    = 600
 
-  depends_on = [
-    aws_eks_cluster.pdex-cluster,
-    aws_eks_addon.coredns-addon
-  ]
-}
+#   depends_on = [
+#     aws_eks_cluster.pdex-cluster,
+#     aws_eks_addon.coredns-addon
+#   ]
+# }
 
 # Cluster Autoscaler Helm Release to see nodes scaling beyond desired count and up to max count
 resource "helm_release" "cluster_autoscaler" {
