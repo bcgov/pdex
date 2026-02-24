@@ -122,49 +122,6 @@ jobs:
 
       #     terragrunt plan
 
-      - name: Terragrunt Init + State Cleanup
-        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
-        env:
-          TF_INPUT: "0"
-          TF_VAR_vpc_id: "vpc-0beb5c99b7f010268"
-          TF_VAR_environment_name: "Dev"
-          TF_VAR_certificate_arn: "arn:aws:acm:ca-central-1:814738839437:certificate/5378658c-ae82-4c9f-a170-36a9f97d77dc"
-          TF_VAR_source_token: ${{ secrets.AWS_HEADER_TOKEN_DEV }}
-          TF_VAR_cloudfront_origin_domain: "dev.pdex.gov.bc.ca.ca-central-1.elb.amazonaws.com"
-          TF_VAR_cloudfront_certificate_arn: "arn:aws:acm:us-east-1:814738839437:certificate/4e46dda5-00b6-49b4-869a-5529077cf4db"
-          TF_VAR_github_actions_role_arn: ${{ secrets.AWS_ROLE_ARN_TO_USE_DEV }}
-        run: |
-          terragrunt run-all init --non-interactive
-
-          # Configure kubeconfig so Helm provider can reach the cluster for imports.
-          aws eks update-kubeconfig \
-            --name pdex-cluster \
-            --region ${{ secrets.AWS_REGION }}
-
-          # Remove stale kubernetes_manifest resources that were replaced with
-          # null_resource + kubectl. Safe to ignore if already absent.
-          terragrunt --non-interactive state rm kubernetes_manifest.eni_config_a || true
-          terragrunt --non-interactive state rm kubernetes_manifest.eni_config_b || true
-          terragrunt --non-interactive state rm kubernetes_manifest.pdex_alb_tgb || true
-
-          # Import Helm releases that already exist in the cluster but are not
-          # (yet) tracked in Terraform state. Format: "<namespace>/<release-name>".
-          # || true makes each import idempotent — safe to re-run if already imported.
-          terragrunt --non-interactive import helm_release.aws_load_balancer_controller "kube-system/aws-load-balancer-controller" || true
-          terragrunt --non-interactive import helm_release.metrics_server               "kube-system/metrics-server"               || true
-          terragrunt --non-interactive import helm_release.vpa                          "kube-system/vpa"                          || true
-          terragrunt --non-interactive import helm_release.cluster_autoscaler           "kube-system/cluster-autoscaler"           || true
-
-          # Reset any Helm releases stuck in pending-upgrade/pending-install state
-          # (left over from a previously failed run). helm rollback 0 resets to last good.
-          helm rollback aws-load-balancer-controller -n kube-system || true
-          helm rollback metrics-server               -n kube-system || true
-          helm rollback vpa                          -n kube-system || true
-          helm rollback cluster-autoscaler           -n kube-system || true
-
-          # Delete the stuck VPA certgen job so the pre-upgrade hook can run cleanly.
-          kubectl delete job -n kube-system -l app.kubernetes.io/name=vpa --ignore-not-found=true
-
       - name: Terragrunt Apply
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
         env:
