@@ -122,26 +122,6 @@ jobs:
 
       #     terragrunt plan
 
-      - name: Terragrunt Init + State Cleanup
-        working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
-        env:
-          TF_INPUT: "0"
-          TF_VAR_vpc_id: "vpc-0beb5c99b7f010268"
-          TF_VAR_environment_name: "Dev"
-          TF_VAR_certificate_arn: "arn:aws:acm:ca-central-1:814738839437:certificate/5378658c-ae82-4c9f-a170-36a9f97d77dc"
-          TF_VAR_source_token: ${{ secrets.AWS_HEADER_TOKEN_DEV }}
-          TF_VAR_cloudfront_origin_domain: "dev.pdex.gov.bc.ca.ca-central-1.elb.amazonaws.com"
-          TF_VAR_cloudfront_certificate_arn: "arn:aws:acm:us-east-1:814738839437:certificate/4e46dda5-00b6-49b4-869a-5529077cf4db"
-          TF_VAR_github_actions_role_arn: ${{ secrets.AWS_ROLE_ARN_TO_USE_DEV }}
-        run: |
-          terragrunt run-all init --non-interactive
-
-          # Remove stale kubernetes_manifest resources that were replaced with
-          # null_resource + kubectl. Safe to ignore if already absent.
-          terragrunt state rm kubernetes_manifest.eni_config_a   --non-interactive || true
-          terragrunt state rm kubernetes_manifest.eni_config_b   --non-interactive || true
-          terragrunt state rm kubernetes_manifest.pdex_alb_tgb   --non-interactive || true
-
       - name: Terragrunt Apply
         working-directory: ${{ env.TG_SRC_PATH }}/${{ env.TFC_WORKSPACE }}
         env:
@@ -158,6 +138,32 @@ jobs:
           terragrunt run-all validate --non-interactive
           terragrunt run-all plan --non-interactive
           terragrunt run-all apply --non-interactive
+
+      # - name: Apply TargetGroupBinding
+      #   run: |
+      #     # Fetch the real target group ARN from AWS and apply the TargetGroupBinding.
+      #     # This binds the ALB target group to the Kubernetes Service so the ALB
+      #     # can route traffic to pods directly via the AWS Load Balancer Controller.
+      #     PDEX_TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \
+      #       --names pdex-target-group \
+      #       --query 'TargetGroups[0].TargetGroupArn' \
+      #       --output text)
+
+      #     echo "Applying TargetGroupBinding with ARN: ${PDEX_TARGET_GROUP_ARN}"
+
+      #     kubectl apply -f - <<EOF
+      #     apiVersion: elbv2.k8s.aws/v1beta1
+      #     kind: TargetGroupBinding
+      #     metadata:
+      #       name: pdex-alb-tgb
+      #       namespace: default
+      #     spec:
+      #       targetGroupARN: "${PDEX_TARGET_GROUP_ARN}"
+      #       targetType: ip
+      #       serviceRef:
+      #         name: pdex-service-dev
+      #         port: 80
+      #     EOF
 
       - name: Finished Terragrunt Apply
         run: |

@@ -7,8 +7,15 @@ locals {
   data_subnet_names  = [for az in local.availability_zones : "${local.environment}-Data-${az}"]
   web_subnet_names   = [for az in local.availability_zones : "${local.environment}-Web-MainTgwAttach-${az}"]
   
-  extended_app_subnet_names = [
-    "BCGOV-LZA-extended-app-ca-central-1a",
-    "BCGOV-LZA-extended-app-ca-central-1b",
-  ]
+  # extended_app_subnet_names = [
+  #   "BCGOV-LZA-extended-app-ca-central-1a",
+  #   "BCGOV-LZA-extended-app-ca-central-1b",
+  # ]
+  # app_subnet_names = concat(
+  #   [for az in local.availability_zones : "${local.environment}-App-${az}"],
+  #   [
+  #     "BCGOV-LZA-extended-app-ca-central-1a",
+  #     "BCGOV-LZA-extended-app-ca-central-1b",
+  #   ]
+  # )
 }

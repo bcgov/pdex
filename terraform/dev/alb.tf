@@ -220,34 +220,3 @@ output "alb_security_group_id" {
   value       = aws_security_group.alb_sg.id
   description = "Security Group ID of the ALB for TargetGroupBinding"
 }
-
-resource "null_resource" "pdex_alb_tgb" {
-  triggers = {
-    target_group_arn = aws_alb_target_group.pdex.arn
-    cluster_name     = aws_eks_cluster.pdex-cluster.name
-  }
-
-  depends_on = [
-    helm_release.aws_load_balancer_controller,
-    null_resource.cluster_ready,
-    aws_alb_target_group.pdex,
-  ]
-
-  provisioner "local-exec" {
-    command = <<EOT
-kubectl apply -f - <<'ENDYAML'
-apiVersion: elbv2.k8s.aws/v1beta1
-kind: TargetGroupBinding
-metadata:
-  name: pdex-alb-tgb
-  namespace: default
-spec:
-  targetGroupARN: ${aws_alb_target_group.pdex.arn}
-  targetType: ip
-  serviceRef:
-    name: pdex-service-dev
-    port: 80
-ENDYAML
-EOT
-  }
-}

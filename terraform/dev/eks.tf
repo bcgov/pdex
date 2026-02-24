@@ -47,28 +47,10 @@ resource "aws_eks_cluster" "pdex-cluster" {
 }
 
 #EKS cluster addons
-# resource "aws_eks_addon" "vpc-cni-addon" {
-#   cluster_name = aws_eks_cluster.pdex-cluster.name
-#   addon_name   = "vpc-cni"
-#   addon_version = "v1.21.1-eksbuild.3"
-# }
-
 resource "aws_eks_addon" "vpc-cni-addon" {
-  cluster_name                = aws_eks_cluster.pdex-cluster.name
-  addon_name                  = "vpc-cni"
-  resolve_conflicts_on_create = "OVERWRITE"
-  resolve_conflicts_on_update = "OVERWRITE"
+  cluster_name = aws_eks_cluster.pdex-cluster.name
+  addon_name   = "vpc-cni"
   addon_version = "v1.21.1-eksbuild.3"
-
-  configuration_values = jsonencode({
-    env = {
-      AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG = "true"                        # Pods get IPs from ENIs that live in the ENIConfig subnets
-      ENI_CONFIG_LABEL_DEF               = "topology.kubernetes.io/zone" # how to choose which ENIConfig to use.
-      AWS_VPC_K8S_CNI_EXTERNALSNAT       = "true"                        # Do not do SNAT on the node.
-    }
-  })
-
-  depends_on = [aws_eks_cluster.pdex-cluster]
 }
 
 resource "aws_eks_addon" "kube-proxy-addon" {
@@ -158,9 +140,9 @@ resource "aws_iam_role_policy_attachment" "ng-AmazonEC2ContainerRegistryReadOnly
 }
 
 #Node group
-resource "aws_eks_node_group" "eks-ng" {
+resource "aws_eks_node_group" "eks-ng2" {
   cluster_name    = aws_eks_cluster.pdex-cluster.name
-  node_group_name = "eks-ng"
+  node_group_name = "eks-ng2"
   node_role_arn   = aws_iam_role.eks-ng-role.arn
   subnet_ids      = data.aws_subnets.app.ids
 
@@ -280,8 +262,7 @@ resource "aws_eks_pod_identity_association" "alb_controller" {
   service_account   = "aws-load-balancer-controller"
   role_arn          = aws_iam_role.alb_role.arn   # same role you built for the controller
   depends_on = [
-    aws_eks_addon.pod-identity-addon,
-    helm_release.aws_load_balancer_controller
+    aws_eks_addon.pod-identity-addon
   ]
 }
 
