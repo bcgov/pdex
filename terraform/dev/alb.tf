@@ -240,3 +240,4 @@ resource "kubernetes_manifest" "pdex_alb_tgb" {
       }
     }
   }
+}
