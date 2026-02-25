@@ -20,6 +20,7 @@ provider "helm" {
   }
 }
 
+
 resource "helm_release" "aws_load_balancer_controller" {
   name       = "aws-load-balancer-controller"
   namespace  = "kube-system"
