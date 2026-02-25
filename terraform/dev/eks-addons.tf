@@ -21,32 +21,32 @@ provider "helm" {
 }
 
 # need metrics server for HPA to work
-# resource "helm_release" "metrics_server" {
-#   name       = "metrics-server"
-#   namespace  = "kube-system"
-#   repository = "https://kubernetes-sigs.github.io/metrics-server/"
-#   chart      = "metrics-server"
-#   version    = "3.12.1" # pick a stable version; you can bump later
-#   wait       = true
-#   timeout    = 600
+resource "helm_release" "metrics_server" {
+  name       = "metrics-server"
+  namespace  = "kube-system"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+  version    = "3.12.1" # pick a stable version; you can bump later
+  wait       = true
+  timeout    = 600
 
-#   # EKS commonly needs these kubelet flags to avoid metrics not available
-#   set = [
-#     {
-#       name  = "args[0]"
-#       value = "--kubelet-insecure-tls"
-#     },
-#     {
-#       name  = "args[1]"
-#       value = "--kubelet-preferred-address-types=InternalIP\\,ExternalIP\\,Hostname"
-#     }
-#   ]
+  # EKS commonly needs these kubelet flags to avoid metrics not available
+  set = [
+    {
+      name  = "args[0]"
+      value = "--kubelet-insecure-tls"
+    },
+    {
+      name  = "args[1]"
+      value = "--kubelet-preferred-address-types=InternalIP\\,ExternalIP\\,Hostname"
+    }
+  ]
 
-#   depends_on = [
-#     aws_eks_cluster.pdex-cluster,
-#     aws_eks_addon.coredns-addon
-#   ]
-# }
+  depends_on = [
+    aws_eks_cluster.pdex-cluster,
+    aws_eks_addon.coredns-addon
+  ]
+}
 
 # need VPA for vertical pod autoscaling, this is set for Recommendation only mode
 # resource "helm_release" "vpa" {
