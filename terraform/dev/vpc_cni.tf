@@ -1,12 +1,4 @@
-﻿data "aws_subnets" "pod" {
-  filter {
-    name   = "tag:Name"
-    values = local.pod_subnet_names
-  }
-}
-
-# Tag extended subnets so EKS/VPC CNI can use them for custom networking / ENIConfig
-
+﻿# Tag extended subnets so EKS/VPC CNI can use them for custom networking / ENIConfig
 resource "aws_ec2_tag" "pod_subnet_cluster_tag" {
   for_each    = toset(data.aws_subnets.pod.ids)
   resource_id = each.value
