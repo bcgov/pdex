@@ -1,4 +1,10 @@
-﻿resource "kubernetes_manifest" "eni_config_a" {
+﻿data "aws_subnets" "pod" {
+  filter {
+    name   = "tag:Name"
+    values = local.pod_subnet_names
+  }
+}
+resource "kubernetes_manifest" "eni_config_a" {
   depends_on = [aws_eks_addon.vpc-cni-addon]
 
   manifest = {
