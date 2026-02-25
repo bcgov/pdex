@@ -6,14 +6,4 @@ locals {
   app_subnet_names   = [for az in local.availability_zones : "${local.environment}-App-${az}"]
   data_subnet_names  = [for az in local.availability_zones : "${local.environment}-Data-${az}"]
   web_subnet_names   = [for az in local.availability_zones : "${local.environment}-Web-MainTgwAttach-${az}"]
-  
-  # extended_app_subnet_names = [
-  #   "BCGOV-LZA-extended-app-ca-central-1a",
-  #   "BCGOV-LZA-extended-app-ca-central-1b",
-  # ]
-  # NEW: subnets for Pod ENIs (custom networking)
-  pod_subnet_names = [
-    "BCGOV-LZA-extended-app-ca-central-1a",
-    "BCGOV-LZA-extended-app-ca-central-1b",
-  ]
 }
