@@ -1,8 +1,6 @@
 ﻿resource "kubernetes_manifest" "eni_config_a" {
   depends_on = [
-    aws_eks_addon.vpc-cni-addon,
-    aws_ec2_tag.pod_subnet_cluster_tag,
-    aws_ec2_tag.pod_subnet_internal_elb_tag,
+    aws_eks_addon.vpc-cni-addon
   ]
 
   manifest = {
@@ -18,9 +16,7 @@
 
 resource "kubernetes_manifest" "eni_config_b" {
   depends_on = [
-    aws_eks_addon.vpc-cni-addon,
-    aws_ec2_tag.pod_subnet_cluster_tag,
-    aws_ec2_tag.pod_subnet_internal_elb_tag,
+    aws_eks_addon.vpc-cni-addon
   ]
 
   manifest = {
