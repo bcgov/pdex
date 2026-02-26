@@ -35,7 +35,7 @@ class InstitutionController extends Controller
         $search = $request->get('search');
         $type = $request->get('type');
         $activeStatus = $request->get('active_status');
-        $perPage = $request->get('per_page', 10);
+        $perPage = $request->get('per_page', 50);
 
         // Apply filters
         if ($search) {
@@ -51,7 +51,8 @@ class InstitutionController extends Controller
         }
 
         // Get paginated results
-        $institutions = $query->orderBy('legal_operating_name')
+        $institutions = $query->withCount('sites')
+                            ->orderBy('legal_operating_name')
                             ->paginate($perPage)
                             ->withQueryString();
 
@@ -69,6 +70,8 @@ class InstitutionController extends Controller
         $stats = [
             'total' => Institution::count(),
             'active' => Institution::where('active_status', true)->count(),
+            'total_sites' => \App\Models\InstitutionSite::count(),
+            'with_dli' => Institution::whereNotNull('dli')->count(),
             'by_type' => Institution::selectRaw('institution_type, count(*) as count')
                                   ->groupBy('institution_type')
                                   ->pluck('count', 'institution_type'),
@@ -121,6 +124,7 @@ class InstitutionController extends Controller
                         'email' => $user->email,
                         'first_name' => $user->first_name,
                         'last_name' => $user->last_name,
+                        'bceid_user_guid' => $user->bceid_user_guid,
                         'is_active' => $user->is_active,
                         'created_at' => $user->created_at,
                         'roles' => $user->roles->pluck('name')->toArray(),

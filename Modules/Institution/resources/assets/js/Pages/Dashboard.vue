@@ -207,7 +207,10 @@ const props = defineProps({
 const redirectToApp = (appId) => {
   if (appId) {
     // Use the centralized gateway route and open in new tab
-    window.open(`/gateway/${appId}`, '_blank')
+    const app = props.applications.find(a => a.id === appId)
+    if (app) {
+      window.open(`/gateway/${app.guid}`, '_blank')
+    }
   }
 }
 

@@ -43,6 +43,7 @@ class StudentController extends Controller
             ->orderBy('name', 'asc')
             ->select([
                 'id',
+                'guid',
                 'name',
                 'description',
                 'bcsc_redirect_url',
@@ -85,6 +86,7 @@ class StudentController extends Controller
 
                 return [
                     'id' => $app->id,
+                    'guid' => $app->guid,
                     'name' => $app->name,
                     'description' => $app->description,
                     'redirect_url' => $app->bcsc_redirect_url,

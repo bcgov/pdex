@@ -11,7 +11,18 @@ class Application extends Model
 {
     use HasFactory, SoftDeletes;
 
+    /**
+     * Get the route key for implicit model binding.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'guid';
+    }
+
     protected $fillable = [
+        'guid',
         'name',
         'description',
         'info_url',

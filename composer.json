@@ -17,8 +17,9 @@
         "laravel/tinker": "^2.10.1",
         "nwidart/laravel-modules": "^12.0",
         "predis/predis": "^2.2",
-        "stevenmaguire/oauth2-keycloak": "^5.1",
-        "tightenco/ziggy": "^2.4"
+        "stevenmaguire/oauth2-keycloak": "dev-master",
+        "tightenco/ziggy": "^2.4",
+        "firebase/php-jwt": "^7.0.2"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.13",
@@ -28,7 +29,7 @@
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^11.5.3"
+        "phpunit/phpunit": "^12.5.14"
     },
     "autoload": {
         "psr-4": {
@@ -92,6 +93,13 @@
             "wikimedia/composer-merge-plugin": true
         }
     },
-    "minimum-stability": "stable",
-    "prefer-stable": true
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/cracksalad/oauth2-keycloak"
+        }
+    ]
+
 }

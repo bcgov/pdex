@@ -19,6 +19,7 @@ class ApplicationSeeder extends Seeder
         
         // Student Active - No Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'BC Student Portal',
             'description' => 'Your gateway to provincial student services, financial aid, and academic records.',
             'bcsc_redirect_url' => 'https://student-portal.edu.bc.ca/bcsc-callback',
@@ -44,6 +45,7 @@ class ApplicationSeeder extends Seeder
 
         // Student Active - With Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'BC Scholarship Hub',
             'description' => 'Apply for scholarships, grants, and bursaries available to BC students.',
             'bcsc_redirect_url' => 'https://scholarships.edu.bc.ca/bcsc-callback',
@@ -69,6 +71,7 @@ class ApplicationSeeder extends Seeder
 
         // Ministry Active - No Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'Ministry Operations Center',
             'description' => 'Central hub for ministry staff to access operational tools and resources.',
             'idir_redirect_url' => 'https://operations.gov.bc.ca/idir-callback',
@@ -94,6 +97,7 @@ class ApplicationSeeder extends Seeder
 
         // Ministry Active - With Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'Policy Management System',
             'description' => 'Comprehensive system for managing government policies and procedures.',
             'idir_redirect_url' => 'https://policy-mgmt.gov.bc.ca/idir-callback',
@@ -119,6 +123,7 @@ class ApplicationSeeder extends Seeder
 
         // Institution Active - No Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'Campus Connect',
             'description' => 'Institutional portal for campus administration and student management.',
             'bceid_redirect_url' => 'https://campus-connect.edu.bc.ca/bceid-callback',
@@ -144,6 +149,7 @@ class ApplicationSeeder extends Seeder
 
         // Institution Active - With Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'Enrollment Management Suite',
             'description' => 'Advanced tools for managing student enrollment, registration, and academic planning.',
             'bceid_redirect_url' => 'https://enrollment.edu.bc.ca/bceid-callback',
@@ -171,6 +177,7 @@ class ApplicationSeeder extends Seeder
 
         // Student Offline - With Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'BC Student Financial Aid',
             'description' => 'Apply for and manage your provincial student loans and grants.',
             'bcsc_redirect_url' => 'https://financial-aid.edu.bc.ca/bcsc-callback',
@@ -196,6 +203,7 @@ class ApplicationSeeder extends Seeder
 
         // Ministry Offline - With Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'Document Management System',
             'description' => 'Secure document storage and collaboration platform for government staff.',
             'idir_redirect_url' => 'https://docs.gov.bc.ca/idir-callback',
@@ -221,6 +229,7 @@ class ApplicationSeeder extends Seeder
 
         // Institution Offline - With Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'Academic Records Portal',
             'description' => 'Comprehensive academic records management for institutional administrators.',
             'bceid_redirect_url' => 'https://records.edu.bc.ca/bceid-callback',
@@ -248,6 +257,7 @@ class ApplicationSeeder extends Seeder
 
         // Student Inactive - No Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'Career Services Network',
             'description' => 'Connect with career counselors and explore job opportunities in BC.',
             'bcsc_redirect_url' => 'https://careers.edu.bc.ca/bcsc-callback',
@@ -271,6 +281,7 @@ class ApplicationSeeder extends Seeder
 
         // Ministry Inactive - No Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'Resource Planning Hub',
             'description' => 'Strategic planning and resource allocation tools for ministry departments.',
             'idir_redirect_url' => 'https://planning.gov.bc.ca/idir-callback',
@@ -294,6 +305,7 @@ class ApplicationSeeder extends Seeder
 
         // Institution Inactive - No Alert
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'Research Collaboration Platform',
             'description' => 'Facilitate research partnerships and grant management across institutions.',
             'bceid_redirect_url' => 'https://research.edu.bc.ca/bceid-callback',
@@ -317,6 +329,7 @@ class ApplicationSeeder extends Seeder
 
         // Multi-auth Active with different alerts
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'BC Education Gateway',
             'description' => 'Unified access point for educational services across BC institutions.',
             'bcsc_redirect_url' => 'http://127.0.0.1:8232/test-gateway/student',
@@ -344,6 +357,7 @@ class ApplicationSeeder extends Seeder
 
         // Multi-auth Offline
         Application::create([
+            'guid' => Str::random(32),
             'name' => 'Provincial Data Exchange',
             'description' => 'Secure data sharing platform for cross-institutional collaboration.',
             'bcsc_redirect_url' => 'https://data-exchange.bc.ca/bcsc-callback',

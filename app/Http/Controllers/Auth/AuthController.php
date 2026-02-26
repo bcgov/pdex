@@ -255,12 +255,27 @@ class AuthController extends Controller
 
 
         // If user doesn't exist, create them
-        if (!$user && $this->shouldCreateUser($providerUser)) {
+        // if (!$user && $this->shouldCreateUser($providerUser)) {
+        if (!$user) {
+            \Log::info('Creating new user', [
+                'email' => $providerUser['email'] ?? 'unknown',
+                'idp_type' => $idpType,
+            ]);
             $user = $this->createNewUser($providerUser, $idpType, $token);
         }
 
+        if ($idpType === 'bcsc') {
+            $this->createStudentProfile($user, $providerUser);
+        }
+
+
         // Update user information and tokens for existing users
-        if ($user) {
+        else {
+            \Log::info('Updating existing user', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'idp_type' => $idpType,
+            ]);
             if (isset($providerUser['name'])) {
                 $user->name = $providerUser['name'];
             }
@@ -354,9 +369,9 @@ class AuthController extends Controller
         $this->assignDefaultRole($user, $idpType);
 
         // Create student profile for BCSC users
-        if ($idpType === 'bcsc') {
-            $this->createStudentProfile($user, $providerUser);
-        }
+        // if ($idpType === 'bcsc') {
+        //     $this->createStudentProfile($user, $providerUser);
+        // }
 
         Log::info('New user created', [
             'user_id' => $user->id,
@@ -371,11 +386,11 @@ class AuthController extends Controller
     /**
      * Check if we should create a new user.
      */
-    private function shouldCreateUser(array $providerUser): bool
-    {
-        // Add validation logic here
-        return isset($providerUser['email']) && !empty($providerUser['email']);
-    }
+    // private function shouldCreateUser(array $providerUser): bool
+    // {
+    //     // Add validation logic here
+    //     return isset($providerUser['email']) && !empty($providerUser['email']);
+    // }
 
     /**
      * Assign default role based on identity provider.
@@ -528,6 +543,15 @@ class AuthController extends Controller
      */
     private function createStudentProfile(User $user, array $providerUser): void
     {
+        // Check if profile already exists to avoid duplicates
+        $existingProfile = \App\Models\Individual::where('user_guid', $user->guid)->first();
+        if ($existingProfile) {
+            Log::info('Student profile already exists for user, skipping creation', [
+                'user_guid' => $user->guid,
+            ]);
+            return;
+        }
+
         try {
             $individual = \App\Models\Individual::create([
                 'user_guid' => $user->guid,

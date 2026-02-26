@@ -47,9 +47,15 @@ export default {
             return user.roles.some(role => role.name === 'Ministry_Admin');
         },
         logoutRoute() {
-            // Use admin logout if we're in admin area
+            // Use module-specific logout routes
             if (this.$page.url.includes('/admin')) {
                 return '/admin/logout';
+            } else if (this.$page.url.includes('/ministry')) {
+                return '/ministry/logout';
+            } else if (this.$page.url.includes('/institution')) {
+                return '/institution/logout';
+            } else if (this.$page.url.includes('/student')) {
+                return '/student/logout';
             }
             return '/logout';
         }
