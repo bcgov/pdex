@@ -157,7 +157,7 @@ resource "aws_eks_node_group" "eks-ng" {
   subnet_ids      = data.aws_subnets.app.ids
 
   scaling_config {
-    desired_size = 3
+    desired_size = 4
     max_size     = 10
     min_size     = 1
   }
@@ -166,7 +166,10 @@ resource "aws_eks_node_group" "eks-ng" {
     max_unavailable = 1
   }
 
-  instance_types = ["t3.xlarge"] # 4vCPU, 16GB RAM, instead of t3.medium 2vCPU 4GB RAM
+  # 4vCPU, 16GB RAM, instead of t3.medium 2vCPU 4GB RAM. c6i instead of t3 because t3 is burstable 
+  # and can have performance issues when bursting. c6i is compute optimized and should perform well 
+  # for our workloads. You can adjust this based on your needs and budget.
+  instance_types = ["c6i.xlarge"]
 
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
