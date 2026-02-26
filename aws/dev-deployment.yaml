@@ -159,6 +159,9 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8080
+    # - protocol: TCP
+    #   port: 443
+    #   targetPort: 9443
   type: ClusterIP
 
 ---
@@ -201,14 +204,14 @@ spec:
     kind: Deployment
     name: pdex-app-dev
   minReplicas: 1
-  maxReplicas: 10
+  maxReplicas: 20
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 60
+        averageUtilization: 70
   - type: Resource
     resource:
       name: memory
@@ -216,24 +219,24 @@ spec:
         type: Utilization
         averageUtilization: 80
 
----
-apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-  name: pdex-vpa-dev
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: pdex-app-dev
-  updatePolicy:
-    updateMode: "Off" # That keeps recommendations but stops pod mutations. (No HPA/VPA fighting.)
-  resourcePolicy:
-    containerPolicies:
-    - containerName: pdex
-      minAllowed:
-        cpu: 100m
-        memory: 256Mi
-      maxAllowed:
-        cpu: 2000m
-        memory: 2Gi
+# ---
+# apiVersion: autoscaling.k8s.io/v1
+# kind: VerticalPodAutoscaler
+# metadata:
+#   name: pdex-vpa-dev
+# spec:
+#   targetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: pdex-app-dev
+#   updatePolicy:
+#     updateMode: "Off" # That keeps recommendations but stops pod mutations. (No HPA/VPA fighting.)
+#   resourcePolicy:
+#     containerPolicies:
+#     - containerName: pdex
+#       minAllowed:
+#         cpu: 100m
+#         memory: 256Mi
+#       maxAllowed:
+#         cpu: 2000m
+#         memory: 2Gi

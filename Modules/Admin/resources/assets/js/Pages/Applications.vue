@@ -57,7 +57,7 @@
             <td>
               <div class="d-flex align-items-center">
                 <div>
-                    <Link :href="`/admin/applications/edit/${app.id}`" class="">
+                    <Link :href="`/admin/applications/edit/${app.guid}`" class="">
                       <strong>{{ app.name }}</strong>
                     </Link>
 
@@ -143,18 +143,18 @@
                     </button>
                   </li>
                   <li v-if="app.deleted_at">
-                    <button @click="restoreApp(app.id)" class="dropdown-item text-success">
+                    <button @click="restoreApp(app)" class="dropdown-item text-success">
                       <i class="bi bi-arrow-clockwise me-2"></i>Restore
                     </button>
                   </li>
                   <li><hr class="dropdown-divider"></li>
                   <li v-if="!app.deleted_at">
-                    <button @click="deleteApp(app.id)" class="dropdown-item text-danger">
+                    <button @click="deleteApp(app)" class="dropdown-item text-danger">
                       <i class="bi bi-trash me-2"></i>Delete
                     </button>
                   </li>
                   <li v-if="app.deleted_at">
-                    <button @click="forceDeleteApp(app.id)" class="dropdown-item text-danger">
+                    <button @click="forceDeleteApp(app)" class="dropdown-item text-danger">
                       <i class="bi bi-trash me-2"></i>Delete Permanently
                     </button>
                   </li>
@@ -287,12 +287,12 @@ export default {
     function submitApproval() {
       let endpoint = '';
       if (approvalType.value === 'security') {
-        endpoint = `/admin/applications/${selectedApp.value.id}/security-approval`;
+        endpoint = `/admin/applications/${selectedApp.value.guid}/security-approval`;
       } else if (approvalType.value === 'privacy') {
-        endpoint = `/admin/applications/${selectedApp.value.id}/privacy-approval`;
+        endpoint = `/admin/applications/${selectedApp.value.guid}/privacy-approval`;
       } else {
         // For reject, we might want to reject both
-        endpoint = `/admin/applications/${selectedApp.value.id}/security-approval`;
+        endpoint = `/admin/applications/${selectedApp.value.guid}/security-approval`;
       }
       
       approvalForm.patch(endpoint, {
@@ -318,25 +318,25 @@ export default {
       const action = statusLabels[nextStatus] || 'change status';
       
       if (confirm(`Are you sure you want to ${action} this application?`)) {
-        router.patch(`/admin/applications/toggle-status/${app.id}`);
+        router.patch(`/admin/applications/toggle-status/${app.guid}`);
       }
     }
 
-    function deleteApp(id) {
+    function deleteApp(app) {
       if (confirm('Are you sure you want to delete this application? It can be restored later.')) {
-        router.delete(`/admin/applications/${id}`);
+        router.delete(`/admin/applications/${app.guid}`);
       }
     }
 
-    function restoreApp(id) {
+    function restoreApp(app) {
       if (confirm('Are you sure you want to restore this application?')) {
-        router.patch(`/admin/applications/restore/${id}`);
+        router.patch(`/admin/applications/restore/${app.id}`);
       }
     }
 
-    function forceDeleteApp(id) {
+    function forceDeleteApp(app) {
       if (confirm('Are you sure you want to permanently delete this application? This action cannot be undone.')) {
-        router.delete(`/admin/applications/force-delete/${id}`);
+        router.delete(`/admin/applications/force-delete/${app.id}`);
       }
     }
 

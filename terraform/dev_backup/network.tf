@@ -16,18 +16,6 @@ data "aws_subnets" "app" {
   }
 }
 
-data "aws_subnets" "pod" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
-  }
-
-  filter {
-    name   = "tag:Name"
-    values = local.pod_subnet_names
-  }
-}
-
 data "aws_subnets" "data" {
   filter {
     name   = "vpc-id"

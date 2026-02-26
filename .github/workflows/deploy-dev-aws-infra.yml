@@ -139,6 +139,32 @@ jobs:
           terragrunt run-all plan --non-interactive
           terragrunt run-all apply --non-interactive
 
+      # - name: Apply TargetGroupBinding
+      #   run: |
+      #     # Fetch the real target group ARN from AWS and apply the TargetGroupBinding.
+      #     # This binds the ALB target group to the Kubernetes Service so the ALB
+      #     # can route traffic to pods directly via the AWS Load Balancer Controller.
+      #     PDEX_TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \
+      #       --names pdex-target-group \
+      #       --query 'TargetGroups[0].TargetGroupArn' \
+      #       --output text)
+
+      #     echo "Applying TargetGroupBinding with ARN: ${PDEX_TARGET_GROUP_ARN}"
+
+      #     kubectl apply -f - <<EOF
+      #     apiVersion: elbv2.k8s.aws/v1beta1
+      #     kind: TargetGroupBinding
+      #     metadata:
+      #       name: pdex-alb-tgb
+      #       namespace: default
+      #     spec:
+      #       targetGroupARN: "${PDEX_TARGET_GROUP_ARN}"
+      #       targetType: ip
+      #       serviceRef:
+      #         name: pdex-service-dev
+      #         port: 80
+      #     EOF
+
       - name: Finished Terragrunt Apply
         run: |
           echo "FINISHED OC Deploy Infrastructure on AWS DEV for PDEX"

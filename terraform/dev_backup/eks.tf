@@ -51,16 +51,6 @@ resource "aws_eks_addon" "vpc-cni-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "vpc-cni"
   addon_version = "v1.21.1-eksbuild.3"
-  resolve_conflicts_on_create = "OVERWRITE"
-  resolve_conflicts_on_update = "OVERWRITE"
-
-  configuration_values = jsonencode({
-    env = {
-      AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG = "true"                        # Pods get IPs from ENIs that live in the ENIConfig subnets
-      ENI_CONFIG_LABEL_DEF               = "topology.kubernetes.io/zone" # how to choose which ENIConfig to use.
-      AWS_VPC_K8S_CNI_EXTERNALSNAT       = "true"                        # Do not do SNAT on the node.
-    }
-  })
 }
 
 resource "aws_eks_addon" "kube-proxy-addon" {
@@ -154,10 +144,10 @@ resource "aws_eks_node_group" "eks-ng" {
   cluster_name    = aws_eks_cluster.pdex-cluster.name
   node_group_name = "eks-ng"
   node_role_arn   = aws_iam_role.eks-ng-role.arn
-  subnet_ids      = data.aws_subnets.pod.ids
+  subnet_ids      = data.aws_subnets.app.ids
 
   scaling_config {
-    desired_size = 4
+    desired_size = 3
     max_size     = 10
     min_size     = 1
   }
@@ -166,10 +156,7 @@ resource "aws_eks_node_group" "eks-ng" {
     max_unavailable = 1
   }
 
-  # 4vCPU, 16GB RAM, instead of t3.medium 2vCPU 4GB RAM. c6i instead of t3 because t3 is burstable 
-  # and can have performance issues when bursting. c6i is compute optimized and should perform well 
-  # for our workloads. You can adjust this based on your needs and budget.
-  instance_types = ["c6i.xlarge"]
+  instance_types = ["t3.xlarge"] # 4vCPU, 16GB RAM, instead of t3.medium 2vCPU 4GB RAM
 
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
@@ -275,8 +262,7 @@ resource "aws_eks_pod_identity_association" "alb_controller" {
   service_account   = "aws-load-balancer-controller"
   role_arn          = aws_iam_role.alb_role.arn   # same role you built for the controller
   depends_on = [
-    aws_eks_addon.pod-identity-addon,
-    helm_release.aws_load_balancer_controller
+    aws_eks_addon.pod-identity-addon
   ]
 }
 

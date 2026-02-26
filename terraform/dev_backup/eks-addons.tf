@@ -1,11 +1,9 @@
 data "aws_eks_cluster" "this" {
   name = aws_eks_cluster.pdex-cluster.name
-  depends_on = [aws_eks_cluster.pdex-cluster]
 }
 
 data "aws_eks_cluster_auth" "this" {
   name = aws_eks_cluster.pdex-cluster.name
-  depends_on = [aws_eks_cluster.pdex-cluster]
 }
 
 provider "kubernetes" {
@@ -19,9 +17,9 @@ provider "helm" {
     host                   = data.aws_eks_cluster.this.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.this.token
-    load_config_file       = false
   }
 }
+
 
 resource "helm_release" "aws_load_balancer_controller" {
   name       = "aws-load-balancer-controller"
@@ -62,7 +60,6 @@ resource "time_sleep" "wait_for_alb_controller_crds" {
   depends_on      = [helm_release.aws_load_balancer_controller]
 }
 
-
 # need metrics server for HPA to work
 resource "helm_release" "metrics_server" {
   name       = "metrics-server"
@@ -92,20 +89,20 @@ resource "helm_release" "metrics_server" {
 }
 
 # need VPA for vertical pod autoscaling, this is set for Recommendation only mode
-resource "helm_release" "vpa" {
-  name       = "vpa"
-  namespace  = "kube-system"
-  repository = "https://charts.fairwinds.com/stable"
-  chart      = "vpa"
-  version    = "4.5.0"
-  wait       = true
-  timeout    = 600
+# resource "helm_release" "vpa" {
+#   name       = "vpa"
+#   namespace  = "kube-system"
+#   repository = "https://charts.fairwinds.com/stable"
+#   chart      = "vpa"
+#   version    = "4.5.0"
+#   wait       = true
+#   timeout    = 600
 
-  depends_on = [
-    aws_eks_cluster.pdex-cluster,
-    aws_eks_addon.coredns-addon
-  ]
-}
+#   depends_on = [
+#     aws_eks_cluster.pdex-cluster,
+#     aws_eks_addon.coredns-addon
+#   ]
+# }
 
 # Cluster Autoscaler Helm Release to see nodes scaling beyond desired count and up to max count
 resource "helm_release" "cluster_autoscaler" {
