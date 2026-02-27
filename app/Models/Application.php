@@ -21,7 +21,7 @@ class Application extends Model
 
         static::creating(function ($model) {
             if (empty($model->guid)) {
-                $model->guid = (string) Str::uuid();
+                $model->guid = Str::orderedUuid()->getHex();
             }
         });
     }

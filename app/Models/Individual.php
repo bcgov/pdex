@@ -72,11 +72,11 @@ class Individual extends Model
         
         static::creating(function ($model) {
             if (empty($model->guid)) {
-                $model->guid = (string) Str::uuid();
+                $model->guid = Str::orderedUuid()->getHex();
             }
         });
     }
-    
+
     // Relationships for addresses, employments, and identities
     public function addresses()
     {
