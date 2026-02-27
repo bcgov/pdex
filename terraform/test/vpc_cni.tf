@@ -8,7 +8,7 @@
     kind       = "ENIConfig"
     metadata   = { name = "ca-central-1a" }
     spec = {
-      subnet         = data.aws_subnets.pod.ids[0]
+      subnet         = local.pod_subnet_by_az["ca-central-1a"]
       securityGroups = [data.aws_security_group.eks_node_sg.id]
     }
   }
@@ -24,7 +24,7 @@ resource "kubernetes_manifest" "eni_config_b" {
     kind       = "ENIConfig"
     metadata   = { name = "ca-central-1b" }
     spec = {
-      subnet         = data.aws_subnets.pod.ids[1]
+      subnet         = local.pod_subnet_by_az["ca-central-1b"]
       securityGroups = [data.aws_security_group.eks_node_sg.id]
     }
   }
