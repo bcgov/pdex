@@ -6,10 +6,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Application extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /**
+     * Boot method to auto-generate GUID.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->guid)) {
+                $model->guid = (string) Str::uuid();
+            }
+        });
+    }
 
     /**
      * Get the route key for implicit model binding.

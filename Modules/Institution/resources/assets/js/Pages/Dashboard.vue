@@ -15,8 +15,8 @@
             Access institutional applications and educational services with secure authentication
           </p>
           <div class="d-inline-flex align-items-center px-3 py-2 bg-warning bg-opacity-10 rounded-pill border border-warning border-opacity-25">
-            <i class="bi bi-shield-check text-warning me-2"></i>
-            <span class="small fw-medium text-warning">Secured by BC Services Card</span>
+            <i class="bi bi-buildings text-warning me-2"></i>
+            <span class="small fw-medium text-warning">{{ user.name }}</span>
           </div>
         </div>
 

@@ -155,7 +155,15 @@
               <div class="mb-4">
                 <h5 class="card-title">Compliance Documentation</h5>
                 <div class="row">
-                  <div class="col-md-6">
+                  <div class="col-md-4">
+                    <div class="form-check">
+                      <input v-model="form.profile_integration_ready" class="form-check-input" type="checkbox" id="profile_integration_ready" />
+                      <label class="form-check-label" for="profile_integration_ready">
+                        Profile Integration Ready (if yes, the user would be prompted the popup dialog to agree to share their profile information)
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
                     <div class="form-check">
                       <input v-model="form.stra_provided" class="form-check-input" type="checkbox" id="stra_provided" />
                       <label class="form-check-label" for="stra_provided">
@@ -163,7 +171,7 @@
                       </label>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                     <div class="form-check">
                       <input v-model="form.pia_provided" class="form-check-input" type="checkbox" id="pia_provided" />
                       <label class="form-check-label" for="pia_provided">
@@ -249,6 +257,7 @@ export default {
       comments: '',
       stra_provided: false,
       pia_provided: false,
+      profile_integration_ready: false,
     });
 
     function submit() {

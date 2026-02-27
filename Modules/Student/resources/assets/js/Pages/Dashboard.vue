@@ -15,8 +15,8 @@
             Access your educational applications securely through BC Services Card authentication
           </p>
           <div class="d-inline-flex align-items-center px-3 py-2 bg-success bg-opacity-10 rounded-pill border border-success border-opacity-25">
-            <i class="bi bi-shield-check text-success me-2"></i>
-            <span class="small fw-medium text-success">Secured by BC Services Card</span>
+            <i class="bi bi-person-circle text-success me-2"></i>
+            <span class="small fw-medium text-success">{{ user.name }}</span>
           </div>
         </div>
 

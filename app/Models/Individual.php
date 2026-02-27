@@ -38,43 +38,8 @@ class Individual extends Model
         'last_login_at',
         'sex',
     ];
-    // Relationships for addresses, employments, and identities
-    public function addresses()
-    {
-        return $this->hasMany(IndividualAddress::class);
-    }
 
-    public function employments()
-    {
-        return $this->hasMany(IndividualEmployment::class);
-    }
-
-    public function identities()
-    {
-        return $this->hasMany(IndividualIdentity::class);
-    }
-
-    // Singular relationships for current/primary records
-    public function currentAddress()
-    {
-        return $this->hasOne(IndividualAddress::class)->where('is_primary', true);
-    }
-
-    public function currentEmployment()
-    {
-        return $this->hasOne(IndividualEmployment::class)->where('is_current', true);
-    }
-
-    public function identity()
-    {
-        return $this->hasOne(IndividualIdentity::class);
-    }
-
-    public function permissionSelections()
-    {
-        return $this->hasMany(IndividualApplicationPermissionSelection::class);
-    }
-
+    
     protected $casts = [
     'date_of_birth' => 'date',
     'disability_status' => 'boolean',
@@ -110,6 +75,43 @@ class Individual extends Model
                 $model->guid = (string) Str::uuid();
             }
         });
+    }
+    
+    // Relationships for addresses, employments, and identities
+    public function addresses()
+    {
+        return $this->hasMany(IndividualAddress::class);
+    }
+
+    public function employments()
+    {
+        return $this->hasMany(IndividualEmployment::class);
+    }
+
+    public function identities()
+    {
+        return $this->hasMany(IndividualIdentity::class);
+    }
+
+    // Singular relationships for current/primary records
+    public function currentAddress()
+    {
+        return $this->hasOne(IndividualAddress::class)->where('is_primary', true);
+    }
+
+    public function currentEmployment()
+    {
+        return $this->hasOne(IndividualEmployment::class)->where('is_current', true);
+    }
+
+    public function identity()
+    {
+        return $this->hasOne(IndividualIdentity::class);
+    }
+
+    public function permissionSelections()
+    {
+        return $this->hasMany(IndividualApplicationPermissionSelection::class);
     }
 
     // Relationships
