@@ -2,7 +2,7 @@ name: Build and Deploy PDEX in DEV AWS
 
 on:
   pull_request:
-    branches: [ dev-aws ]
+    branches: [ dev ]
     types: [ closed ]
 
 permissions:
