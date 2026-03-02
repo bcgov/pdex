@@ -5,17 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Http\Controllers\RedirectResponse;
 
 class WelcomeController extends Controller
 {
     /**
      * Display the public welcome page.
      */
-    public function index(): Response | RedirectResponse
+    public function index()
     {
         // force redirect to /login page and skip welcome page for now since we don't have public content yet
-        return RedirectResponse::route('login');
+        return redirect()->route('login');
 
         return Inertia::render('Welcome', [
             'stats' => [
