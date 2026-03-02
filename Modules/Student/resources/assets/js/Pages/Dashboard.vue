@@ -12,11 +12,12 @@
             <div class="border-bottom border-success border-3 w-25 mx-auto mb-3"></div>
           </div>
           <p class="lead text-muted mb-4" style="max-width: 600px; margin: 0 auto;">
-            Access your educational applications securely through BC Services Card authentication
+            Access your educational applications securely<br/>through Post Secondary Data Exchange
+
           </p>
           <div class="d-inline-flex align-items-center px-3 py-2 bg-success bg-opacity-10 rounded-pill border border-success border-opacity-25">
-            <i class="bi bi-shield-check text-success me-2"></i>
-            <span class="small fw-medium text-success">Secured by BC Services Card</span>
+            <i class="bi bi-person-circle text-success me-2"></i>
+            <span class="small fw-medium text-success">{{ $attrs.auth.user.given_name + ' ' + $attrs.auth.user.family_name }}</span>
           </div>
         </div>
 

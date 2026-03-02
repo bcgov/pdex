@@ -84,7 +84,7 @@ class InstitutionController extends Controller
 
         return Inertia::render('Institution::Dashboard', [
             'applications' => $applications,
-            'user' => auth()->user()->only(['name', 'email']),
+            'user' => auth()->user()->only(['name', 'email', 'organization']),
         ]);
     }
 

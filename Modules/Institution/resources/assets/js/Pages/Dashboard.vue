@@ -12,11 +12,11 @@
             <div class="border-bottom border-warning border-3 w-25 mx-auto mb-3"></div>
           </div>
           <p class="lead text-muted mb-4" style="max-width: 600px; margin: 0 auto;">
-            Access institutional applications and educational services with secure authentication
+            Access institutional applications and educational services securely<br/>through Post Secondary Data Exchange
           </p>
           <div class="d-inline-flex align-items-center px-3 py-2 bg-warning bg-opacity-10 rounded-pill border border-warning border-opacity-25">
-            <i class="bi bi-shield-check text-warning me-2"></i>
-            <span class="small fw-medium text-warning">Secured by BC Services Card</span>
+            <i class="bi bi-buildings text-warning me-2"></i>
+            <span class="small fw-medium text-warning">{{ user.organization }}</span>
           </div>
         </div>
 

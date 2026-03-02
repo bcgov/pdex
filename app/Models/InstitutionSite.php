@@ -88,7 +88,7 @@ class InstitutionSite extends Model
 
         static::creating(function ($model) {
             if (empty($model->guid)) {
-                $model->guid = Str::uuid()->getHex();
+                $model->guid = Str::orderedUuid()->getHex();
             }
         });
     }
