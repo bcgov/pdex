@@ -30,6 +30,8 @@
           <option value="Security Officer">Security Officer</option>
           <option value="Privacy Officer">Privacy Officer</option>
           <option value="Admin Guest">Admin Guest</option>
+          <option value="Institution User">Institution User</option>
+          <option value="Student">Student</option>
         </select>
       </div>
       <div class="col-md-3">
@@ -120,7 +122,7 @@
                   <div class="btn-group btn-group-sm" role="group">
                     <!-- Role Management -->
                     <button
-                      v-if="!user.deleted_at && canManageUsers"
+                      v-if="!user.deleted_at && canManageUsers && !isRestrictedUser(user)"
                       type="button"
                       class="btn btn-outline-primary"
                       @click="openRoleModal(user)"
@@ -296,6 +298,13 @@ export default {
       'Admin Guest'
     ]
 
+    const RESTRICTED_ROLES = ['Institution User', 'Student']
+
+    const isRestrictedUser = (user) => {
+      const roles = user.admin_roles || []
+      return roles.some(role => RESTRICTED_ROLES.includes(role))
+    }
+
     // Computed properties
     const filteredUsers = computed(() => {
       // Since we're doing server-side filtering now, just return the users as-is
@@ -329,7 +338,9 @@ export default {
         'Application Manager': 'bg-warning text-dark',
         'Security Officer': 'bg-info',
         'Privacy Officer': 'bg-success',
-        'Admin Guest': 'bg-secondary'
+        'Admin Guest': 'bg-secondary',
+        'Institution User': 'bg-secondary',
+        'Student': 'bg-secondary'
       }
       return classes[role] || 'bg-secondary'
     }
@@ -341,7 +352,9 @@ export default {
         'Application Manager': 'Manage applications',
         'Security Officer': 'Security oversight and application approvals',
         'Privacy Officer': 'Privacy compliance and data protection',
-        'Admin Guest': 'Limited admin access'
+        'Admin Guest': 'Limited admin access',
+        'Institution User': 'BCeID Institutional user access',
+        'Student': 'BCSC Student access'
       }
       return descriptions[role] || ''
     }
@@ -493,6 +506,7 @@ export default {
       selectedUser,
       selectedRoles,
       availableRoles,
+      isRestrictedUser,
       canManageUsers,
       filteredUsers,
       filterUsers,
