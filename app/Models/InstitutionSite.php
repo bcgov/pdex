@@ -74,7 +74,7 @@ class InstitutionSite extends Model
 
     // Constants for Regulating Bodies
     const REGULATING_BODY_PTIB = 'Private Training Institutions Branch (PTIB)';
-    const REGULATING_BODY_AEST = 'Ministry of Advanced Education and Skills Training';
+    const REGULATING_BODY_AEST = 'Ministry of Post-Secondary Education and Future Skills';
     const REGULATING_BODY_DQAB = 'Degree Quality Assessment Board (DQAB)';
     const REGULATING_BODY_EQA = 'Educational Quality Assurance (EQA)';
     const REGULATING_BODY_OTHER = 'Other';

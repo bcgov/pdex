@@ -89,7 +89,7 @@ class InstitutionRelationshipController extends Controller
         // Get other institutions for selection
         $otherInstitutions = Institution::where('id', '!=', $institution->id)
                                        ->where('active_status', true)
-                                       ->select(['id', 'guid', 'legal_operating_name'])
+                                       ->select(['id', 'guid', 'legal_operating_name', 'institution_type', 'dli', 'active_status'])
                                        ->orderBy('legal_operating_name')
                                        ->get();
 
@@ -142,14 +142,15 @@ class InstitutionRelationshipController extends Controller
                 $institutionB = $allInstitutions[$j];
                 
                 try {
-                    // Check if relationship already exists
+                                        // Check if a relationship of this type already exists
                     $existing = InstitutionRelationship::where(function($query) use ($institutionA, $institutionB) {
                         $query->where('institution_a_guid', $institutionA)
                               ->where('institution_b_guid', $institutionB);
                     })->orWhere(function($query) use ($institutionA, $institutionB) {
                         $query->where('institution_a_guid', $institutionB)
                               ->where('institution_b_guid', $institutionA);
-                    })->first();
+                                        })->where('relationship_type', $validated['relationship_type'])
+                                            ->first();
 
                     $relationship = InstitutionRelationship::createBidirectional(
                         $institutionA,

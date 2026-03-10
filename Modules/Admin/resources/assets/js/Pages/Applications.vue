@@ -7,6 +7,14 @@
         
         <!-- Main Content Column -->
         <div class="col-lg-12">
+          <div v-if="$page.props.flash?.success" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ $page.props.flash.success }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          <div v-if="$page.props.flash?.error" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>{{ $page.props.flash.error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
           <div class="card shadow-sm">
             <div class="card-header">
               <div class="d-flex justify-content-between align-items-center">
@@ -187,7 +195,7 @@
             </div>
             <div class="modal-footer">
               <button @click="closeModal" type="button" class="btn btn-secondary">Cancel</button>
-              <button type="submit" :class="`btn btn-${modalAction === 'Approve' ? 'success' : 'warning'}`">
+              <button type="submit" :class="`btn btn-${modalAction.startsWith('Approve') ? 'success' : 'danger'}`">
                 {{ modalAction }}
               </button>
             </div>
@@ -288,16 +296,29 @@ export default {
       let endpoint = '';
       if (approvalType.value === 'security') {
         endpoint = `/admin/applications/${selectedApp.value.guid}/security-approval`;
+        approvalForm.transform(() => ({
+          security_approval_status: approvalForm.approval_status,
+          security_approval_notes: approvalForm.approval_notes,
+        })).patch(endpoint, {
+          onSuccess: closeModal,
+        });
       } else if (approvalType.value === 'privacy') {
         endpoint = `/admin/applications/${selectedApp.value.guid}/privacy-approval`;
+        approvalForm.transform(() => ({
+          privacy_approval_status: approvalForm.approval_status,
+          privacy_approval_notes: approvalForm.approval_notes,
+        })).patch(endpoint, {
+          onSuccess: closeModal,
+        });
       } else {
-        // For reject, we might want to reject both
-        endpoint = `/admin/applications/${selectedApp.value.guid}/security-approval`;
+        // Reject — both security and privacy
+        const endpoint = `/admin/applications/${selectedApp.value.guid}/reject`;
+        approvalForm.transform(() => ({
+          rejection_notes: approvalForm.approval_notes,
+        })).patch(endpoint, {
+          onSuccess: closeModal,
+        });
       }
-      
-      approvalForm.patch(endpoint, {
-        onSuccess: closeModal,
-      });
     }
 
     function toggleStatus(app) {

@@ -7,7 +7,7 @@
         <div class="text-center mb-5">
           <div class="d-inline-block position-relative">
             <h2 class="display-4 fw-bold text-success mb-3">
-              Your Learning Gateway
+              People Gateway
             </h2>
             <div class="border-bottom border-success border-3 w-25 mx-auto mb-3"></div>
           </div>

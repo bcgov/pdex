@@ -3,16 +3,16 @@
     <div class="container-fluid py-4" style="min-height: 100vh; background-color: #f8f9fa;">
       <!-- Main Content -->
       <main class="container">
-        <!-- Header Section with Institution Theme (Orange) -->
+        <!-- Header Section with Organization Theme (Orange) -->
         <div class="text-center mb-5">
           <div class="d-inline-block position-relative">
             <h2 class="display-4 fw-bold mb-3 text-warning">
-              Institution Portal
+              Organization Portal
             </h2>
             <div class="border-bottom border-warning border-3 w-25 mx-auto mb-3"></div>
           </div>
           <p class="lead text-muted mb-4" style="max-width: 600px; margin: 0 auto;">
-            Access institutional applications and educational services securely<br/>through Post Secondary Data Exchange
+            Access organizational applications and educational services securely<br/>through Post Secondary Data Exchange
           </p>
           <div class="d-inline-flex align-items-center px-3 py-2 bg-warning bg-opacity-10 rounded-pill border border-warning border-opacity-25">
             <i class="bi bi-buildings text-warning me-2"></i>
@@ -147,9 +147,9 @@
               </div>
             </div>
             
-            <h3 class="fw-bold text-dark mb-3">Institution Services</h3>
+            <h3 class="fw-bold text-dark mb-3">Organization Services</h3>
             <p class="text-muted lead mb-4">
-              No institutional applications are currently available for your access level.
+              No organizational applications are currently available for your access level.
             </p>
             
             <div class="row g-3">
@@ -157,7 +157,7 @@
                 <div class="card border-warning border-opacity-25 bg-warning bg-opacity-5">
                   <div class="card-body text-center py-3">
                     <i class="bi bi-shield-check text-warning fs-4 mb-2"></i>
-                    <div class="fw-semibold text-warning">Institution Authentication</div>
+                    <div class="fw-semibold text-warning">Organization Authentication</div>
                   </div>
                 </div>
               </div>
