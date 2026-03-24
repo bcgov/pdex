@@ -112,7 +112,7 @@ resource "aws_cloudfront_distribution" "pdex-cer" {
   aliases = ["pdex.gov.bc.ca"]
 
   viewer_certificate {
-    acm_certificate_arn = "arn:aws:acm:ca-central-1:868987904026:certificate/9af1af37-a4fb-46ac-9d23-f9ec9501e0b5"
+    acm_certificate_arn = "arn:aws:acm:us-east-1:868987904026:certificate/9af1af37-a4fb-46ac-9d23-f9ec9501e0b5"
     ssl_support_method = "sni-only"
   }
 }
