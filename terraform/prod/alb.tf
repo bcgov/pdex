@@ -222,6 +222,7 @@ output "alb_security_group_id" {
 }
 
 resource "kubernetes_manifest" "pdex_alb_tgb" {
+  count      = var.enable_k8s_manifests ? 1 : 0
   depends_on = [helm_release.aws_load_balancer_controller]
 
   manifest = {

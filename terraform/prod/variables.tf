@@ -97,3 +97,8 @@ variable "pdex_rds_envpref_secret_arn_wildcard" {
   type        = string
   default     = "arn:aws:secretsmanager:ca-central-1:868987904026:secret:secrets.env-YejdSZ-*"
 }
+
+variable "enable_k8s_manifests" {
+  type    = bool
+  default = false
+}
