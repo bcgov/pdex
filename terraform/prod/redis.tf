@@ -3,8 +3,8 @@
 resource "aws_elasticache_replication_group" "pdex_redis_rg" {
 	automatic_failover_enabled	=	true
 	preferred_cache_cluster_azs	=	["ca-central-1a", "ca-central-1b"]
-	replication_group_id		=	"pdex-rep-group"
-	description			=	"Redis replication group for Drupal"
+  replication_group_id		=	"pdex-rep-group"
+	description			=	"Redis replication group for PDEX"
 	node_type			=	"cache.t4g.small"
 	num_cache_clusters		=	2
 	engine_version			=	"6.x"
@@ -26,8 +26,6 @@ resource "aws_elasticache_cluster" "replica" {
 }
 
 resource "aws_elasticache_subnet_group" "default" {
-	name		=	"redis-subnet-group-drupal"
-	subnet_ids	=	data.aws_subnets.app.ids
+	name		=	"redis-subnet-group-pdex"
+	subnet_ids	=	data.aws_subnets.data.ids
 }
-
-

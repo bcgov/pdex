@@ -1,4 +1,10 @@
 #Cluster role
+resource "aws_eks_access_entry" "github_actions" {
+  cluster_name  = aws_eks_cluster.pdex-cluster.name
+  principal_arn = "arn:aws:iam::868987904026:role/GitHubActionsPDEXProdRole"
+  type          = "STANDARD"
+}
+
 resource "aws_iam_role" "eks-cluster-role" {
   name = "eks-cluster-role"
   assume_role_policy = jsonencode({
@@ -44,21 +50,35 @@ resource "aws_eks_cluster" "pdex-cluster" {
 resource "aws_eks_addon" "vpc-cni-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "vpc-cni"
+  addon_version = "v1.21.1-eksbuild.3"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  configuration_values = jsonencode({
+    env = {
+      AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG = "true"                        # Pods get IPs from ENIs that live in the ENIConfig subnets
+      ENI_CONFIG_LABEL_DEF               = "topology.kubernetes.io/zone" # how to choose which ENIConfig to use.
+      AWS_VPC_K8S_CNI_EXTERNALSNAT       = "true"                        # Do not do SNAT on the node.
+    }
+  })
 }
 
 resource "aws_eks_addon" "kube-proxy-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "kube-proxy"
+  addon_version = "v1.34.1-eksbuild.2"
 }
 
 resource "aws_eks_addon" "pod-identity-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "eks-pod-identity-agent"
+  addon_version = "v1.3.10-eksbuild.2"
 }
 
 resource "aws_eks_addon" "coredns-addon" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "coredns"
+  addon_version = "v1.13.1-eksbuild.1"
 }
 
 #EFS CSI role
@@ -89,6 +109,7 @@ resource "aws_iam_role_policy_attachment" "ec-AmazonEFSCSIDriverPolicy" {
 resource "aws_eks_addon" "aws-efs-csi-driver" {
   cluster_name = aws_eks_cluster.pdex-cluster.name
   addon_name   = "aws-efs-csi-driver"
+  addon_version = "v2.3.0-eksbuild.1"
 
   pod_identity_association {
     role_arn = aws_iam_role.efs-csi-role.arn
@@ -133,22 +154,22 @@ resource "aws_eks_node_group" "eks-ng" {
   cluster_name    = aws_eks_cluster.pdex-cluster.name
   node_group_name = "eks-ng"
   node_role_arn   = aws_iam_role.eks-ng-role.arn
-  subnet_ids      = data.aws_subnets.app.ids
-  
-#  launch_template {
-#    id      = aws_launch_template.eks_nodes_lt.id
-#    version = "$Latest"
-#  }
+  subnet_ids      = data.aws_subnets.pod.ids
 
   scaling_config {
-    desired_size = 6
-    max_size     = 15
-    min_size     = 5
+    desired_size = 4
+    max_size     = 10
+    min_size     = 1
   }
 
   update_config {
     max_unavailable = 1
   }
+
+  # 4vCPU, 16GB RAM, instead of t3.medium 2vCPU 4GB RAM. c6i instead of t3 because t3 is burstable 
+  # and can have performance issues when bursting. c6i is compute optimized and should perform well 
+  # for our workloads. You can adjust this based on your needs and budget.
+  instance_types = ["c6i.xlarge"]
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
@@ -206,7 +227,7 @@ resource "aws_iam_role_policy" "cluster_auto_scaler" {
   EOF
 }
 
-#Pod identity role
+#Pod identity role for SES mailer
 resource "aws_iam_role" "ses_mailer_role" {
   name = "ses_mailer_role"
 
@@ -225,7 +246,7 @@ resource "aws_iam_role" "ses_mailer_role" {
   })
 }
 
-#Pod identity policy
+#Pod identity policy for SES
 resource "aws_iam_role_policy" "ses_mailer_policy" {
   name   = "ses_mailer_policy"
   role   = aws_iam_role.ses_mailer_role.id
@@ -237,31 +258,31 @@ resource "aws_iam_role_policy" "ses_mailer_policy" {
               "Effect": "Allow",
               "Action": [
                   "ses:SendEmail",
-		  "ses:SendRawEmail",
-		  "ses:ListIdentities"
+                  "ses:SendRawEmail",
+                  "ses:ListIdentities"
               ],
               "Resource": "*"
-          },
-		  {
-      "Effect": "Allow",
-      "Action": [
-        "s3:ListBucket",
-		"s3:GetBucketLocation"
-      ],
-      "Resource": "${aws_s3_bucket.pdex_s32.arn}"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-	    "s3:GetObjectAttributes",
-        "s3:GetObject",
-        "s3:PutObject",
-        "s3:ListMultipartUploadParts",
-        "s3:AbortMultipartUpload"
-      ],
-      "Resource": "${aws_s3_bucket.pdex_s32.arn}/*"
-    }
+          }
       ]
   }
   EOF
+}
+
+resource "aws_eks_pod_identity_association" "alb_controller" {
+  cluster_name      = aws_eks_cluster.pdex-cluster.name
+  namespace         = "kube-system"
+  service_account   = "aws-load-balancer-controller"
+  role_arn          = aws_iam_role.alb_role.arn   # same role you built for the controller
+  depends_on = [
+    aws_eks_addon.pod-identity-addon,
+    helm_release.aws_load_balancer_controller
+  ]
+}
+
+# Pod Identity Association for Cluster Autoscaler
+resource "aws_eks_pod_identity_association" "cluster_autoscaler" {
+  cluster_name    = aws_eks_cluster.pdex-cluster.name
+  namespace       = "kube-system"
+  service_account = "cluster-autoscaler"
+  role_arn        = aws_iam_role.cluster_auto_scaler_role.arn
 }
