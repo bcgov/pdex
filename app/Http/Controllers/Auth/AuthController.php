@@ -17,6 +17,9 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    private const LOGIN_VIEW = 'Auth/Login';
+    private const OPENID_SCOPES = 'openid profile email';
+
     public function __construct(
         private KeycloakService $keycloakService
     ) {}
@@ -30,7 +33,7 @@ class AuthController extends Controller
             return $this->redirectToDashboard();
         }
 
-        return Inertia::render('Auth/Login', [
+        return Inertia::render(self::LOGIN_VIEW, [
             'loginAttempt' => false,
             'hasAccess' => false,
             'status' => session('status'),
@@ -49,7 +52,7 @@ class AuthController extends Controller
             'clientId' => config('auth.keycloak.client_id'),
             'clientSecret' => config('auth.keycloak.client_secret'),
             'redirectUri' => config('auth.keycloak.redirect_uri'),
-            'scopes' => 'openid profile email',
+            'scopes' => self::OPENID_SCOPES,
         ]);
 
         return $this->loginUser($request, $provider);
@@ -66,7 +69,7 @@ class AuthController extends Controller
             'clientId' => config('auth.keycloak.client_id'),
             'clientSecret' => config('auth.keycloak.client_secret'),
             'redirectUri' => config('auth.keycloak.redirect_uri'),
-            'scopes' => 'openid profile email',
+            'scopes' => self::OPENID_SCOPES,
         ]);
 
         return $this->loginUser($request, $provider, 'idir');
@@ -83,7 +86,7 @@ class AuthController extends Controller
             'clientId' => config('auth.keycloak.client_id'),
             'clientSecret' => config('auth.keycloak.client_secret'),
             'redirectUri' => config('auth.keycloak.redirect_uri'),
-            'scopes' => 'openid profile email',
+            'scopes' => self::OPENID_SCOPES,
         ]);
 
         return $this->loginUser($request, $provider, 'bcsc');
@@ -100,7 +103,7 @@ class AuthController extends Controller
             'clientId' => config('auth.keycloak.client_id'),
             'clientSecret' => config('auth.keycloak.client_secret'),
             'redirectUri' => config('auth.keycloak.redirect_uri'),
-            'scopes' => 'openid profile email',
+            'scopes' => self::OPENID_SCOPES,
         ]);
 
         return $this->loginUser($request, $provider, 'bceid');
@@ -114,7 +117,7 @@ class AuthController extends Controller
         if (!$request->has('code')) {
             // If we don't have an authorization code then get one
             $authUrl = $provider->getAuthorizationUrl([
-                'scope' => 'openid profile email',
+                'scope' => self::OPENID_SCOPES,
             ]);
 
             $request->session()->put('oauth2state', $provider->getState());
@@ -147,7 +150,7 @@ class AuthController extends Controller
             $request->session()->forget('oauth2state');
             // $request->session()->forget($provider->getState());
 
-            return Inertia::render('Auth/Login', [
+            return Inertia::render(self::LOGIN_VIEW, [
                 'loginAttempt' => true,
                 'hasAccess' => false,
                 'status' => 'Authentication failed. Please try again.',
@@ -166,10 +169,10 @@ class AuthController extends Controller
             } catch (\Exception $e) {
                 Log::error('Failed to get access token', [
                     'error' => $e->getMessage(),
-                    // 'idp_type' => $idpType,
+                    'state' => $state,
                 ]);
                 
-                return Inertia::render('Auth/Login', [
+                return Inertia::render(self::LOGIN_VIEW, [
                     'loginAttempt' => true,
                     'hasAccess' => false,
                     'status' => 'Failed to get access token',
@@ -192,7 +195,7 @@ class AuthController extends Controller
                     // 'idp_type' => $idpType,
                 ]);
                 
-                return Inertia::render('Auth/Login', [
+                return Inertia::render(self::LOGIN_VIEW, [
                     'loginAttempt' => true,
                     'hasAccess' => false,
                     'status' => 'Failed to get user information: ' . $e->getMessage(),
@@ -203,7 +206,7 @@ class AuthController extends Controller
             [$user, $idpType] = $this->findOrCreateUser($providerUser, $token, $request);
             
             if (!$user) {
-                return Inertia::render('Auth/Login', [
+                return Inertia::render(self::LOGIN_VIEW, [
                     'loginAttempt' => true,
                     'hasAccess' => false,
                     'status' => 'Access denied. Please contact administrator.',
@@ -252,12 +255,27 @@ class AuthController extends Controller
 
 
         // If user doesn't exist, create them
-        if (!$user && $this->shouldCreateUser($providerUser)) {
+        // if (!$user && $this->shouldCreateUser($providerUser)) {
+        if (!$user) {
+            \Log::info('Creating new user', [
+                'email' => $providerUser['email'] ?? 'unknown',
+                'idp_type' => $idpType,
+            ]);
             $user = $this->createNewUser($providerUser, $idpType, $token);
         }
 
+        if ($idpType === 'bcsc') {
+            $this->createStudentProfile($user, $providerUser);
+        }
+
+
         // Update user information and tokens for existing users
-        if ($user) {
+        else {
+            \Log::info('Updating existing user', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'idp_type' => $idpType,
+            ]);
             if (isset($providerUser['name'])) {
                 $user->name = $providerUser['name'];
             }
@@ -302,12 +320,12 @@ class AuthController extends Controller
         $user = new User();
         $user->guid = Str::orderedUuid()->getHex();
         $user->name = Str::upper($providerUser['name'] ?? '');
-        $user->first_name = Str::upper($providerUser['given_name'] ?? '');
+        $user->first_name = Str::upper($providerUser['given_names'] ?? '');
         $user->last_name = Str::upper($providerUser['family_name'] ?? '');
         $user->email = Str::lower($providerUser['email'] ?? '');
         $user->display_name = Str::upper($providerUser['display_name'] ?? '');
         $user->family_name = Str::upper($providerUser['family_name'] ?? '');
-        $user->given_name = Str::upper($providerUser['given_name'] ?? '');
+        $user->given_name = Str::upper($providerUser['given_names'] ?? '');
 
         $user->identity_provider = $idpType;
         $user->keycloak_id = $providerUser['sub'];
@@ -325,6 +343,7 @@ class AuthController extends Controller
             case 'bcsc':
                 // default bcsc user to active state
                 $user->is_active = true;
+
                 break;
                 
             case 'idir':
@@ -338,12 +357,21 @@ class AuthController extends Controller
                 $user->bceid_business_guid = $providerUser['bceid_business_guid'] ?? null;
                 $user->organization = Str::upper($providerUser['bceid_business_name'] ?? '');
                 break;
+                
+            default:
+                Log::warning('Unknown identity provider type', ['idp_type' => $idpType]);
+                break;
         }
         
         $user->save();
 
         // Assign default role based on IDP type
         $this->assignDefaultRole($user, $idpType);
+
+        // Create student profile for BCSC users
+        // if ($idpType === 'bcsc') {
+        //     $this->createStudentProfile($user, $providerUser);
+        // }
 
         Log::info('New user created', [
             'user_id' => $user->id,
@@ -358,11 +386,11 @@ class AuthController extends Controller
     /**
      * Check if we should create a new user.
      */
-    private function shouldCreateUser(array $providerUser): bool
-    {
-        // Add validation logic here
-        return isset($providerUser['email']) && !empty($providerUser['email']);
-    }
+    // private function shouldCreateUser(array $providerUser): bool
+    // {
+    //     // Add validation logic here
+    //     return isset($providerUser['email']) && !empty($providerUser['email']);
+    // }
 
     /**
      * Assign default role based on identity provider.
@@ -508,5 +536,41 @@ class AuthController extends Controller
         // Default dashboard for other cases
         return redirect()->route('login')
             ->withErrors(['error' => 'Could not access dashboard. Please contact an administrator. Error #0082940']);
+    }
+
+    /**
+     * Create student profile for newly registered BCSC users
+     */
+    private function createStudentProfile(User $user, array $providerUser): void
+    {
+        // Check if profile already exists to avoid duplicates
+        $existingProfile = \App\Models\Individual::where('user_guid', $user->guid)->first();
+        if ($existingProfile) {
+            Log::info('Student profile already exists for user, skipping creation', [
+                'user_guid' => $user->guid,
+            ]);
+            return;
+        }
+
+        try {
+            $individual = \App\Models\Individual::create([
+                'user_guid' => $user->guid,
+                'first_name' => Str::upper($providerUser['given_names'] ?? ''),
+                'last_name' => Str::upper($providerUser['family_name'] ?? ''),
+                'email_address' => Str::lower($providerUser['email'] ?? ''),
+                'date_of_birth' => $providerUser['birthdate'] ?? null,
+                'sex' => $providerUser['gender'] ?? null,
+            ]);
+
+            Log::info('Student profile created during user registration', [
+                'individual_guid' => $individual->guid,
+                'user_guid' => $user->guid,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to create student profile during registration', [
+                'user_guid' => $user->guid,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

@@ -10,6 +10,8 @@ class ApplicationIndividualPermission extends Model
 {
     use HasFactory;
 
+    private const DESC_ASSOCIATED_INDIVIDUAL_ID = 'Associated individual identifier';
+
     protected $fillable = [
         'application_id',
         'table_name',
@@ -123,7 +125,7 @@ class ApplicationIndividualPermission extends Model
             ],
             // Individual Addresses table
             'individual_addresses' => [
-                'individual_id' => 'Associated individual identifier',
+                'individual_id' => self::DESC_ASSOCIATED_INDIVIDUAL_ID,
                 'address_type' => 'Type of address (home, mailing, work)',
                 'street_address' => 'Street address line 1',
                 'street_address_2' => 'Street address line 2',
@@ -136,7 +138,7 @@ class ApplicationIndividualPermission extends Model
             ],
             // Individual Employments table
             'individual_employments' => [
-                'individual_id' => 'Associated individual identifier',
+                'individual_id' => self::DESC_ASSOCIATED_INDIVIDUAL_ID,
                 'employer_name' => 'Name of employer',
                 'job_title' => 'Job title or position',
                 'industry' => 'Industry sector',
@@ -149,7 +151,7 @@ class ApplicationIndividualPermission extends Model
             ],
             // Individual Identities table
             'individual_identities' => [
-                'individual_id' => 'Associated individual identifier',
+                'individual_id' => self::DESC_ASSOCIATED_INDIVIDUAL_ID,
                 'citizenship' => 'Citizenship status',
                 'ethnicity' => 'Ethnic background',
                 'first_language' => 'First or native language',

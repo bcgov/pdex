@@ -33,6 +33,7 @@ class InstitutionController extends Controller
             ->orderBy('name', 'asc')
             ->select([
                 'id',
+                'guid',
                 'name',
                 'description',
                 'bceid_redirect_url',
@@ -67,6 +68,7 @@ class InstitutionController extends Controller
 
                 return [
                     'id' => $app->id,
+                    'guid' => $app->guid,
                     'name' => $app->name,
                     'description' => $app->description,
                     'redirect_url' => $app->bceid_redirect_url,
@@ -82,7 +84,7 @@ class InstitutionController extends Controller
 
         return Inertia::render('Institution::Dashboard', [
             'applications' => $applications,
-            'user' => auth()->user()->only(['name', 'email']),
+            'user' => auth()->user()->only(['name', 'email', 'organization']),
         ]);
     }
 

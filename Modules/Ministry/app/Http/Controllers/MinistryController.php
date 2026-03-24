@@ -26,6 +26,7 @@ class MinistryController extends Controller
             ->orderBy('name', 'asc')
             ->select([
                 'id',
+                'guid',
                 'name',
                 'description',
                 'idir_redirect_url',
@@ -60,6 +61,7 @@ class MinistryController extends Controller
 
                 return [
                     'id' => $app->id,
+                    'guid' => $app->guid,
                     'name' => $app->name,
                     'description' => $app->description,
                     'redirect_url' => $app->idir_redirect_url,

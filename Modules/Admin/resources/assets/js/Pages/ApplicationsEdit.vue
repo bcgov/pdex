@@ -198,7 +198,7 @@
                       <div class="form-text">
                         <small class="text-muted">
                           <strong>Active:</strong> Application is fully operational and available to users.<br>
-                          <strong>Inactive:</strong> Application is temporarily disabled but not offline.<br>
+                          <strong>Inactive:</strong> Application is temporarily disabled and not visible to users.<br>
                           <strong>Offline:</strong> Application is down for maintenance or scheduled outage.
                         </small>
                       </div>
@@ -206,7 +206,15 @@
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-md-6">
+                  <div class="col-md-4">
+                    <div class="form-check">
+                      <input v-model="form.profile_integration_ready" class="form-check-input" type="checkbox" id="profile_integration_ready" />
+                      <label class="form-check-label" for="profile_integration_ready">
+                        Profile Integration Ready (if yes, the user would be prompted the popup dialog to agree to share their profile information)
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
                     <div class="form-check">
                       <input v-model="form.stra_provided" class="form-check-input" type="checkbox" id="stra_provided" />
                       <label class="form-check-label" for="stra_provided">
@@ -214,7 +222,7 @@
                       </label>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                     <div class="form-check">
                       <input v-model="form.pia_provided" class="form-check-input" type="checkbox" id="pia_provided" />
                       <label class="form-check-label" for="pia_provided">
@@ -280,11 +288,12 @@
               <div class="mb-4">
                 <h5 class="card-title">
                   <i class="bi bi-database me-1"></i>
-                  Data Access Permissions
+                  Individual Data Access Permissions
                 </h5>
                 <p class="text-muted small mb-3">
+                  The student/individual would be prompted to approve sharing the selected fields.<br/>
                   Configure which individual data fields this application can access. 
-                  <span class="text-warning">⚠️</span> indicates personally identifiable information (PII).
+                  <br/><span class="text-warning">⚠️</span> indicates personally identifiable information (PII).
                 </p>
                 <div class="accordion" id="dataPermissionsAccordion">
                   <div v-for="table in Object.values(availableDataTables)" :key="table.name" class="accordion-item">
@@ -693,7 +702,7 @@
           <div class="d-flex align-items-center">
             <i class="bi bi-lock me-2"></i>
             <div>
-              <strong class="d-block">Application Fully Approved</strong>
+              <strong class="d-block">Application Security &amp; Privacy Approved</strong>
               <small>Both security and privacy approvals are complete. Changes to approvals are no longer permitted.</small>
             </div>
           </div>
@@ -1137,6 +1146,7 @@ export default {
       comments: props.application.comments,
       stra_provided: props.application.stra_provided,
       pia_provided: props.application.pia_provided,
+      profile_integration_ready: props.application.profile_integration_ready,
       data_permissions: [],
       // Add manager fields
       client_id: props.application.client_id || '',
@@ -1348,7 +1358,7 @@ export default {
       const allPermissions = [...dataPermissionsArray, ...apiPermissionsArray];
       
       form.data_permissions = allPermissions;
-      form.put(`/admin/applications/${props.application.id}`, {
+      form.put(`/admin/applications/${props.application.guid}`, {
         onSuccess: () => {
           // Flash message will be handled by the backend redirect
           console.log('Application updated successfully');
@@ -1378,7 +1388,7 @@ export default {
         return;
       }
       
-      securityForm.put(`/admin/applications/${props.application.id}/security-approval`, {
+      securityForm.patch(`/admin/applications/${props.application.guid}/security-approval`, {
         onSuccess: () => {
           // Handle success
         },
@@ -1395,7 +1405,7 @@ export default {
         return;
       }
       
-      privacyForm.put(`/admin/applications/${props.application.id}/privacy-approval`, {
+      privacyForm.patch(`/admin/applications/${props.application.guid}/privacy-approval`, {
         onSuccess: () => {
           // Handle success
         },
@@ -1406,16 +1416,36 @@ export default {
     }
 
     // Generate functions for API credentials
+    const SECURE_CHARSET = 'abcdefghijklmnopqrstuvwxyz0123456789';
+
+    function generateSecureRandomString(length) {
+      const cryptoObj = (typeof window !== 'undefined' && window.crypto) || (typeof self !== 'undefined' && self.crypto) || (typeof globalThis !== 'undefined' && globalThis.crypto);
+      if (!cryptoObj || !cryptoObj.getRandomValues) {
+        throw new Error('Secure random number generator not available.');
+      }
+
+      const randomValues = new Uint32Array(length);
+      cryptoObj.getRandomValues(randomValues);
+
+      let result = '';
+      const charsetLength = SECURE_CHARSET.length;
+      for (let i = 0; i < length; i++) {
+        const index = randomValues[i] % charsetLength;
+        result += SECURE_CHARSET.charAt(index);
+      }
+      return result;
+    }
+
     function generateClientId() {
-      form.client_id = 'client_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36);
+      form.client_id = 'client_' + generateSecureRandomString(16) + Date.now().toString(36);
     }
 
     function generateClientSecret() {
-      form.client_secret = 'secret_' + Math.random().toString(36).substr(2, 32) + Date.now().toString(36);
+      form.client_secret = 'secret_' + generateSecureRandomString(32) + Date.now().toString(36);
     }
 
     function generateApiKey() {
-      form.api_key = 'key_' + Math.random().toString(36).substr(2, 24) + Date.now().toString(36);
+      form.api_key = 'key_' + generateSecureRandomString(24) + Date.now().toString(36);
     }
 
     function getSecurityApprovalBadgeColor(status) {

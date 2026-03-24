@@ -35,7 +35,7 @@ class InstitutionController extends Controller
         $search = $request->get('search');
         $type = $request->get('type');
         $activeStatus = $request->get('active_status');
-        $perPage = $request->get('per_page', 10);
+        $perPage = $request->get('per_page', 50);
 
         // Apply filters
         if ($search) {
@@ -51,12 +51,13 @@ class InstitutionController extends Controller
         }
 
         // Get paginated results
-        $institutions = $query->orderBy('legal_operating_name')
+        $institutions = $query->withCount('sites')
+                            ->orderBy('legal_operating_name')
                             ->paginate($perPage)
                             ->withQueryString();
 
-        // Return JSON for API requests
-        if ($request->expectsJson()) {
+        // Return JSON for API requests (but not Inertia requests)
+        if ($request->expectsJson() && !$request->header('X-Inertia')) {
             return response()->json([
                 'institutions' => $institutions,
                 'filters' => [
@@ -69,6 +70,8 @@ class InstitutionController extends Controller
         $stats = [
             'total' => Institution::count(),
             'active' => Institution::where('active_status', true)->count(),
+            'total_sites' => \App\Models\InstitutionSite::count(),
+            'with_dli' => Institution::whereNotNull('dli')->count(),
             'by_type' => Institution::selectRaw('institution_type, count(*) as count')
                                   ->groupBy('institution_type')
                                   ->pluck('count', 'institution_type'),
@@ -95,7 +98,7 @@ class InstitutionController extends Controller
     {
         $this->authorize('view', $institution);
         
-        if (request()->expectsJson()) {
+        if (request()->expectsJson() && !request()->header('X-Inertia')) {
             return response()->json($institution);
         }
 
@@ -121,6 +124,7 @@ class InstitutionController extends Controller
                         'email' => $user->email,
                         'first_name' => $user->first_name,
                         'last_name' => $user->last_name,
+                        'bceid_user_guid' => $user->bceid_user_guid,
                         'is_active' => $user->is_active,
                         'created_at' => $user->created_at,
                         'roles' => $user->roles->pluck('name')->toArray(),
@@ -255,8 +259,8 @@ class InstitutionController extends Controller
 
         $institution = Institution::create($validated);
 
-        // Return JSON for API requests
-        if ($request->expectsJson()) {
+        // Return JSON for API requests (but not Inertia requests)
+        if ($request->expectsJson() && !$request->header('X-Inertia')) {
             return response()->json([
                 'message' => 'Institution created successfully',
                 'institution' => $institution
@@ -284,8 +288,8 @@ class InstitutionController extends Controller
 
         $institution->update($validated);
 
-        // Return JSON for API requests
-        if ($request->expectsJson()) {
+        // Return JSON for API requests (but not Inertia requests)
+        if ($request->expectsJson() && !$request->header('X-Inertia')) {
             return response()->json([
                 'message' => 'Institution updated successfully',
                 'institution' => $institution->fresh()
@@ -360,8 +364,8 @@ class InstitutionController extends Controller
 
         $institution->delete();
 
-        // Return JSON for API requests
-        if (request()->expectsJson()) {
+        // Return JSON for API requests (but not Inertia requests)
+        if (request()->expectsJson() && !request()->header('X-Inertia')) {
             return response()->json([
                 'message' => 'Institution deleted successfully'
             ]);

@@ -4,6 +4,19 @@
       <div class="bcds-footer--acknowledgement-text">
         <slot name="acknowledgement">
           <p>
+            Your personal information is collected, used and disclosed by the Ministry 
+            of Post-Secondary Education and Future Skills under the Freedom of 
+            Information and Protection of Privacy Act (FOIPPA) sections 26(c) and 
+            26(e). The information you provide will be shared with the program 
+            administration you choose to apply to through this portal. It will be used 
+            for the purposes of confirming your identity and program eligibility, 
+            administering financial assistance, and supporting program planning and 
+            evaluation. If you have any questions about the collection of this 
+            information, please contact: Ministry Privacy Officer, 
+            PSFS.InformationPrivacy@gov.bc.ca
+          </p>
+          <br/>
+          <p>
             The B.C. Public Service acknowledges the territories of First Nations
             around B.C. and is grateful to carry out our work on these lands. We
             acknowledge the rights, interests, priorities, and concerns of all
@@ -29,12 +42,8 @@
                 <p>
                   We can help in over 220 languages and through other accessible options.
                   <a href="https://www2.gov.bc.ca/gov/content?id=6A77C17D0CCB48F897F8598CCC019111">
-                    Call, email or text us
-                  </a>
-                  , or
-                  <a href="https://www2.gov.bc.ca/gov/content?id=FBC4210F6BC047A5884198F543C97D53">
-                    find a service centre
-                  </a>
+                    Call, email or text us</a>, or <a href="https://www2.gov.bc.ca/gov/content?id=FBC4210F6BC047A5884198F543C97D53">
+                    find a service centre</a>
                 </p>
               </slot>
             </div>

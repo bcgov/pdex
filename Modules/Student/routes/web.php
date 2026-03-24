@@ -2,12 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Student\Http\Controllers\StudentController;
+use Modules\Student\Http\Controllers\StudentLogoutController;
 
 Route::prefix('student')->group(function () {
     Route::group([
         'middleware' => ['auth', 'student_active'],
         'as' => 'student.',
     ], function () {
+        // Logout route
+        Route::post('logout', [StudentLogoutController::class, 'logout'])->name('logout');
         // Dashboard route with profile check
         Route::get('/', [StudentController::class, 'index'])
             ->middleware('student_profile')

@@ -7,6 +7,14 @@
         
         <!-- Main Content Column -->
         <div class="col-lg-12">
+          <div v-if="$page.props.flash?.success" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ $page.props.flash.success }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          <div v-if="$page.props.flash?.error" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>{{ $page.props.flash.error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
           <div class="card shadow-sm">
             <div class="card-header">
               <div class="d-flex justify-content-between align-items-center">
@@ -57,7 +65,7 @@
             <td>
               <div class="d-flex align-items-center">
                 <div>
-                    <Link :href="`/admin/applications/edit/${app.id}`" class="">
+                    <Link :href="`/admin/applications/edit/${app.guid}`" class="">
                       <strong>{{ app.name }}</strong>
                     </Link>
 
@@ -143,18 +151,18 @@
                     </button>
                   </li>
                   <li v-if="app.deleted_at">
-                    <button @click="restoreApp(app.id)" class="dropdown-item text-success">
+                    <button @click="restoreApp(app)" class="dropdown-item text-success">
                       <i class="bi bi-arrow-clockwise me-2"></i>Restore
                     </button>
                   </li>
                   <li><hr class="dropdown-divider"></li>
                   <li v-if="!app.deleted_at">
-                    <button @click="deleteApp(app.id)" class="dropdown-item text-danger">
+                    <button @click="deleteApp(app)" class="dropdown-item text-danger">
                       <i class="bi bi-trash me-2"></i>Delete
                     </button>
                   </li>
                   <li v-if="app.deleted_at">
-                    <button @click="forceDeleteApp(app.id)" class="dropdown-item text-danger">
+                    <button @click="forceDeleteApp(app)" class="dropdown-item text-danger">
                       <i class="bi bi-trash me-2"></i>Delete Permanently
                     </button>
                   </li>
@@ -187,7 +195,7 @@
             </div>
             <div class="modal-footer">
               <button @click="closeModal" type="button" class="btn btn-secondary">Cancel</button>
-              <button type="submit" :class="`btn btn-${modalAction === 'Approve' ? 'success' : 'warning'}`">
+              <button type="submit" :class="`btn btn-${modalAction.startsWith('Approve') ? 'success' : 'danger'}`">
                 {{ modalAction }}
               </button>
             </div>
@@ -287,17 +295,30 @@ export default {
     function submitApproval() {
       let endpoint = '';
       if (approvalType.value === 'security') {
-        endpoint = `/admin/applications/${selectedApp.value.id}/security-approval`;
+        endpoint = `/admin/applications/${selectedApp.value.guid}/security-approval`;
+        approvalForm.transform(() => ({
+          security_approval_status: approvalForm.approval_status,
+          security_approval_notes: approvalForm.approval_notes,
+        })).patch(endpoint, {
+          onSuccess: closeModal,
+        });
       } else if (approvalType.value === 'privacy') {
-        endpoint = `/admin/applications/${selectedApp.value.id}/privacy-approval`;
+        endpoint = `/admin/applications/${selectedApp.value.guid}/privacy-approval`;
+        approvalForm.transform(() => ({
+          privacy_approval_status: approvalForm.approval_status,
+          privacy_approval_notes: approvalForm.approval_notes,
+        })).patch(endpoint, {
+          onSuccess: closeModal,
+        });
       } else {
-        // For reject, we might want to reject both
-        endpoint = `/admin/applications/${selectedApp.value.id}/security-approval`;
+        // Reject — both security and privacy
+        const endpoint = `/admin/applications/${selectedApp.value.guid}/reject`;
+        approvalForm.transform(() => ({
+          rejection_notes: approvalForm.approval_notes,
+        })).patch(endpoint, {
+          onSuccess: closeModal,
+        });
       }
-      
-      approvalForm.patch(endpoint, {
-        onSuccess: closeModal,
-      });
     }
 
     function toggleStatus(app) {
@@ -318,25 +339,25 @@ export default {
       const action = statusLabels[nextStatus] || 'change status';
       
       if (confirm(`Are you sure you want to ${action} this application?`)) {
-        router.patch(`/admin/applications/toggle-status/${app.id}`);
+        router.patch(`/admin/applications/toggle-status/${app.guid}`);
       }
     }
 
-    function deleteApp(id) {
+    function deleteApp(app) {
       if (confirm('Are you sure you want to delete this application? It can be restored later.')) {
-        router.delete(`/admin/applications/${id}`);
+        router.delete(`/admin/applications/${app.guid}`);
       }
     }
 
-    function restoreApp(id) {
+    function restoreApp(app) {
       if (confirm('Are you sure you want to restore this application?')) {
-        router.patch(`/admin/applications/restore/${id}`);
+        router.patch(`/admin/applications/restore/${app.id}`);
       }
     }
 
-    function forceDeleteApp(id) {
+    function forceDeleteApp(app) {
       if (confirm('Are you sure you want to permanently delete this application? This action cannot be undone.')) {
-        router.delete(`/admin/applications/force-delete/${id}`);
+        router.delete(`/admin/applications/force-delete/${app.id}`);
       }
     }
 

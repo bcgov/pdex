@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 use App\Models\User;
 use App\Models\Institution;
 
@@ -29,6 +30,23 @@ class HandleInertiaRequests extends Middleware
     public function version(Request $request): ?string
     {
         return parent::version($request);
+    }
+
+    /**
+     * Prepare the request for Inertia by setting the correct root URL
+     * to prevent redirects to backend ALB domain when behind CloudFront
+     */
+    public function handle($request, $next)
+    {
+        // Force Laravel to use APP_URL for URL generation within Inertia
+        if (config('app.url')) {
+            URL::forceRootUrl(config('app.url'));
+            if (str_starts_with(config('app.url'), 'https://')) {
+                URL::forceScheme('https');
+            }
+        }
+
+        return parent::handle($request, $next);
     }
 
     /**
@@ -68,6 +86,10 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'logoutUrl' => $logoutUrl,
             'logoutBcscUrl' => $logoutBcscUrl,
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error'   => $request->session()->get('error'),
+            ],
 
         ];
     }
