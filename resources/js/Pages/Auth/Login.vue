@@ -117,19 +117,19 @@ export default {
                         <!-- BCSC Login -->
                         <a href="/bcsc-login" class="btn btn-primary btn-lg px-5 py-3 shadow-sm">
                             <i class="bi bi-mortarboard me-2"></i>
-                            Sign In as Learner (BC Services Card)
+                            Sign In with BC Services Card Account
                         </a>
                         
                         <!-- BCeID Login -->
                         <a href="/bceid-login" class="btn btn-outline-primary btn-lg px-5 py-3 shadow-sm">
                             <i class="bi bi-bank me-2"></i>
-                            Sign In as Institution (BCeID Business)
+                            Sign In as an Organization with BCeID Business Account
                         </a>
                         
                         <!-- IDIR Login -->
                         <a href="/idir-login" class="btn btn-outline-primary btn-lg px-5 py-3 shadow-sm">
                             <i class="bi bi-building me-2"></i>
-                            Sign In as Ministry Staff (IDIR)
+                            Sign In as Ministry Staff with IDIR Account
                         </a>
                     </div>
 
@@ -140,8 +140,8 @@ export default {
                                 <div class="text-primary mb-2">
                                     <i class="bi bi-mortarboard fs-4"></i>
                                 </div>
-                                <h6 class="fw-semibold mb-2">Learners</h6>
-                                <small class="text-muted">BC Services Card authentication for learner portal access</small>
+                                <h6 class="fw-semibold mb-2">People</h6>
+                                <small class="text-muted">BC Services Card Account authentication for people portal access</small>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -149,8 +149,8 @@ export default {
                                 <div class="text-primary mb-2">
                                     <i class="bi bi-bank fs-4"></i>
                                 </div>
-                                <h6 class="fw-semibold mb-2">Institutions</h6>
-                                <small class="text-muted">BCeID business authentication for institutional access</small>
+                                <h6 class="fw-semibold mb-2">Organizations</h6>
+                                <small class="text-muted">BCeID business authentication for organizational access</small>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -179,12 +179,12 @@ export default {
                                     Register for BCeID
                                 </a>
                             </div>
-                            <div class="col-md-4">
+                            <!-- <div class="col-md-4">
                                 <a href="#" class="link-primary small text-decoration-none">
                                     <i class="bi bi-info-circle me-1"></i>
                                     About PDEX
                                 </a>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>

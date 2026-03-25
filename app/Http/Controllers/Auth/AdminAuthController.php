@@ -17,6 +17,8 @@ use App\Models\Role;
 
 class AdminAuthController extends Controller
 {
+    private const ADMIN_LOGIN_VIEW = 'Auth/AdminLogin';
+
     public function __construct(
         private KeycloakService $keycloakService
     ) {}
@@ -40,7 +42,7 @@ class AdminAuthController extends Controller
             request()->session()->regenerateToken();
         }
 
-        return Inertia::render('Auth/AdminLogin', [
+        return Inertia::render(self::ADMIN_LOGIN_VIEW, [
             'loginAttempt' => false,
             'hasAccess' => false,
             'status' => session('status'),
@@ -85,7 +87,7 @@ class AdminAuthController extends Controller
             
             $request->session()->forget('oauth2state');
             
-            return Inertia::render('Auth/AdminLogin', [
+            return Inertia::render(self::ADMIN_LOGIN_VIEW, [
                 'loginAttempt' => true,
                 'hasAccess' => false,
                 'status' => 'Authentication failed. Please try again.',
@@ -102,7 +104,7 @@ class AdminAuthController extends Controller
                     'error' => $e->getMessage(),
                 ]);
                 
-                return Inertia::render('Auth/AdminLogin', [
+                return Inertia::render(self::ADMIN_LOGIN_VIEW, [
                     'loginAttempt' => true,
                     'hasAccess' => false,
                     'status' => 'Failed to authenticate. Please try again.',
@@ -123,7 +125,7 @@ class AdminAuthController extends Controller
                     'error' => $e->getMessage(),
                 ]);
                 
-                return Inertia::render('Auth/AdminLogin', [
+                return Inertia::render(self::ADMIN_LOGIN_VIEW, [
                     'loginAttempt' => true,
                     'hasAccess' => false,
                     'status' => 'Failed to get user information. Please try again.',
@@ -172,7 +174,7 @@ class AdminAuthController extends Controller
                     'roles' => $user->roles->pluck('name')->toArray(),
                 ]);
 
-                return Inertia::render('Auth/AdminLogin', [
+                return Inertia::render(self::ADMIN_LOGIN_VIEW, [
                     'loginAttempt' => true,
                     'hasAccess' => false,
                     'status' => 'Access denied. You do not have administrative privileges.',

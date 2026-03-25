@@ -8,62 +8,157 @@
             </div>
             <!-- Stats Cards -->
             <div class="row g-4 mb-4">
-                <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card h-100">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary me-3">
-                                    <i class="bi bi-people" style="font-size: 1.25rem;"></i>
-                                </div>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <p class="card-text text-muted small mb-1">Total Users</p>
+                                    <p class="card-text text-muted small mb-1">Users</p>
                                     <h4 class="card-title mb-0">{{ stats.totalUsers || 0 }}</h4>
                                 </div>
+                                <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
+                                    <i class="bi bi-people" style="font-size: 1.25rem;"></i>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center text-muted small">
+                                <i class="bi bi-person-check me-2"></i>
+                                <span>Active: {{ stats.activeUsers || 0 }}</span>
+                            </div>
+                            <div class="mt-2">
+                                <Link href="/admin/users" class="text-decoration-none small text-primary">
+                                    View users <i class="bi bi-arrow-right"></i>
+                                </Link>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card h-100">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success me-3">
-                                    <i class="bi bi-person-check" style="font-size: 1.25rem;"></i>
-                                </div>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <p class="card-text text-muted small mb-1">Active Users</p>
-                                    <h4 class="card-title mb-0">{{ stats.activeUsers || 0 }}</h4>
+                                    <p class="card-text text-muted small mb-1">Applications</p>
+                                    <h4 class="card-title mb-0">{{ stats.totalApplications || 0 }}</h4>
                                 </div>
+                                <div class="p-3 rounded-circle bg-info bg-opacity-10 text-info">
+                                    <i class="bi bi-folder-check" style="font-size: 1.25rem;"></i>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center text-muted small">
+                                <i class="bi bi-clock me-2"></i>
+                                <span>Pending approvals: {{ stats.pendingApprovals || 0 }}</span>
+                            </div>
+                            <div class="mt-2">
+                                <Link href="/admin/applications" class="text-decoration-none small text-info">
+                                    View applications <i class="bi bi-arrow-right"></i>
+                                </Link>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card h-100">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="p-3 rounded-circle bg-warning bg-opacity-10 text-warning me-3">
-                                    <i class="bi bi-clock" style="font-size: 1.25rem;"></i>
-                                </div>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
-                                    <p class="card-text text-muted small mb-1">Pending Approvals</p>
-                                    <h4 class="card-title mb-0">{{ stats.pendingApprovals || 0 }}</h4>
+                                    <p class="card-text text-muted small mb-1">Institutions</p>
+                                    <h4 class="card-title mb-0">{{ stats.totalInstitutions || 0 }}</h4>
                                 </div>
+                                <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success">
+                                    <i class="bi bi-bank2" style="font-size: 1.25rem;"></i>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center text-muted small">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <span>Active: {{ stats.activeInstitutions || 0 }}</span>
+                            </div>
+                            <div class="mt-2">
+                                <Link href="/admin/institutions" class="text-decoration-none small text-success">
+                                    View institutions <i class="bi bi-arrow-right"></i>
+                                </Link>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-6 col-lg-3">
+            </div>
+            <div class="row g-4 mb-4">
+                <div class="col-12 col-lg-4">
                     <div class="card h-100">
                         <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger me-3">
-                                    <i class="bi bi-exclamation-triangle" style="font-size: 1.25rem;"></i>
+                            <h5 class="card-title text-bc-blue mb-3">Applications Overview</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Pending security</span>
+                                <span class="fw-semibold">{{ stats.pendingSecurityApprovals || 0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Pending privacy</span>
+                                <span class="fw-semibold">{{ stats.pendingPrivacyApprovals || 0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Offline</span>
+                                <span class="fw-semibold">{{ stats.offlineApplications || 0 }}</span>
+                            </div>
+                            <div class="mt-3">
+                                <div class="text-muted small mb-2">Status breakdown</div>
+                                <div v-if="stats.applicationStatusBreakdown && Object.keys(stats.applicationStatusBreakdown).length">
+                                    <div v-for="(count, status) in stats.applicationStatusBreakdown" :key="status" class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted text-capitalize">{{ status }}</span>
+                                        <span class="small fw-semibold">{{ count }}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="card-text text-muted small mb-1">System Alerts</p>
-                                    <h4 class="card-title mb-0">{{ stats.systemAlerts || 0 }}</h4>
+                                <div v-else class="text-muted small">No status data available.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-bc-blue mb-3">Institutions Overview</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Active</span>
+                                <span class="fw-semibold">{{ stats.activeInstitutions || 0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Inactive</span>
+                                <span class="fw-semibold">{{ stats.inactiveInstitutions || 0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">With DLI</span>
+                                <span class="fw-semibold">{{ stats.institutionsWithDli || 0 }}</span>
+                            </div>
+                            <div class="mt-3">
+                                <div class="text-muted small mb-2">By type</div>
+                                <div v-if="stats.institutionTypeBreakdown && Object.keys(stats.institutionTypeBreakdown).length">
+                                    <div v-for="(count, type) in stats.institutionTypeBreakdown" :key="type" class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted">{{ type }}</span>
+                                        <span class="small fw-semibold">{{ count }}</span>
+                                    </div>
                                 </div>
+                                <div v-else class="text-muted small">No type data available.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-bc-blue mb-3">System Health</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Failed jobs</span>
+                                <span class="fw-semibold">{{ stats.failedJobs || 0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Alerting apps</span>
+                                <span class="fw-semibold">{{ stats.alertingApplications || 0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Offline apps</span>
+                                <span class="fw-semibold">{{ stats.offlineApplications || 0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="text-muted">System alerts</span>
+                                <span class="fw-semibold">{{ stats.systemAlerts || 0 }}</span>
                             </div>
                         </div>
                     </div>
@@ -101,7 +196,7 @@
 </template>
 
 <script>
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import Authenticated from '../Layouts/Authenticated.vue';
 import AdminMenu from '../Components/Menu.vue';
 
@@ -109,6 +204,7 @@ export default {
     name: 'AdminHome',
     components: {
         Head,
+        Link,
         Authenticated,
         AdminMenu
     },
@@ -118,7 +214,19 @@ export default {
             default: () => ({
                 totalUsers: 0,
                 activeUsers: 0,
+                totalInstitutions: 0,
+                activeInstitutions: 0,
+                inactiveInstitutions: 0,
+                institutionsWithDli: 0,
+                institutionTypeBreakdown: {},
+                totalApplications: 0,
+                applicationStatusBreakdown: {},
                 pendingApprovals: 0,
+                pendingSecurityApprovals: 0,
+                pendingPrivacyApprovals: 0,
+                offlineApplications: 0,
+                alertingApplications: 0,
+                failedJobs: 0,
                 systemAlerts: 0
             })
         },

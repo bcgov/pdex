@@ -184,24 +184,33 @@ class InstitutionRelationship extends Model
         string $relationshipReason,
         array $additionalData = []
     ): self {
-        // Ensure consistent ordering to prevent duplicates
-        if ($institutionAGuid > $institutionBGuid) {
-            [$institutionAGuid, $institutionBGuid] = [$institutionBGuid, $institutionAGuid];
-        }
+                // Check if relationship of the same type already exists in either direction
+        $existingRelationships = self::where(function ($query) use ($institutionAGuid, $institutionBGuid) {
+            $query->where('institution_a_guid', $institutionAGuid)
+                  ->where('institution_b_guid', $institutionBGuid);
+        })->orWhere(function ($query) use ($institutionAGuid, $institutionBGuid) {
+            $query->where('institution_a_guid', $institutionBGuid)
+                  ->where('institution_b_guid', $institutionAGuid);
+                })->where('relationship_type', $relationshipType)
+                    ->get();
 
-        // Check if relationship already exists
-        $existing = self::where('institution_a_guid', $institutionAGuid)
-                       ->where('institution_b_guid', $institutionBGuid)
-                       ->first();
-
-        if ($existing) {
-            // Update existing relationship instead of creating new one
-            $existing->update(array_merge([
+        if ($existingRelationships->isNotEmpty()) {
+            // Update any existing relationship(s) of the same type
+            $updates = array_merge([
                 'relationship_type' => $relationshipType,
                 'relationship_reason' => $relationshipReason,
-            ], $additionalData));
+            ], $additionalData);
+
+            foreach ($existingRelationships as $existingRelationship) {
+                $existingRelationship->update($updates);
+            }
             
-            return $existing;
+            return $existingRelationships->first();
+        }
+
+        // Ensure consistent ordering for new relationships
+        if ($institutionAGuid > $institutionBGuid) {
+            [$institutionAGuid, $institutionBGuid] = [$institutionBGuid, $institutionAGuid];
         }
 
         return self::create(array_merge([

@@ -107,6 +107,22 @@ class ApplicationPolicy
     }
 
     /**
+     * Determine whether the user can reject applications (security or privacy).
+     */
+    public function reject(User $user, Application $application = null): bool
+    {
+        if ($application && !$application->canModifyApprovals()) {
+            return false;
+        }
+
+        return $user->hasAnyRole([
+            Role::SUPER_ADMIN,
+            Role::SECURITY_OFFICER,
+            Role::PRIVACY_OFFICER
+        ]);
+    }
+
+    /**
      * Determine whether the user can activate/deactivate applications.
      */
     public function toggleStatus(User $user, Application $application = null): bool

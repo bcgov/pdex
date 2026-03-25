@@ -239,17 +239,14 @@ import { computed, ref, watch } from 'vue'
 // Helper function to format date for HTML date input (YYYY-MM-DD)
 function formatDateForInput(dateString) {
     if (!dateString) return '';
-    
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return '';
-        
-        // Format as YYYY-MM-DD for HTML date input
-        return date.toISOString().split('T')[0];
-    } catch (error) {
-        console.warn('Date formatting error:', error);
-        return '';
+
+    // Keep date-only values timezone-safe (no JS Date conversion)
+    if (typeof dateString === 'string') {
+        const match = dateString.match(/^(\d{4}-\d{2}-\d{2})/);
+        return match ? match[1] : '';
     }
+
+    return '';
 }
 
 export default {

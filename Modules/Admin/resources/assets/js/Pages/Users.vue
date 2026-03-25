@@ -12,7 +12,7 @@
             <div class="card-body">
 
     <!-- Search and Filter Controls -->
-    <div class="row mb-4">
+    <form class="row mb-4" @submit.prevent="filterUsers">
       <div class="col-md-4">
         <input
           v-model="searchQuery"
@@ -30,6 +30,8 @@
           <option value="Security Officer">Security Officer</option>
           <option value="Privacy Officer">Privacy Officer</option>
           <option value="Admin Guest">Admin Guest</option>
+          <option value="Institution User">Institution User</option>
+          <option value="Student">Student</option>
         </select>
       </div>
       <div class="col-md-3">
@@ -42,9 +44,8 @@
       </div>
       <div class="col-md-2">
         <button 
-          type="button" 
+          type="submit" 
           class="btn btn-primary w-100" 
-          @click="filterUsers"
           :disabled="loading"
         >
           <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -52,7 +53,7 @@
           Filter
         </button>
       </div>
-    </div>
+    </form>
 
     <!-- Users Table -->
     <div class="card">
@@ -76,6 +77,9 @@
               <tr style="border-bottom: 2px solid #dee2e6; background-color: white;">
                 <th>Name</th>
                 <th>Email</th>
+                <th>Organization</th>
+                <th>Identity Provider</th>
+                <th>GUID</th>
                 <th>Roles</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -94,6 +98,16 @@
                   </div>
                 </td>
                 <td>{{ user.email }}</td>
+                <td>{{ user.organization || '—' }}</td>
+                <td>
+                  <span v-if="user.identity_provider" class="badge" :class="getIdpBadgeClass(user.identity_provider)">
+                    {{ user.identity_provider.toUpperCase() }}
+                  </span>
+                  <span v-else class="text-muted small">—</span>
+                </td>
+                <td>
+                  <span class="font-monospace small text-muted" style="word-break: break-all;">{{ getUserGuid(user) || '—' }}</span>
+                </td>
                 <td>
                   <div class="d-flex flex-wrap gap-1">
                     <span
@@ -120,7 +134,7 @@
                   <div class="btn-group btn-group-sm" role="group">
                     <!-- Role Management -->
                     <button
-                      v-if="!user.deleted_at && canManageUsers"
+                      v-if="!user.deleted_at && canManageUsers && !isRestrictedUser(user)"
                       type="button"
                       class="btn btn-outline-primary"
                       @click="openRoleModal(user)"
@@ -296,6 +310,13 @@ export default {
       'Admin Guest'
     ]
 
+    const RESTRICTED_ROLES = ['Institution User', 'Student']
+
+    const isRestrictedUser = (user) => {
+      const roles = user.admin_roles || []
+      return roles.some(role => RESTRICTED_ROLES.includes(role))
+    }
+
     // Computed properties
     const filteredUsers = computed(() => {
       // Since we're doing server-side filtering now, just return the users as-is
@@ -322,6 +343,24 @@ export default {
       })
     }
 
+    const getUserGuid = (user) => {
+      switch (user.identity_provider) {
+        case 'idir':  return user.idir_user_guid
+        case 'bcsc':  return user.bcsc_user_guid
+        case 'bceid': return user.bceid_user_guid
+        default:      return user.guid
+      }
+    }
+
+    const getIdpBadgeClass = (idp) => {
+      const classes = {
+        'bceid': 'bg-warning text-dark',
+        'idir':  'bg-primary',
+        'bcsc':  'bg-success',
+      }
+      return classes[idp] || 'bg-secondary'
+    }
+
     const getRoleBadgeClass = (role) => {
       const classes = {
         'Super Admin': 'bg-danger',
@@ -329,7 +368,9 @@ export default {
         'Application Manager': 'bg-warning text-dark',
         'Security Officer': 'bg-info',
         'Privacy Officer': 'bg-success',
-        'Admin Guest': 'bg-secondary'
+        'Admin Guest': 'bg-secondary',
+        'Institution User': 'bg-secondary',
+        'Student': 'bg-secondary'
       }
       return classes[role] || 'bg-secondary'
     }
@@ -341,7 +382,9 @@ export default {
         'Application Manager': 'Manage applications',
         'Security Officer': 'Security oversight and application approvals',
         'Privacy Officer': 'Privacy compliance and data protection',
-        'Admin Guest': 'Limited admin access'
+        'Admin Guest': 'Limited admin access',
+        'Institution User': 'BCeID Institutional user access',
+        'Student': 'BCSC Student access'
       }
       return descriptions[role] || ''
     }
@@ -493,6 +536,9 @@ export default {
       selectedUser,
       selectedRoles,
       availableRoles,
+      isRestrictedUser,
+      getUserGuid,
+      getIdpBadgeClass,
       canManageUsers,
       filteredUsers,
       filterUsers,

@@ -31,7 +31,7 @@ export default {
             return user.roles.some(role => role.name === 'Ministry_Admin');
         },
         logoutUrl() {
-            return this.$page.props.logoutUrl;
+            return '/ministry/logout';
         }
     }
 };

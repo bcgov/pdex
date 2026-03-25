@@ -1,0 +1,238 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdex-app-prod
+  labels:
+    app: pdex
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pdex
+  template:
+    metadata:
+      labels:
+        app: pdex
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      tolerations:
+      - key: "CriticalAddonsOnly"
+        operator: "Exists"
+
+      initContainers:
+      - name: secrets-manager-fetch
+        image: public.ecr.aws/aws-cli/aws-cli:2.17.38
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c']
+        args:
+        - |
+          set -euo pipefail
+          mkdir -p /secrets
+          echo "Fetching secrets from AWS Secrets Manager..."
+          aws secretsmanager get-secret-value \
+            --secret-id arn:aws:secretsmanager:ca-central-1:868987904026:secret:secrets.env-YejdSZ \
+            --query SecretString \
+            --output text > /secrets/secrets.json
+          chmod 600 /secrets/secrets.json
+        env:
+        - name: AWS_REGION
+          value: ca-central-1
+        volumeMounts:
+        - name: sm-secret
+          mountPath: /secrets
+
+      - name: secrets-init
+        image: public.ecr.aws/docker/library/alpine:3.19
+        command: ['sh', '-c']
+        args:
+        - |
+          set -euo pipefail
+          apk add --no-cache jq >/dev/null
+          
+          ######
+
+          echo "Processing secrets from Secrets Manager JSON..."
+          set -eu
+
+          src="/vault/secrets/secrets.json"
+          out="/secrets/.env"
+
+          if [ ! -f "$src" ]; then
+            echo "ERROR: $src not found"
+            ls -la /vault/secrets || true
+            exit 1
+          fi
+
+          mkdir -p /secrets
+          rm -f "$out"
+
+          # Convert JSON object to KEY=VALUE lines.
+          # - values are coerced to strings
+          # - internal newlines are escaped as \n
+          jq -r '
+            to_entries
+            | map(.key + "=" + ((.value | tostring | gsub("\r";"")) | @json))
+            | .[]
+          ' "$src" > "$out"
+
+          chmod 600 "$out" || true
+
+          echo "Generated $out"
+
+
+        volumeMounts:
+        - name: sm-secret
+          mountPath: /vault/secrets
+          readOnly: true
+        - name: dotenv-out
+          mountPath: /secrets
+
+
+      containers:
+      - name: pdex
+        image: "${PROD_ECR}:${TAG}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1500m
+            memory: 1Gi
+          requests:
+            cpu: 650m
+            memory: 600Mi
+
+        startupProbe:
+          httpGet:
+            path: /up
+            port: 8080
+          periodSeconds: 5
+          failureThreshold: 60   # ~5 minutes warmup
+
+        readinessProbe:
+          httpGet:
+            path: /up
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 6
+
+        livenessProbe:
+          httpGet:
+            path: /up
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        volumeMounts:
+        - name: dotenv-out
+          mountPath: /secrets
+          readOnly: true
+        - name: sm-secret
+          mountPath: /vault/secrets
+          readOnly: true
+
+      serviceAccountName: pdex-secret-manager-sa
+      volumes:
+      - name: sm-secret
+        emptyDir: {}
+      - name: dotenv-out
+        emptyDir: {}
+
+---
+# needed to receive traffic from the ALB. It must match the serviceRef name in alb.tf
+apiVersion: v1
+kind: Service
+metadata:
+  name: pdex-service-prod
+spec:
+  selector:
+    app: pdex
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pdex-ingress-prod
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/load-balancer-name: default
+    kubernetes.io/ingress.class: alb
+spec:
+  rules:
+  - host: prod.pdex.gov.bc.ca
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pdex-service-prod
+            port:
+              number: 80
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pdex-secret-manager-sa
+  namespace: default
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: pdex-hpa-prod
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pdex-app-prod
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: pdex-vpa-prod
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pdex-app-prod
+  updatePolicy:
+    updateMode: "Off" # That keeps recommendations but stops pod mutations. (No HPA/VPA fighting.)
+  resourcePolicy:
+    containerPolicies:
+    - containerName: pdex
+      minAllowed:
+        cpu: 100m
+        memory: 256Mi
+      maxAllowed:
+        cpu: 2000m
+        memory: 2Gi

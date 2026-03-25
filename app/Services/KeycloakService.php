@@ -132,6 +132,10 @@ class KeycloakService
                 $user->bcsc_user_guid = $userData['bcsc_user_guid'] ?? $keycloakId;
                 $user->user_guid = $user->bcsc_user_guid;
                 break;
+            default:
+                Log::warning('Unknown identity provider', ['identity_provider' => $identityProvider]);
+                $user->user_guid = $keycloakId;
+                break;
         }
 
         $user->organization = $userData['organization'] ?? null;

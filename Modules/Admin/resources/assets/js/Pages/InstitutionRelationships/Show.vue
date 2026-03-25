@@ -208,6 +208,20 @@ export default {
 
         const formatDate = (dateString) => {
             if (!dateString) return '';
+
+            if (typeof dateString === 'string') {
+                const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                if (match) {
+                    const [, year, month, day] = match;
+                    const safeDate = new Date(Number(year), Number(month) - 1, Number(day));
+                    return safeDate.toLocaleDateString('en-CA', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                }
+            }
+
             return new Date(dateString).toLocaleDateString('en-CA', {
                 year: 'numeric',
                 month: 'long',

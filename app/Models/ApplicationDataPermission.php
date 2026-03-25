@@ -10,6 +10,15 @@ class ApplicationDataPermission extends Model
 {
     use HasFactory;
 
+    private const LABEL_USER_GUID = 'User GUID';
+    private const LABEL_POSTAL_CODE = 'Postal Code';
+    private const LABEL_INDIVIDUAL_ID = 'Individual ID';
+    private const DESC_REFERENCE_TO_INDIVIDUAL = 'Reference to individual';
+    private const LABEL_USER_ID = 'User ID';
+    private const DESC_REFERENCE_TO_USER = 'Reference to user';
+    private const LABEL_ACTIVE_STATUS = 'Active Status';
+    private const LABEL_INSTITUTION_GUID = 'Institution GUID';
+
     protected $fillable = [
         'application_id',
         'table_name',
@@ -100,11 +109,11 @@ class ApplicationDataPermission extends Model
             'phone_number' => 'Phone Number',
             'date_of_birth' => 'Date of Birth',
             'bceid_guid' => 'BCeID GUID',
-            'user_guid' => 'User GUID',
+            'user_guid' => self::LABEL_USER_GUID,
             'guid' => 'GUID',
             'id' => 'ID',
             'url' => 'URL',
-            'postal_code' => 'Postal Code',
+            'postal_code' => self::LABEL_POSTAL_CODE,
             'start_date' => 'Start Date',
             'end_date' => 'End Date',
             'job_title' => 'Job Title',
@@ -153,7 +162,7 @@ class ApplicationDataPermission extends Model
         $metadata = [
             'individuals' => [
                 'guid' => ['label' => 'GUID', 'description' => 'Unique identifier', 'pii' => false],
-                'user_guid' => ['label' => 'User GUID', 'description' => 'User system identifier', 'pii' => false],
+                'user_guid' => ['label' => self::LABEL_USER_GUID, 'description' => 'User system identifier', 'pii' => false],
                 'social_insurance_number' => ['label' => 'Social Insurance Number', 'description' => 'SIN', 'sensitive' => true, 'pii' => true],
                 'government_issued_id' => ['label' => 'Government ID', 'description' => 'Government issued identification', 'sensitive' => true, 'pii' => true],
                 'first_name' => ['label' => 'First Name', 'description' => 'Given name', 'pii' => true],
@@ -180,21 +189,21 @@ class ApplicationDataPermission extends Model
                 'last_login_at' => ['label' => 'Last Login', 'description' => 'Last login timestamp', 'pii' => false],
             ],
             'individual_addresses' => [
-                'individual_id' => ['label' => 'Individual ID', 'description' => 'Reference to individual', 'pii' => false],
-                'user_id' => ['label' => 'User ID', 'description' => 'Reference to user', 'pii' => false],
+                'individual_id' => ['label' => self::LABEL_INDIVIDUAL_ID, 'description' => self::DESC_REFERENCE_TO_INDIVIDUAL, 'pii' => false],
+                'user_id' => ['label' => self::LABEL_USER_ID, 'description' => self::DESC_REFERENCE_TO_USER, 'pii' => false],
                 'address_type' => ['label' => 'Address Type', 'description' => 'Type of address (home, mailing, etc.)', 'pii' => false],
                 'address_line1' => ['label' => 'Address Line 1', 'description' => 'Street address', 'pii' => true],
                 'address_line2' => ['label' => 'Address Line 2', 'description' => 'Apartment, suite, etc.', 'pii' => true],
                 'city' => ['label' => 'City', 'description' => 'City name', 'pii' => true],
                 'province' => ['label' => 'Province', 'description' => 'Province/state', 'pii' => true],
-                'postal_code' => ['label' => 'Postal Code', 'description' => 'Postal/ZIP code', 'pii' => true],
+                'postal_code' => ['label' => self::LABEL_POSTAL_CODE, 'description' => 'Postal/ZIP code', 'pii' => true],
                 'country' => ['label' => 'Country', 'description' => 'Country name', 'pii' => true],
                 'is_primary' => ['label' => 'Is Primary', 'description' => 'Primary address flag', 'pii' => false],
                 'is_active' => ['label' => 'Is Active', 'description' => 'Active address flag', 'pii' => false],
             ],
             'individual_employments' => [
-                'individual_id' => ['label' => 'Individual ID', 'description' => 'Reference to individual', 'pii' => false],
-                'user_id' => ['label' => 'User ID', 'description' => 'Reference to user', 'pii' => false],
+                'individual_id' => ['label' => self::LABEL_INDIVIDUAL_ID, 'description' => self::DESC_REFERENCE_TO_INDIVIDUAL, 'pii' => false],
+                'user_id' => ['label' => self::LABEL_USER_ID, 'description' => self::DESC_REFERENCE_TO_USER, 'pii' => false],
                 'employment_status' => ['label' => 'Employment Status', 'description' => 'Current employment status', 'pii' => false],
                 'is_looking_for_work' => ['label' => 'Looking for Work', 'description' => 'Job seeking status', 'pii' => false],
                 'job_title' => ['label' => 'Job Title', 'description' => 'Current job title', 'pii' => false],
@@ -220,8 +229,8 @@ class ApplicationDataPermission extends Model
                 'is_current' => ['label' => 'Is Current', 'description' => 'Current employment record flag', 'pii' => false],
             ],
             'individual_identities' => [
-                'individual_id' => ['label' => 'Individual ID', 'description' => 'Reference to individual', 'pii' => false],
-                'user_id' => ['label' => 'User ID', 'description' => 'Reference to user', 'pii' => false],
+                'individual_id' => ['label' => self::LABEL_INDIVIDUAL_ID, 'description' => self::DESC_REFERENCE_TO_INDIVIDUAL, 'pii' => false],
+                'user_id' => ['label' => self::LABEL_USER_ID, 'description' => self::DESC_REFERENCE_TO_USER, 'pii' => false],
                 'citizenship_status' => ['label' => 'Citizenship Status', 'description' => 'Citizenship/residency status', 'sensitive' => true],
                 'country_of_birth' => ['label' => 'Country of Birth', 'description' => 'Birth country', 'sensitive' => true, 'pii' => true],
                 'language_spoken_at_home' => ['label' => 'Home Language', 'description' => 'Primary language at home', 'sensitive' => true],
@@ -245,12 +254,12 @@ class ApplicationDataPermission extends Model
                 'legal_operating_name' => ['label' => 'Legal Operating Name', 'description' => 'Official institution name', 'pii' => false],
                 'institution_type' => ['label' => 'Institution Type', 'description' => 'Type of educational institution', 'pii' => false],
                 'dli' => ['label' => 'DLI Number', 'description' => 'Designated Learning Institution number', 'pii' => false],
-                'active_status' => ['label' => 'Active Status', 'description' => 'Whether institution is active', 'pii' => false],
+                'active_status' => ['label' => self::LABEL_ACTIVE_STATUS, 'description' => 'Whether institution is active', 'pii' => false],
             ],
             'institution_staff' => [
                 'guid' => ['label' => 'GUID', 'description' => 'Unique staff identifier', 'pii' => false],
-                'user_guid' => ['label' => 'User GUID', 'description' => 'User system identifier', 'pii' => false],
-                'institution_guid' => ['label' => 'Institution GUID', 'description' => 'Institution identifier', 'pii' => false],
+                'user_guid' => ['label' => self::LABEL_USER_GUID, 'description' => 'User system identifier', 'pii' => false],
+                'institution_guid' => ['label' => self::LABEL_INSTITUTION_GUID, 'description' => 'Institution identifier', 'pii' => false],
                 'bceid_business_guid' => ['label' => 'BCeID Business GUID', 'description' => 'Business BCeID identifier', 'pii' => false],
                 'bceid_user_guid' => ['label' => 'BCeID User GUID', 'description' => 'User BCeID identifier', 'pii' => false],
                 'bceid_user_id' => ['label' => 'BCeID User ID', 'description' => 'BCeID user ID', 'pii' => false],
@@ -261,7 +270,7 @@ class ApplicationDataPermission extends Model
             ],
             'institution_sites' => [
                 'guid' => ['label' => 'GUID', 'description' => 'Unique site identifier', 'pii' => false],
-                'institution_guid' => ['label' => 'Institution GUID', 'description' => 'Parent institution identifier', 'pii' => false],
+                'institution_guid' => ['label' => self::LABEL_INSTITUTION_GUID, 'description' => 'Parent institution identifier', 'pii' => false],
                 'operating_name' => ['label' => 'Operating Name', 'description' => 'Site operating name', 'pii' => false],
                 'site_type' => ['label' => 'Site Type', 'description' => 'Type of site or campus', 'pii' => false],
                 'contact_first_name' => ['label' => 'Contact First Name', 'description' => 'Site contact first name', 'pii' => true],
@@ -273,16 +282,16 @@ class ApplicationDataPermission extends Model
                 'city' => ['label' => 'City', 'description' => 'City name', 'pii' => true],
                 'province_state' => ['label' => 'Province/State', 'description' => 'Province or state', 'pii' => true],
                 'country' => ['label' => 'Country', 'description' => 'Country name', 'pii' => true],
-                'postal_code' => ['label' => 'Postal Code', 'description' => 'Postal/ZIP code', 'pii' => true],
+                'postal_code' => ['label' => self::LABEL_POSTAL_CODE, 'description' => 'Postal/ZIP code', 'pii' => true],
                 'public' => ['label' => 'Public', 'description' => 'Public institution flag', 'pii' => false],
-                'active_status' => ['label' => 'Active Status', 'description' => 'Site active status', 'pii' => false],
+                'active_status' => ['label' => self::LABEL_ACTIVE_STATUS, 'description' => 'Site active status', 'pii' => false],
                 'standing_status' => ['label' => 'Standing Status', 'description' => 'Institutional standing', 'pii' => false],
                 'economic_region' => ['label' => 'Economic Region', 'description' => 'BC economic region', 'pii' => false],
                 'notes' => ['label' => 'Notes', 'description' => 'Administrative notes', 'pii' => false],
             ],
             'programs' => [
                 'guid' => ['label' => 'GUID', 'description' => 'Unique program identifier', 'pii' => false],
-                'institution_guid' => ['label' => 'Institution GUID', 'description' => 'Institution identifier', 'pii' => false],
+                'institution_guid' => ['label' => self::LABEL_INSTITUTION_GUID, 'description' => 'Institution identifier', 'pii' => false],
                 'program_name' => ['label' => 'Program Name', 'description' => 'Name of the program', 'pii' => false],
                 'program_type' => ['label' => 'Program Type', 'description' => 'Type of educational program', 'pii' => false],
                 'program_number' => ['label' => 'Program Number', 'description' => 'Historical program number', 'pii' => false],
@@ -297,7 +306,7 @@ class ApplicationDataPermission extends Model
                 'prov_funded_micro_cred' => ['label' => 'Provincially Funded Micro Credential', 'description' => 'Provincial funding flag', 'pii' => false],
                 'indigenous_related_learning' => ['label' => 'Indigenous Related Learning', 'description' => 'Indigenous content flag', 'pii' => false],
                 'diversity_inclusion_related_learning' => ['label' => 'Diversity & Inclusion Related', 'description' => 'D&I content flag', 'pii' => false],
-                'active_status' => ['label' => 'Active Status', 'description' => 'Program active status', 'pii' => false],
+                'active_status' => ['label' => self::LABEL_ACTIVE_STATUS, 'description' => 'Program active status', 'pii' => false],
                 'last_touch_by_user_guid' => ['label' => 'Last Modified By', 'description' => 'Last modifier user GUID', 'pii' => false],
                 'excel_guid' => ['label' => 'Excel GUID', 'description' => 'Excel import identifier', 'pii' => false],
                 'start_date' => ['label' => 'Start Date', 'description' => 'Program start date', 'pii' => false],

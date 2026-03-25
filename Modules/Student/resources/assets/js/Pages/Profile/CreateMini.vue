@@ -84,7 +84,7 @@
                     <i class="bi bi-calendar me-2"></i>Personal Details
                   </h6>
                   <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                       <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
                       <input
                         id="date_of_birth"
@@ -98,7 +98,7 @@
                         {{ form.errors.date_of_birth }}
                       </div>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                       <label for="gender" class="form-label">Gender</label>
                       <select
                         id="gender"
@@ -106,15 +106,32 @@
                         class="form-select"
                         :class="{ 'is-invalid': form.errors.gender }"
                       >
-                        <option value="">Select Gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
+                        <option v-if="form.gender == ''" value="">Select Gender</option>
+                        <option value="man">Man/Boy</option>
+                        <option value="woman">Woman/Girl</option>
                         <option value="non-binary">Non-binary</option>
-                        <option value="other">Other</option>
-                        <option value="prefer_not_to_say">Prefer not to say</option>
+                        <option value="unknown">Prefer not to answer</option>
                       </select>
                       <div v-if="form.errors.gender" class="invalid-feedback">
                         {{ form.errors.gender }}
+                      </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label for="sex" class="form-label">Sex</label>
+                      <select
+                        id="sex"
+                        v-model="form.sex"
+                        class="form-select"
+                        :class="{ 'is-invalid': form.errors.sex }"
+                      >
+                        <option v-if="form.sex == ''" value="">Select Sex</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="indeterminate">Indeterminate</option>
+                        <option value="unknown">Prefer not to answer</option>
+                      </select>
+                      <div v-if="form.errors.sex" class="invalid-feedback">
+                        {{ form.errors.sex }}
                       </div>
                     </div>
                   </div>
@@ -192,121 +209,6 @@
                   </div>
                 </div>
 
-                <!-- Racial Identity -->
-                <div class="mb-4">
-                  <h6 class="border-bottom pb-2 mb-3">
-                    <i class="bi bi-people me-2"></i>Racial Identity
-                  </h6>
-                  <div class="row">
-                    <div class="col-md-12 mb-3">
-                      <label class="form-label">Select all that apply</label>
-                      <div class="row">
-                        <div class="col-md-6 mb-2">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="BLACK" v-model="form.racial_identity" id="racial_black">
-                            <label class="form-check-label" for="racial_black">
-                              Black
-                            </label>
-                          </div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="EAST_ASIAN" v-model="form.racial_identity" id="racial_east_asian">
-                            <label class="form-check-label" for="racial_east_asian">
-                              East Asian
-                            </label>
-                          </div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="INDIGENOUS" v-model="form.racial_identity" id="racial_indigenous">
-                            <label class="form-check-label" for="racial_indigenous">
-                              Indigenous
-                            </label>
-                          </div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="LATIN_AMERICAN" v-model="form.racial_identity" id="racial_latin_american">
-                            <label class="form-check-label" for="racial_latin_american">
-                              Latin American
-                            </label>
-                          </div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="MIDDLE_EASTERN" v-model="form.racial_identity" id="racial_middle_eastern">
-                            <label class="form-check-label" for="racial_middle_eastern">
-                              Middle Eastern
-                            </label>
-                          </div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="SOUTH_ASIAN" v-model="form.racial_identity" id="racial_south_asian">
-                            <label class="form-check-label" for="racial_south_asian">
-                              South Asian
-                            </label>
-                          </div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="SOUTHEAST_ASIAN" v-model="form.racial_identity" id="racial_southeast_asian">
-                            <label class="form-check-label" for="racial_southeast_asian">
-                              Southeast Asian
-                            </label>
-                          </div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="WHITE" v-model="form.racial_identity" id="racial_white">
-                            <label class="form-check-label" for="racial_white">
-                              White
-                            </label>
-                          </div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="ANOTHER_RACIAL_IDENTITY" v-model="form.racial_identity" id="racial_another" @change="handleAnotherRacialIdentityChange">
-                            <label class="form-check-label" for="racial_another">
-                              Another Racial Identity
-                            </label>
-                          </div>
-                          <div v-if="form.racial_identity.includes('ANOTHER_RACIAL_IDENTITY')" class="mt-2 ms-4">
-                            <input
-                              v-model="form.racial_identity_other_text"
-                              type="text"
-                              class="form-control form-control-sm"
-                              placeholder="Please specify (200 characters max)"
-                              maxlength="200"
-                            />
-                          </div>
-                        </div>
-                        <div class="col-12 mt-3 border-top pt-3">
-                          <div class="col-md-6 mb-2">
-                            <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="DO_NOT_KNOW" v-model="form.racial_identity" id="racial_do_not_know">
-                              <label class="form-check-label" for="racial_do_not_know">
-                                I do not know / I am not sure
-                              </label>
-                            </div>
-                          </div>
-                          <div class="col-md-6 mb-2">
-                            <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="PREFER_NOT_TO_ANSWER" v-model="form.racial_identity" id="racial_prefer_not">
-                              <label class="form-check-label" for="racial_prefer_not">
-                                Prefer not to answer
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div v-if="form.errors.racial_identity" class="invalid-feedback d-block">
-                        {{ form.errors.racial_identity }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <!-- Form Actions -->
@@ -352,37 +254,12 @@ const form = useForm({
   last_name: '',
   date_of_birth: '',
   gender: '',
+  sex: '',
   email_address: '',
   social_insurance_number: '',
   provincial_education_number: '',
-  racial_identity: [],
-  racial_identity_other_text: ''
 })
 
-// Watch for changes to racial_identity to enforce mutual exclusivity
-watch(() => form.racial_identity, (newValue, oldValue) => {
-  const exclusiveOptions = ['DO_NOT_KNOW', 'PREFER_NOT_TO_ANSWER']
-  
-  // Find which option was just added
-  const added = newValue.find(val => !oldValue.includes(val))
-  
-  if (added) {
-    if (exclusiveOptions.includes(added)) {
-      // If an exclusive option was selected, clear all others
-      form.racial_identity = [added]
-      form.racial_identity_other_text = ''
-    } else {
-      // If a regular option was selected, remove any exclusive options
-      form.racial_identity = newValue.filter(val => !exclusiveOptions.includes(val))
-    }
-  }
-}, { deep: true })
-
-const handleAnotherRacialIdentityChange = () => {
-  if (!form.racial_identity.includes('ANOTHER_RACIAL_IDENTITY')) {
-    form.racial_identity_other_text = ''
-  }
-}
 
 // Format SIN as 000-000-000 (only digits, max 9)
 const formatSIN = (event) => {
@@ -412,13 +289,10 @@ const submitForm = () => {
     last_name: form.last_name,
     date_of_birth: form.date_of_birth,
     gender: form.gender,
+    sex: form.sex,
     email_address: form.email_address,
     social_insurance_number: form.social_insurance_number,
     provincial_education_number: form.provincial_education_number,
-    identity: {
-      racial_identity: form.racial_identity,
-      racial_identity_other_text: form.racial_identity_other_text
-    }
   }
 
   form.post('/student/profile', {

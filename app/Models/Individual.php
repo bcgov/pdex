@@ -36,7 +36,47 @@ class Individual extends Model
         'notes',
         'email_verified_at',
         'last_login_at',
+        'sex',
     ];
+
+    
+    protected $casts = [
+    'date_of_birth' => 'date',
+    'disability_status' => 'boolean',
+    'emergency_contact' => 'array',
+    'metadata' => 'array',
+    'email_verified_at' => 'timestamp',
+    'last_login_at' => 'timestamp',
+    ];
+
+    protected $dates = [
+        'deleted_at',
+        'email_verified_at',
+        'last_login_at',
+    ];
+
+    // Status constants
+    const STATUS_ACTIVE = 'active';
+    const STATUS_INACTIVE = 'inactive';
+    const STATUS_SUSPENDED = 'suspended';
+
+    // Verification status constants
+    const VERIFICATION_UNVERIFIED = 'unverified';
+    const VERIFICATION_PENDING = 'pending';
+    const VERIFICATION_VERIFIED = 'verified';
+    const VERIFICATION_REJECTED = 'rejected';
+
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($model) {
+            if (empty($model->guid)) {
+                $model->guid = Str::orderedUuid()->getHex();
+            }
+        });
+    }
+
     // Relationships for addresses, employments, and identities
     public function addresses()
     {
@@ -72,43 +112,6 @@ class Individual extends Model
     public function permissionSelections()
     {
         return $this->hasMany(IndividualApplicationPermissionSelection::class);
-    }
-
-    protected $casts = [
-    'date_of_birth' => 'date',
-    'disability_status' => 'boolean',
-    'emergency_contact' => 'array',
-    'metadata' => 'array',
-    'email_verified_at' => 'timestamp',
-    'last_login_at' => 'timestamp',
-    ];
-
-    protected $dates = [
-        'deleted_at',
-        'email_verified_at',
-        'last_login_at',
-    ];
-
-    // Status constants
-    const STATUS_ACTIVE = 'active';
-    const STATUS_INACTIVE = 'inactive';
-    const STATUS_SUSPENDED = 'suspended';
-
-    // Verification status constants
-    const VERIFICATION_UNVERIFIED = 'unverified';
-    const VERIFICATION_PENDING = 'pending';
-    const VERIFICATION_VERIFIED = 'verified';
-    const VERIFICATION_REJECTED = 'rejected';
-
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($model) {
-            if (empty($model->guid)) {
-                $model->guid = (string) Str::uuid();
-            }
-        });
     }
 
     // Relationships

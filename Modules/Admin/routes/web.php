@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Admin\Http\Controllers\AdminController;
 use Modules\Admin\Http\Controllers\AdminUserController;
 use Modules\Admin\Http\Controllers\ApplicationController;
+use Modules\Admin\Http\Controllers\AdminLogoutController;
 
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\InstitutionSiteController;
@@ -14,6 +15,8 @@ Route::prefix('admin')->group(function () {
         'middleware' => ['auth', 'admin'],
         'as' => 'admin.',
     ], function () {
+        // Logout route
+        Route::post('logout', [AdminLogoutController::class, 'logout'])->name('logout');
         Route::get('/', [AdminController::class, 'index'])->name('dashboard');
         // Route::get('intake', [AdminController::class, 'intake'])->name('intake.index');
         
@@ -38,6 +41,7 @@ Route::prefix('admin')->group(function () {
         Route::delete('applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
         Route::patch('applications/{application}/security-approval', [ApplicationController::class, 'securityApproval'])->name('applications.security-approval');
         Route::patch('applications/{application}/privacy-approval', [ApplicationController::class, 'privacyApproval'])->name('applications.privacy-approval');
+        Route::patch('applications/{application}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
         // Route::patch('applications/{application}/manager-update', [ApplicationController::class, 'managerUpdate'])->name('applications.manager-update');
         Route::patch('applications/toggle-status/{application}', [ApplicationController::class, 'toggleStatus'])->name('applications.toggle-status');
         Route::patch('applications/restore/{id}', [ApplicationController::class, 'restore'])->name('applications.restore');

@@ -15,8 +15,8 @@
             Access the Ministry of Post-Secondary Education and Future Skills applications and services
           </p>
           <div class="d-inline-flex align-items-center px-3 py-2 rounded-pill border border-opacity-25" style="background-color: rgba(0, 51, 102, 0.1); border-color: var(--bc-blue) !important;">
-            <i class="bi bi-shield-check me-2" style="color: var(--bc-blue);"></i>
-            <span class="small fw-medium" style="color: var(--bc-blue);">Secured by Keycloak</span>
+            <i class="bi bi-person-badge me-2" style="color: var(--bc-blue);"></i>
+            <span class="small fw-medium" style="color: var(--bc-blue);">{{ user.name }}</span>
           </div>
         </div>
 
@@ -208,7 +208,10 @@ const props = defineProps({
 const redirectToApp = (appId) => {
   if (appId) {
     // Use the centralized gateway route and open in new tab
-    window.open(`/gateway/${appId}`, '_blank')
+    const app = props.applications.find(a => a.id === appId)
+    if (app) {
+      window.open(`/gateway/${app.guid}`, '_blank')
+    }
   }
 }
 

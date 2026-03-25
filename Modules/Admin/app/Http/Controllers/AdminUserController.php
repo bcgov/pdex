@@ -53,7 +53,9 @@ class AdminUserController extends Controller
                 case 'deleted':
                     $query->whereNotNull('deleted_at');
                     break;
-                // If no status filter or "All Users", don't add any additional where clause
+                default:
+                    // If no status filter or "All Users", don't add any additional where clause
+                    break;
             }
         }
 

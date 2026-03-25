@@ -37,6 +37,7 @@ class ApplicationStoreRequest extends FormRequest
             'comments' => 'nullable|string|max:2000',
             'stra_provided' => 'boolean',
             'pia_provided' => 'boolean',
+            'profile_integration_ready' => 'boolean',
         ];
     }
 
