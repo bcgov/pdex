@@ -24,7 +24,7 @@ provider "helm" {
 }
 
 resource "helm_release" "aws_load_balancer_controller" {
-  name       = "aws-load-balancer-controller"
+  name       = "aws-load-balancer-controller1"
   namespace  = "kube-system"
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
@@ -109,7 +109,7 @@ resource "helm_release" "vpa" {
 
 # Cluster Autoscaler Helm Release to see nodes scaling beyond desired count and up to max count
 resource "helm_release" "cluster_autoscaler" {
-  name       = "cluster-autoscaler"
+  name       = "cluster-autoscaler1"
   namespace  = "kube-system"
   repository = "https://kubernetes.github.io/autoscaler"
   chart      = "cluster-autoscaler"
