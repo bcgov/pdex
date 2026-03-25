@@ -151,35 +151,35 @@ resource "aws_iam_role_policy_attachment" "ng-AmazonEC2ContainerRegistryReadOnly
 }
 
 #Node group
-# resource "aws_eks_node_group" "eks-ng" {
-#   cluster_name    = aws_eks_cluster.pdex-cluster.name
-#   node_group_name = "eks-ng"
-#   node_role_arn   = aws_iam_role.eks-ng-role.arn
-#   subnet_ids      = data.aws_subnets.pod.ids
+resource "aws_eks_node_group" "eks-ng" {
+  cluster_name    = aws_eks_cluster.pdex-cluster.name
+  node_group_name = "eks-ng"
+  node_role_arn   = aws_iam_role.eks-ng-role.arn
+  subnet_ids      = data.aws_subnets.pod.ids
 
-#   scaling_config {
-#     desired_size = 4
-#     max_size     = 10
-#     min_size     = 1
-#   }
+  scaling_config {
+    desired_size = 4
+    max_size     = 10
+    min_size     = 1
+  }
 
-#   update_config {
-#     max_unavailable = 1
-#   }
+  update_config {
+    max_unavailable = 1
+  }
 
-#   # 4vCPU, 16GB RAM, instead of t3.medium 2vCPU 4GB RAM. c6i instead of t3 because t3 is burstable 
-#   # and can have performance issues when bursting. c6i is compute optimized and should perform well 
-#   # for our workloads. You can adjust this based on your needs and budget.
-#   instance_types = ["c6i.xlarge"]
+  # 4vCPU, 16GB RAM, instead of t3.medium 2vCPU 4GB RAM. c6i instead of t3 because t3 is burstable 
+  # and can have performance issues when bursting. c6i is compute optimized and should perform well 
+  # for our workloads. You can adjust this based on your needs and budget.
+  instance_types = ["c6i.xlarge"]
 
-#   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
-#   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
-#   depends_on = [
-#     aws_iam_role_policy_attachment.ng-AmazonEKSWorkerNodePolicy,
-#     aws_iam_role_policy_attachment.ng-AmazonEKS_CNI_Policy,
-#     aws_iam_role_policy_attachment.ng-AmazonEC2ContainerRegistryReadOnly,
-#   ]
-# }
+  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
+  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
+  depends_on = [
+    aws_iam_role_policy_attachment.ng-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.ng-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.ng-AmazonEC2ContainerRegistryReadOnly,
+  ]
+}
 
 
 #Cluster auto scaler role
