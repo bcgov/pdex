@@ -6,7 +6,6 @@ include {
   path = find_in_parent_folders()
 }
 
-
 generate "prod_tfvars" {
   path              = "prod.auto.tfvars"
   if_exists         = "overwrite"
