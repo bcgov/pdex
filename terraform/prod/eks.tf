@@ -55,13 +55,13 @@ resource "aws_eks_addon" "vpc-cni-addon" {
   resolve_conflicts_on_update = "OVERWRITE"
 
   // comment this out temporarily when you first apply the cluster and addons, then uncomment to update the addon with the custom config. This is because some of these settings can only be applied on addon update, not create.
-  configuration_values = jsonencode({
-    env = {
-      AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG = "true"                        # Pods get IPs from ENIs that live in the ENIConfig subnets
-      ENI_CONFIG_LABEL_DEF               = "topology.kubernetes.io/zone" # how to choose which ENIConfig to use.
-      AWS_VPC_K8S_CNI_EXTERNALSNAT       = "true"                        # Do not do SNAT on the node.
-    }
-  })
+  # configuration_values = jsonencode({
+  #   env = {
+  #     AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG = "true"                        # Pods get IPs from ENIs that live in the ENIConfig subnets
+  #     ENI_CONFIG_LABEL_DEF               = "topology.kubernetes.io/zone" # how to choose which ENIConfig to use.
+  #     AWS_VPC_K8S_CNI_EXTERNALSNAT       = "true"                        # Do not do SNAT on the node.
+  #   }
+  # })
 }
 
 resource "aws_eks_addon" "kube-proxy-addon" {
