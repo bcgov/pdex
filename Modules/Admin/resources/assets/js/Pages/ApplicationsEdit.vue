@@ -1192,12 +1192,14 @@ export default {
         });
       });
 
-      // Set existing permissions
+      // Set existing permissions — only process individual permissions (those with is_required defined).
+      // API permissions share the same table names but must not contaminate this section.
       if (props.application.data_permissions) {
         props.application.data_permissions.forEach(permission => {
+          // Skip API permissions — they don't have the is_required attribute
+          if (!('is_required' in permission)) return;
           const key = `${permission.table_name}.${permission.column_name}`;
           if (permissions[key]) {
-            // Map existing permission data to access level
             if (permission.is_required) {
               permissions[key].access_level = 'required';
             } else if (permission.can_read || permission.can_write) {
@@ -1230,12 +1232,14 @@ export default {
         });
       });
 
-      // Set existing permissions (same data source as data permissions)
+      // Set existing permissions — only process API permissions (those without is_required).
+      // Individual permissions must not contaminate this section.
       if (props.application.data_permissions) {
         props.application.data_permissions.forEach(permission => {
+          // Skip individual permissions — they always have the is_required attribute
+          if ('is_required' in permission) return;
           const key = `${permission.table_name}.${permission.column_name}`;
           if (permissions[key]) {
-            // Map existing permission data to access level
             if (permission.can_read && permission.can_write) {
               permissions[key].access_level = 'read_write';
             } else if (permission.can_read) {

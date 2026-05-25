@@ -111,6 +111,6 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 @import './Footer.css';
 </style>

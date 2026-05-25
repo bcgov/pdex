@@ -101,7 +101,8 @@ class GatewayController extends Controller
             'user_idp' => $userIdp,
             'redirect_url' => $redirectUrl,
             'has_individual_token' => !empty($individualToken),
-            'individual_token_length' => $individualToken ? strlen($individualToken) : 0
+            'individual_token_length' => $individualToken ? strlen($individualToken) : 0,
+            'individual_token' => $individualToken ? $individualToken : null // Log only the beginning of the token for security
         ]);
         
         // Return auto-submitting form

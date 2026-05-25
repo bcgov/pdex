@@ -49,6 +49,6 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 @import './AlertBanner.css';
 </style>

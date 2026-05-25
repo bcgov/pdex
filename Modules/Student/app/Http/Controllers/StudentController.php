@@ -24,6 +24,7 @@ use Modules\Student\Http\Requests\StoreIndividualRequest;
 use Modules\Student\Http\Requests\UpdateIndividualRequest;
 use Modules\Student\Http\Requests\StoreIndividualMultiStepRequest;
 use Modules\Student\Http\Requests\UpdateIndividualMultiStepRequest;
+use Firebase\JWT\JWT;
 
 class StudentController extends Controller
 {
@@ -351,7 +352,7 @@ class StudentController extends Controller
             
             // Include ALL fields that the application requests, regardless of null values
             // This ensures the application gets complete data structure for all 11 fields
-            $tokenData[$columnName] = $value;
+            $tokenData[$columnName] = $this->normalizeDatetimeValue($value);
             
             \Log::debug("Processing permission", [
                 'table_name' => $tableName,
@@ -389,8 +390,10 @@ class StudentController extends Controller
         ];
         
         // In a real implementation, you would create a JWT token here
+        //use Firebase\JWT\JWT; to encode the token with a secret key
+        return JWT::encode($tokenData, $application->client_secret, 'HS256');
         // For now, we'll just return the data as is
-        return base64_encode(json_encode($tokenData));
+        // return base64_encode(json_encode($tokenData));
     }
 
     /**
@@ -1044,6 +1047,26 @@ class StudentController extends Controller
     }
 
     /**
+     * Strip the time portion from ISO 8601 datetime strings (e.g. 1966-07-08T00:00:00.000000Z → 1966-07-08).
+     * Non-datetime values are returned unchanged.
+     * Also handles cases where time portion is present but not in ISO format (e.g. 1966-07-08T00:00:00 → 1966-07-08).
+     * Also handles cases where time portion is present with milliseconds but not in ISO format (e.g. 1966-07-08T00:00:00.000 → 1966-07-08).
+     * Also handles cases where time portion is present with milliseconds and timezone but not in ISO format (e.g. 1966-07-08T00:00:00.000Z → 1966-07-08).
+     * Also handles cases where time portion is present with milliseconds and timezone in ISO format (e.g. 1966-07-08T00:00:00.000Z → 1966-07-08).
+     * Also handles cases where time portion is present after a space instead of T (e.g. 1966-07-08 00:00:00 → 1966-07-08).
+     */
+    private function normalizeDatetimeValue($value)
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d');
+        }
+        if (is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}[T ]/', $value)) {
+            return substr($value, 0, 10);
+        }
+        return $value;
+    }
+
+    /**
      * Check if individual has a related record for the given table
      */
     private function hasRelatedRecord($individual, string $tableName): bool
@@ -1205,12 +1228,13 @@ class StudentController extends Controller
                     continue 2;
             }
             
-            $tokenData[$columnName] = $value;
+            $tokenData[$columnName] = $this->normalizeDatetimeValue($value);
             
             \Log::debug("Processing selected permission", [
                 'table_name' => $tableName,
                 'column_name' => $columnName,
-                'value' => $value,
+                'raw_value' => $value,
+                'normalized_value' => $tokenData[$columnName],
                 'is_selected' => $isSelected
             ]);
         }
@@ -1219,7 +1243,8 @@ class StudentController extends Controller
             'app_id' => $application->id,
             'app_name' => $application->name,
             'token_data_keys' => array_keys($tokenData),
-            'token_data_count' => count($tokenData)
+            'token_data_count' => count($tokenData),
+            'token_data' => $tokenData
         ]);
         
         return $tokenData;

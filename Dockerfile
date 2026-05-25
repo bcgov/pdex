@@ -1,6 +1,6 @@
 FROM alpine:latest
 ARG TZ=America/Vancouver
-ARG DEVENV=prod
+ARG DEVENV=build
 
 WORKDIR /var/www/html
 

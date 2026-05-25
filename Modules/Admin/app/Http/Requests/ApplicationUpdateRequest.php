@@ -45,8 +45,8 @@ class ApplicationUpdateRequest extends FormRequest
             'offline_start_time' => 'nullable|date',
             'offline_end_time' => 'nullable|date|after:offline_start_time',
             'comments' => 'nullable|string|max:2000',
-            'stra_provided' => 'required_if:status,active|accepted',
-            'pia_provided' => 'required_if:status,active|accepted',
+            'stra_provided' => 'nullable|boolean',
+            'pia_provided' => 'nullable|boolean',
             'data_permissions' => 'nullable|array',
             'data_permissions.*.table_name' => 'required|string|in:individuals,individual_addresses,individual_employments,individual_identities,institutions,institution_staff,institution_sites,programs',
             'data_permissions.*.column_name' => 'required|string',
@@ -82,6 +82,16 @@ class ApplicationUpdateRequest extends FormRequest
             }
             if (($data['bceid_enabled'] ?? false) && empty($data['bceid_redirect_url'])) {
                 $validator->errors()->add('bceid_redirect_url', 'BCeID redirect URL is required when BCeID is enabled.');
+            }
+
+            // Validate compliance docs when activating
+            if (($data['status'] ?? '') === 'active') {
+                if (!($data['stra_provided'] ?? false)) {
+                    $validator->errors()->add('stra_provided', 'STRA documentation must be provided before setting status to active.');
+                }
+                if (!($data['pia_provided'] ?? false)) {
+                    $validator->errors()->add('pia_provided', 'PIA documentation must be provided before setting status to active.');
+                }
             }
 
             // Validate info fields - both must be provided together or not at all
