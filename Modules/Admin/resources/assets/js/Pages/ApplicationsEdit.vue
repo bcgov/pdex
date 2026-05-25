@@ -353,7 +353,7 @@
                                     <p class="card-text text-muted small mb-2">{{ column.description }}</p>
                                     <!-- Display Name Input -->
                                     <div class="mb-2">
-                                      <label :for="`display-name-${table.name}-${column.name}`" class="form-label small">Display Name</label>
+                                      <label :for="`display-name-${table.name}-${column.name}`" class="form-label small">Display Name on PDEX</label>
                                       <input 
                                         :id="`display-name-${table.name}-${column.name}`"
                                         v-model="dataPermissions[`${table.name}.${column.name}`].display_name"
@@ -361,6 +361,18 @@
                                         type="text"
                                         :placeholder="column.default_display_name"
                                       >
+                                    </div>
+                                    <!-- Destination Application Field -->
+                                    <div class="mb-2">
+                                      <label :for="`dest-field-${table.name}-${column.name}`" class="form-label small">Destination Application Field</label>
+                                      <input 
+                                        :id="`dest-field-${table.name}-${column.name}`"
+                                        v-model="dataPermissions[`${table.name}.${column.name}`].destination_field"
+                                        class="form-control form-control-sm font-monospace"
+                                        type="text"
+                                        :placeholder="column.name"
+                                      >
+                                      <div class="form-text">Key name used in the JWT token sent to the destination application.</div>
                                     </div>
                                     <div class="mb-2">
                                       <label class="form-label small">Access Level</label>
@@ -1207,6 +1219,7 @@ export default {
             } else {
               permissions[key].access_level = 'none';
             }
+            permissions[key].destination_field = permission.destination_field || permissions[key].destination_field;
             permissions[key].display_name = permission.display_name || permissions[key].display_name;
           }
         });
@@ -1340,6 +1353,7 @@ export default {
         .map(permission => ({
           table_name: permission.table_name,
           column_name: permission.column_name,
+          destination_field: permission.destination_field || permission.column_name,
           display_name: permission.display_name,
           can_read: permission.access_level === 'required' || permission.access_level === 'optional',
           can_write: false, // Data permissions are typically read-only

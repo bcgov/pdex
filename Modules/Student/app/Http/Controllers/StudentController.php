@@ -1138,12 +1138,15 @@ class StudentController extends Controller
             $permissionId = $permission->id;
             $isSelected = isset($permissionSelections[$permissionId]) ? (bool)$permissionSelections[$permissionId] : false;
             
+            $destinationKey = $permission->destination_field ?: $permission->column_name;
+
             // If permission is not selected, set value to null
             if (!$isSelected) {
-                $tokenData[$permission->column_name] = null;
+                $tokenData[$destinationKey] = null;
                 \Log::debug("Permission not selected, setting to null", [
                     'permission_id' => $permissionId,
-                    'column_name' => $permission->column_name
+                    'column_name' => $permission->column_name,
+                    'destination_key' => $destinationKey,
                 ]);
                 continue;
             }
@@ -1228,13 +1231,14 @@ class StudentController extends Controller
                     continue 2;
             }
             
-            $tokenData[$columnName] = $this->normalizeDatetimeValue($value);
+            $tokenData[$destinationKey] = $this->normalizeDatetimeValue($value);
             
             \Log::debug("Processing selected permission", [
                 'table_name' => $tableName,
                 'column_name' => $columnName,
+                'destination_key' => $destinationKey,
                 'raw_value' => $value,
-                'normalized_value' => $tokenData[$columnName],
+                'normalized_value' => $tokenData[$destinationKey],
                 'is_selected' => $isSelected
             ]);
         }
