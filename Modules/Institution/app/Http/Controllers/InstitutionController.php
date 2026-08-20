@@ -7,10 +7,13 @@ use App\Models\User;
 use App\Models\Application;
 use App\Models\ApplicationDataPermission;
 use App\Models\Institution;
+use App\Models\InstitutionSite;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Institution\Http\Requests\InstitutionStoreRequest;
 
 class InstitutionController extends Controller
 {
@@ -172,6 +175,87 @@ class InstitutionController extends Controller
     }
 
     /**
+     * Display the current BCeID user's associated institution profile.
+     */
+    public function showInstitutionProfile(): Response|RedirectResponse
+    {
+        $this->authorize('accessPortal', Institution::class);
+
+        $user = auth()->user();
+
+        if (!$user->bceid_business_guid) {
+            return redirect()->route('institution.dashboard')
+                ->with('error', 'Invalid BCeID business GUID.');
+        }
+
+        if (!$user->hasRole(Role::INSTITUTION_ADMIN)) {
+            abort(403, 'Only institution admins can view institution information.');
+        }
+
+        $institution = $user->institution();
+
+        if (!$institution) {
+            return redirect()->route('institution.create');
+        }
+
+        return Inertia::render('Institution::Show', [
+            'institution' => $institution->load('sites'),
+        ]);
+    }
+
+    /**
+     * Show the form for a BCeID user to submit a new institution.
+     */
+    public function create(): Response|RedirectResponse
+    {
+        $this->authorize('accessPortal', Institution::class);
+
+        $user = auth()->user();
+
+        if (!$user->bceid_business_guid) {
+            return redirect()->route('institution.dashboard')
+                ->with('error', 'Invalid BCeID business GUID.');
+        }
+
+        if ($user->institution()) {
+            return $this->handleExistingInstitution($user);
+        }
+
+        return Inertia::render('Institution::Create', [
+            'institutionTypes' => Institution::getInstitutionTypes(),
+            'regulatingBodies' => InstitutionSite::getRegulatingBodies(),
+            'standingStatuses' => InstitutionSite::getStandingStatuses(),
+            'economicRegions' => InstitutionSite::getEconomicRegions(),
+            'businessGuid' => $user->bceid_business_guid,
+        ]);
+    }
+
+    /**
+     * Store an institution from the BCeID portal.
+     */
+    public function store(InstitutionStoreRequest $request): RedirectResponse
+    {
+        $this->authorize('accessPortal', Institution::class);
+
+        $user = auth()->user();
+
+        if (!$user->bceid_business_guid) {
+            return redirect()->route('institution.dashboard')
+                ->with('error', 'Invalid BCeID business GUID.');
+        }
+
+        if ($user->institution()) {
+            return $this->handleExistingInstitution($user);
+        }
+
+        $this->createSubmittedInstitutionWithSites($request->validated(), $user);
+        $this->assignInstitutionAdminRole($user);
+
+        return redirect()->route('institution.profile')
+            ->with('success', 'Institution submitted successfully.');
+    }
+
+    /**
      * Get user-friendly label for database table names
      */
     private function getTableLabel(string $tableName): string
@@ -179,4 +263,82 @@ class InstitutionController extends Controller
         $availableTables = ApplicationDataPermission::getAvailableTables();
         return $availableTables[$tableName]['label'] ?? ucfirst(str_replace('_', ' ', $tableName));
     }
+
+    /**
+     * Create the inactive institution (Pending Review) and sites for a BCeID portal submission.
+     */
+    private function createSubmittedInstitutionWithSites(array $validated, User $user): Institution
+    {
+        $institution = Institution::create([
+            'legal_operating_name' => $validated['legal_operating_name'],
+            'institution_type' => $validated['institution_type'],
+            'dli' => $validated['dli'] ?? null,
+            'bceid_business_guid' => $user->bceid_business_guid,
+        ]);
+
+        foreach ($validated['sites'] as $site) {
+            $institution->sites()->create($this->siteAttributesForSubmission($site));
+        }
+
+        return $institution;
+    }
+
+    /**
+     * Map validated Portal input to site fields.
+     */
+    private function siteAttributesForSubmission(array $site): array
+    {
+        return [
+            'operating_name' => $site['operating_name'],
+            'primary_phone' => $site['primary_phone'],
+            'primary_email' => $site['primary_email'],
+            'website' => $site['website'] ?? null,
+            'regulating_body' => $site['regulating_body'],
+            'other_regulating_body' => $site['other_regulating_body'] ?? null,
+            'established_date' => $site['established_date'] ?? null,
+            'contact_first_name' => $site['contact_first_name'],
+            'contact_last_name' => $site['contact_last_name'],
+            'contact_email' => $site['contact_email'],
+            'contact_phone' => $site['contact_phone'],
+            'address_line_1' => $site['address_line_1'],
+            'address_line_2' => $site['address_line_2'] ?? null,
+            'city' => $site['city'],
+            'province_state' => $site['province_state'],
+            'country' => $site['country'],
+            'postal_code' => $site['postal_code'],
+            'standing_status' => $site['standing_status'] ?? null,
+            'economic_region' => $site['economic_region'] ?? null,
+        ];
+    }
+
+    /**
+     * Redirect the user to the institution profile page if they already have an existing institution.
+     */
+    private function handleExistingInstitution(User $user): RedirectResponse
+    {
+        if (!$user->hasRole(Role::INSTITUTION_ADMIN)) {
+            abort(403, 'Only institution admins can submit or view institution information.');
+        }
+
+        return redirect()->route('institution.profile');
+    }
+
+    /**
+     * Assign the Institution Admin role to the user, removing any existing Institution roles.
+     */
+    private function assignInstitutionAdminRole(User $user): void
+    {
+        $adminRole = Role::where('name', Role::INSTITUTION_ADMIN)->firstOrFail();
+        $currentInstitutionRoles = $user->roles()
+            ->whereIn('name', [Role::INSTITUTION_ADMIN, Role::INSTITUTION_USER])
+            ->pluck('roles.id');
+
+        if ($currentInstitutionRoles->isNotEmpty()) {
+            $user->roles()->detach($currentInstitutionRoles);
+        }
+
+        $user->roles()->syncWithoutDetaching([$adminRole->id]);
+        $user->load('roles');
+    }
+
 }

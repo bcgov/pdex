@@ -37,6 +37,8 @@ class Institution extends Model
     const TYPE_COLLEGE = 'College';
     const TYPE_INSTITUTE = 'Institute';
     const TYPE_PRIVATE_CAREER_COLLEGE = 'Private Career College';
+    const TYPE_UNION = 'Union';
+    const TYPE_PRIVATE_TRAINER = 'Private Trainer';
     const TYPE_OTHER = 'Other';
 
     /**
@@ -96,6 +98,8 @@ class Institution extends Model
             self::TYPE_COLLEGE,
             self::TYPE_INSTITUTE,
             self::TYPE_PRIVATE_CAREER_COLLEGE,
+            self::TYPE_UNION,
+            self::TYPE_PRIVATE_TRAINER,
             self::TYPE_OTHER,
         ];
     }

@@ -13,6 +13,9 @@ Route::prefix('institution')->group(function () {
         Route::post('logout', [InstitutionLogoutController::class, 'logout'])->name('logout');
         Route::get('/', [InstitutionController::class, 'index'])->name('dashboard');
         Route::get('applications', [InstitutionController::class, 'applications'])->name('applications.index');
+        Route::get('profile', [InstitutionController::class, 'showInstitutionProfile'])->name('profile');
+        Route::get('create', [InstitutionController::class, 'create'])->name('create');
+        Route::post('store', [InstitutionController::class, 'store'])->name('store');
         
         // Admin-only institution routes
         Route::group([
