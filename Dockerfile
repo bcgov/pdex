@@ -1,3 +1,6 @@
+ARG NODE_VERSION=24.22.1
+FROM node:${NODE_VERSION}-alpine AS node
+
 FROM alpine:latest
 ARG TZ=America/Vancouver
 ARG DEVENV=build
@@ -15,8 +18,15 @@ RUN apk add --no-cache \
     php83-fileinfo php83-simplexml php83-xmlwriter php83-openssl \
     php83-iconv \
     curl bash ca-certificates tzdata \
-    nodejs npm nano \
+    libstdc++ nano \
   && update-ca-certificates
+
+# ---- Node.js (pinned, copied from the official image) ----
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+  && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+  && node --version && npm --version
 
 # ---- Composer ----
 ENV COMPOSER_ALLOW_SUPERUSER=1
