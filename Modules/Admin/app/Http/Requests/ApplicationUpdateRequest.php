@@ -48,7 +48,7 @@ class ApplicationUpdateRequest extends FormRequest
             'stra_provided' => 'nullable|boolean',
             'pia_provided' => 'nullable|boolean',
             'data_permissions' => 'nullable|array',
-            'data_permissions.*.table_name' => 'required|string|in:individuals,individual_addresses,individual_employments,individual_identities,institutions,institution_staff,institution_sites,programs',
+            'data_permissions.*.table_name' => 'required|string|in:individuals,individual_addresses,individual_employments,individual_identities,institutions,institution_staff,institution_sites,institution_relationships,programs,countries,profile_form_fields',
             'data_permissions.*.column_name' => 'required|string',
             'data_permissions.*.destination_field' => 'nullable|string|max:255|regex:/^[a-zA-Z_][a-zA-Z0-9_]*$/',
             'data_permissions.*.display_name' => 'nullable|string|max:255',

@@ -159,6 +159,12 @@ export default {
                 >
                     System
                 </Link>
+                <Link 
+                    href="/admin/utils/student" 
+                    :class="['bc-nav-link', { 'active': $page.url.includes('/admin/utils') }]"
+                >
+                    Form Fields
+                </Link>
             </template>
         </nav>
 
@@ -240,6 +246,7 @@ export default {
                 <Link href="/admin/users" class="bc-nav-link">Users</Link>
                 <Link href="/admin/intake" class="bc-nav-link">Intake</Link>
                 <Link href="/admin/system" class="bc-nav-link">System</Link>
+                <Link href="/admin/utils/student" class="bc-nav-link">Form Fields</Link>
             </template>
             
             <div class="bc-dropdown-divider"></div>

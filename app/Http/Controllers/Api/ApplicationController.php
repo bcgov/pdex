@@ -20,7 +20,7 @@ class ApplicationController extends Controller
     {
         try {
             $tokenData = $request->input('token_data');
-            $registeredApp = $this->getRegisteredApplication($tokenData['sub'] ?? null);
+            $registeredApp = $this->getRegisteredApplication($this->resolveClientIdentifier($tokenData));
 
             if (!$registeredApp) {
                 return response()->json([
@@ -69,7 +69,7 @@ class ApplicationController extends Controller
     {
         try {
             $tokenData = $request->input('token_data');
-            $registeredApp = $this->getRegisteredApplication($tokenData['sub'] ?? null);
+            $registeredApp = $this->getRegisteredApplication($this->resolveClientIdentifier($tokenData));
 
             if (!$registeredApp) {
                 return response()->json([
@@ -129,13 +129,13 @@ class ApplicationController extends Controller
             ]);
 
             $tokenData = $request->input('token_data');
-            $sub = $tokenData['sub'] ?? null;
+            $clientIdentifier = $this->resolveClientIdentifier($tokenData);
             $applicationId = $request->input('application_id');
 
-            if (!$sub) {
+            if (!$clientIdentifier) {
                 return response()->json([
                     'error' => 'Bad Request',
-                    'message' => 'Invalid token: missing subject claim'
+                    'message' => 'Invalid token: missing client identifier claim'
                 ], 400);
             }
 
@@ -162,13 +162,13 @@ class ApplicationController extends Controller
             }
 
             // Register the application
-            $application->client_id = $sub;
+            $application->client_id = $clientIdentifier;
             $application->save();
 
             Log::info('Application registered for API access', [
                 'application_id' => $application->id,
                 'application_name' => $application->name,
-                'client_id' => $sub
+                'client_id' => $clientIdentifier
             ]);
 
             return response()->json([
@@ -176,7 +176,7 @@ class ApplicationController extends Controller
                 'data' => [
                     'application_id' => $application->id,
                     'application_name' => $application->name,
-                    'client_id' => $sub,
+                    'client_id' => $clientIdentifier,
                     'registered_at' => $application->updated_at->toISOString()
                 ]
             ], 201);
@@ -204,13 +204,25 @@ class ApplicationController extends Controller
     /**
      * Get the registered application for the current token
      */
-    private function getRegisteredApplication(?string $sub): ?Application
+    private function getRegisteredApplication(?string $clientIdentifier): ?Application
     {
-        if (!$sub) {
+        if (!$clientIdentifier) {
             return null;
         }
 
-        return Application::where('client_id', $sub)->first();
+        return Application::where('client_id', $clientIdentifier)
+            ->orWhereHas('oauthClient', function ($query) use ($clientIdentifier) {
+                $query->where('client_id', $clientIdentifier);
+            })
+            ->first();
+    }
+
+    /**
+     * Resolve the OAuth client identifier from token claims.
+     */
+    private function resolveClientIdentifier(array $tokenData): ?string
+    {
+        return $tokenData['azp'] ?? $tokenData['client_id'] ?? $tokenData['sub'] ?? null;
     }
 
     /**

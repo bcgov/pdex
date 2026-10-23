@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             ApplicationSeeder::class,
             InstitutionSeeder::class,
             InstitutionSiteSeeder::class,
+            ProfileFormFieldSeeder::class,
              
         ]);
 

@@ -15,6 +15,7 @@ use App\Models\IndividualAddress;
 use App\Models\IndividualEmployment;
 use App\Models\IndividualIdentity;
 use App\Models\Country;
+use App\Models\ProfileFormField;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -389,11 +390,22 @@ class StudentController extends Controller
             'expires_at' => time() + (60 * 15), // 15 minutes expiry
         ];
         
-        // In a real implementation, you would create a JWT token here
-        //use Firebase\JWT\JWT; to encode the token with a secret key
-        return JWT::encode($tokenData, $application->client_secret, 'HS256');
-        // For now, we'll just return the data as is
-        // return base64_encode(json_encode($tokenData));
+        // The JWT is signed with the application's client_secret (HS256, symmetric).
+        // The receiving application verifies the token using the same shared secret.
+        $secret = $application->client_secret;
+        if (! is_string($secret) || $secret === '') {
+            // Application has no signing secret yet; generate and persist a stable one
+            // so the token can be signed and later verified consistently.
+            $secret = \Illuminate\Support\Str::random(64);
+            $application->forceFill(['client_secret' => $secret])->save();
+
+            \Log::warning('Application had no client_secret; generated one for JWT signing', [
+                'app_id' => $application->id,
+                'app_name' => $application->name,
+            ]);
+        }
+
+        return JWT::encode($tokenData, $secret, 'HS256');
     }
 
     /**
@@ -535,6 +547,22 @@ class StudentController extends Controller
     /**
      * Display the student's profile.
      */
+    /**
+     * Build the student profile form field configuration keyed by field_id.
+     *
+     * Consumed by the profile step components to drive labels, options,
+     * required flags, placeholders and visibility from the database.
+     */
+    private function getStudentFormConfig(): array
+    {
+        return ProfileFormField::with('options')
+            ->where('profile_type', 'student')
+            ->orderBy('sort_order')
+            ->get()
+            ->keyBy('field_id')
+            ->toArray();
+    }
+
     public function profile()
     {
         // $individual = Individual::where('user_guid', Auth::user()->guid)->first();
@@ -549,14 +577,27 @@ class StudentController extends Controller
         //     'individual' => $individual,
         // ]);
         $individual = Individual::where('user_guid', Auth::user()->guid)
-            ->with(['identity'])
+            ->with(['addresses', 'employments', 'identities'])
             ->first();
 
         $this->authorize('update', $individual);
 
-        return Inertia::render('Student::Profile/EditMini', [
-            'individual' => $individual,
-            'identity' => $individual->identity ?? [],
+        // Get all active countries for the form
+        $countries = Country::getActiveCountries();
+
+        $profileData = $individual ? [
+            "general" => $individual,
+            "addresses" => $individual->addresses,
+            // Pass employment/identity as single objects so the step forms
+            // (which read a flat object) display existing values correctly.
+            "employments" => $individual->employments->first() ?? (object) [],
+            "identities" => $individual->identities->first() ?? (object) [],
+        ] : null;
+
+        return Inertia::render('Student::Profile/EditMultiStep', [
+            'individual' => $profileData,
+            'countries' => $countries,
+            'formConfig' => $this->getStudentFormConfig(),
         ]);
     }
     /**
@@ -577,9 +618,10 @@ class StudentController extends Controller
             'identity' => (new IndividualIdentity())->getFillable(),
         ];
 
-        return Inertia::render('Student::Profile/CreateMini', [
+        return Inertia::render('Student::Profile/CreateMultiStep', [
             'countries' => $countries,
             'individual' => $individual,
+            'formConfig' => $this->getStudentFormConfig(),
         ]);
     }
 
@@ -597,6 +639,7 @@ class StudentController extends Controller
         $mailingAddress = $validated['mailing_address'] ?? null;
         $currentEmployment = $validated['current_employment'] ?? null;
         $identity = $validated['identity'] ?? null;
+        $useDifferentMailing = (bool) ($validated['use_different_mailing_address'] ?? false);
         
         // Remove nested data from main validated array
         unset($validated['current_address'], $validated['mailing_address'], $validated['current_employment'], $validated['identity']);
@@ -619,7 +662,7 @@ class StudentController extends Controller
             }
 
             // Create mailing address if provided
-            if ($mailingAddress && ($validated['use_different_mailing_address'] ?? false)) {
+            if ($mailingAddress && $useDifferentMailing) {
                 $mailingAddress['individual_id'] = $individual->id;
                 $mailingAddress['user_id'] = auth()->user()->id;
                 $mailingAddress['is_primary'] = false;
@@ -686,25 +729,32 @@ class StudentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    // public function edit(Request $request)
-    // {
-    //     $individual = Individual::where('user_guid', Auth::user()->guid)
-    //         ->with(['currentAddress', 'currentEmployment', 'identity'])
-    //         ->first();
+    public function edit(Request $request)
+    {
+        $individual = Individual::where('user_guid', Auth::user()->guid)
+            ->with(['currentAddress', 'currentEmployment', 'identity'])
+            ->first();
 
-    //     $this->authorize('update', $individual);
+        $this->authorize('update', $individual);
 
-    //     // Get all active countries for the form
-    //     $countries = Country::getActiveCountries();
+        // Get all active countries for the form
+        $countries = Country::getActiveCountries();
 
-    //     $profileData = $individual ? ["general" => $individual, "addresses" => $individual->addresses, 
-    //         "employments" => $individual->employments, "identities" => $individual->identities] : null;
+        $profileData = $individual ? [
+            "general" => $individual,
+            "addresses" => $individual->addresses,
+            // Pass employment/identity as single objects so the step forms
+            // (which read a flat object) display existing values correctly.
+            "employments" => $individual->currentEmployment ?? $individual->employments->first() ?? (object) [],
+            "identities" => $individual->identity ?? $individual->identities->first() ?? (object) [],
+        ] : null;
 
-    //     return Inertia::render('Student::Profile/EditMultiStep', [
-    //         'individual' => $profileData,
-    //         'countries' => $countries,
-    //     ]);
-    // }
+        return Inertia::render('Student::Profile/EditMultiStep', [
+            'individual' => $profileData,
+            'countries' => $countries,
+            'formConfig' => $this->getStudentFormConfig(),
+        ]);
+    }
 
     /**
      * Update the specified resource in storage.

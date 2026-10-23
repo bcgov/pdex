@@ -152,7 +152,7 @@ class ProfileFormUiUxTest extends TestCase
 
         // Test non-indigenous status
         $nonIndigenousData = $this->getMinimalValidData();
-        $nonIndigenousData['identity']['indigenous_status'] = false;
+        $nonIndigenousData['identity']['indigenous_status'] = 'no';
 
         $response = $this->post(route('student.profile.store'), $nonIndigenousData);
         $response->assertRedirect(route('student.dashboard'));
@@ -160,7 +160,7 @@ class ProfileFormUiUxTest extends TestCase
         // Test indigenous status with additional fields
         $indigenousData = $this->getMinimalValidData();
         $indigenousData['email_address'] = 'indigenous@example.com'; // Unique email
-        $indigenousData['identity']['indigenous_status'] = true;
+        $indigenousData['identity']['indigenous_status'] = 'yes';
         $indigenousData['identity']['indigenous_group'] = 'first_nations';
         $indigenousData['identity']['band_affiliation'] = 'Sample Band';
 
@@ -171,7 +171,7 @@ class ProfileFormUiUxTest extends TestCase
         $individual = Individual::where('email_address', 'indigenous@example.com')->first();
         $this->assertDatabaseHas('individual_identities', [
             'individual_id' => $individual->id,
-            'indigenous_status' => true,
+            'indigenous_status' => 'yes',
             'indigenous_group' => 'first_nations',
             'band_affiliation' => 'Sample Band',
         ]);
@@ -184,7 +184,7 @@ class ProfileFormUiUxTest extends TestCase
 
         // Test without disability - should not require accommodation needs
         $noDisabilityData = $this->getMinimalValidData();
-        $noDisabilityData['disability_status'] = false;
+        $noDisabilityData['disability_status'] = 'no';
 
         $response = $this->post(route('student.profile.store'), $noDisabilityData);
         $response->assertRedirect(route('student.dashboard'));
@@ -192,7 +192,7 @@ class ProfileFormUiUxTest extends TestCase
         // Test with disability - should require accommodation needs
         $disabilityData = $this->getMinimalValidData();
         $disabilityData['email_address'] = 'disability@example.com'; // Unique email
-        $disabilityData['disability_status'] = true;
+        $disabilityData['disability_status'] = 'yes';
         $disabilityData['accommodation_needs'] = 'Need wheelchair access';
 
         $response = $this->post(route('student.profile.store'), $disabilityData);
@@ -201,7 +201,7 @@ class ProfileFormUiUxTest extends TestCase
         // Test with disability but no accommodation needs - should fail
         $invalidDisabilityData = $this->getMinimalValidData();
         $invalidDisabilityData['email_address'] = 'invalid@example.com';
-        $invalidDisabilityData['disability_status'] = true;
+        $invalidDisabilityData['disability_status'] = 'yes';
         // Don't include accommodation_needs
 
         $response = $this->post(route('student.profile.store'), $invalidDisabilityData);
@@ -331,7 +331,7 @@ class ProfileFormUiUxTest extends TestCase
             'first_name' => 'John',
             'last_name' => 'Doe',
             'email_address' => 'john.doe@example.com',
-            'disability_status' => false,
+            'disability_status' => null,
             'address' => [
                 'address_line1' => '123 Main St',
                 'city' => 'Vancouver',
@@ -349,8 +349,8 @@ class ProfileFormUiUxTest extends TestCase
             'identity' => [
                 'citizenship_status' => 'canadian_citizen',
                 'country_of_birth' => 'Canada',
-                'indigenous_status' => false,
-                'is_visible_minority' => false,
+                'indigenous_status' => null,
+                'is_visible_minority' => null,
             ],
         ];
     }
@@ -373,7 +373,7 @@ class ProfileFormUiUxTest extends TestCase
             'date_of_birth' => '1990-05-15',
             'gender' => 'female',
             'preferred_pronouns' => 'she/her',
-            'disability_status' => false,
+            'disability_status' => 'no',
             'address' => [
                 'address_line1' => '456 Oak Avenue',
                 'address_line2' => 'Suite 123',
@@ -409,9 +409,9 @@ class ProfileFormUiUxTest extends TestCase
                 'years_in_country' => 33,
                 'refugee_status' => false,
                 'immigration_status' => 'born_in_canada',
-                'indigenous_status' => false,
+                'indigenous_status' => 'no',
                 'racial_identity' => 'white',
-                'is_visible_minority' => false,
+                'is_visible_minority' => 'no',
                 'receives_indigenous_support_services' => false,
                 'receives_minority_support_services' => false,
             ],

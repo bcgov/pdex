@@ -21,7 +21,7 @@ namespace Modules\Student\Http\Swagger;
  *     @OA\Property(property="date_of_birth", type="string", format="date", description="Date of birth", example="1995-05-15"),
  *     @OA\Property(property="gender", type="string", description="Gender", example="male", enum={"male", "female", "other", "prefer_not_to_say"}),
  *     @OA\Property(property="preferred_pronouns", type="string", description="Preferred pronouns", example="he/him"),
- *     @OA\Property(property="disability_status", type="boolean", description="Disability status", example=false),
+ *     @OA\Property(property="disability_status", type="string", description="Disability status", example="yes", enum={"yes", "no", "unknown"}),
  *     @OA\Property(property="accommodation_needs", type="string", description="Accommodation needs", example="Wheelchair access required"),
  *     @OA\Property(
  *         property="emergency_contact",
@@ -76,8 +76,8 @@ namespace Modules\Student\Http\Swagger;
  *         @OA\Property(property="citizenship_status", type="string", example="canadian_citizen"),
  *         @OA\Property(property="country_of_birth", type="string", example="Canada"),
  *         @OA\Property(property="language_spoken_at_home", type="string", example="English"),
- *         @OA\Property(property="is_visible_minority", type="boolean", example=false),
- *         @OA\Property(property="indigenous_status", type="boolean", example=false),
+ *         @OA\Property(property="is_visible_minority", type="string", example="no", enum={"yes", "no", "unknown"}),
+ *         @OA\Property(property="indigenous_status", type="string", example="no", enum={"yes", "no", "unknown"}),
  *         @OA\Property(property="refugee_status", type="boolean", example=false)
  *     )
  * )

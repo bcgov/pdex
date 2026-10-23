@@ -78,13 +78,64 @@ class ApplicationApiPermission extends Model
                 'description' => 'Physical sites/campuses of institutions',
                 'columns' => self::getTableColumns('institution_sites')
             ],
+            'institution_relationships' => [
+                'name' => 'institution_relationships',
+                'label' => 'Institution Relationships',
+                'description' => 'Relationships between institutions (partnerships, transfer agreements, etc.)',
+                'columns' => self::getTableColumns('institution_relationships')
+            ],
             'programs' => [
                 'name' => 'programs',
                 'label' => 'Programs',
                 'description' => 'Educational programs offered by institutions',
                 'columns' => self::getTableColumns('programs')
+            ],
+            // Configuration / metadata tables
+            'countries' => [
+                'name' => 'countries',
+                'label' => 'Countries',
+                'description' => 'Reference list of countries used across the application',
+                'columns' => self::getTableColumns('countries')
+            ],
+            'profile_form_fields' => [
+                'name' => 'profile_form_fields',
+                'label' => 'Student Profile Form Fields',
+                'description' => 'Definitions of the student profile form fields, including labels, types, and selectable options (utils/student endpoint)',
+                'columns' => self::getProfileFormFieldColumns()
             ]
         ];
+    }
+
+    /**
+     * Curated columns exposed for the student profile form field catalog.
+     * These describe the shape returned by the utils/student API endpoint.
+     */
+    private static function getProfileFormFieldColumns(): array
+    {
+        $columns = [
+            'field_id' => 'Machine name / identifier of the field',
+            'label' => 'Human readable label shown in the form',
+            'type' => 'Input type (text, select, checkbox, etc.)',
+            'required' => 'Whether the field is required',
+            'placeholder' => 'Placeholder text for the field',
+            'help_text' => 'Optional hint shown near the field',
+            'options' => 'Selectable options (value/label pairs) for choice fields',
+        ];
+
+        $columnData = [];
+
+        foreach ($columns as $name => $description) {
+            $columnData[$name] = [
+                'name' => $name,
+                'label' => ucwords(str_replace('_', ' ', $name)),
+                'description' => $description,
+                'default_display_name' => ucwords(str_replace('_', ' ', $name)),
+                'pii' => false,
+                'sensitive' => false,
+            ];
+        }
+
+        return $columnData;
     }
 
     /**

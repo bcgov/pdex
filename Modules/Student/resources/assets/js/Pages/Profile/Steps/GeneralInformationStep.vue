@@ -15,28 +15,29 @@
           <i class="bi bi-person-badge me-2"></i>Name Information
         </h6>
         <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+          <div v-if="cfg.isActive('first_name')" class="col-md-6 mb-3">
+            <label for="first_name" class="form-label">{{ cfg.label('first_name', 'First Name') }} <span v-if="cfg.isRequired('first_name', true)" class="text-danger">*</span></label>
             <input
               id="first_name"
               v-model="form.first_name"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('first_name') }"
-              required
+              :required="cfg.isRequired('first_name', true)"
             />
             <div v-if="hasFieldError('first_name')" class="invalid-feedback">
               {{ getFieldError('first_name') }}
             </div>
           </div>
-          <div class="col-md-6 mb-3">
-            <label for="middle_name" class="form-label">Middle Name</label>
+          <div v-if="cfg.isActive('middle_name')" class="col-md-6 mb-3">
+            <label for="middle_name" class="form-label">{{ cfg.label('middle_name', 'Middle Name') }} <span v-if="cfg.isRequired('middle_name')" class="text-danger">*</span></label>
             <input
               id="middle_name"
               v-model="form.middle_name"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('middle_name') }"
+              :required="cfg.isRequired('middle_name')"
             />
             <div v-if="hasFieldError('middle_name')" class="invalid-feedback">
               {{ getFieldError('middle_name') }}
@@ -44,28 +45,29 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+          <div v-if="cfg.isActive('last_name')" class="col-md-6 mb-3">
+            <label for="last_name" class="form-label">{{ cfg.label('last_name', 'Last Name') }} <span v-if="cfg.isRequired('last_name', true)" class="text-danger">*</span></label>
             <input
               id="last_name"
               v-model="form.last_name"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('last_name') }"
-              required
+              :required="cfg.isRequired('last_name', true)"
             />
             <div v-if="hasFieldError('last_name')" class="invalid-feedback">
               {{ getFieldError('last_name') }}
             </div>
           </div>
-          <div class="col-md-6 mb-3">
-            <label for="preferred_name" class="form-label">Preferred Name</label>
+          <div v-if="cfg.isActive('preferred_name')" class="col-md-6 mb-3">
+            <label for="preferred_name" class="form-label">{{ cfg.label('preferred_name', 'Preferred Name') }} <span v-if="cfg.isRequired('preferred_name')" class="text-danger">*</span></label>
             <input
               id="preferred_name"
               v-model="form.preferred_name"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('preferred_name') }"
+              :required="cfg.isRequired('preferred_name')"
             />
             <div v-if="hasFieldError('preferred_name')" class="invalid-feedback">
               {{ getFieldError('preferred_name') }}
@@ -80,47 +82,62 @@
           <i class="bi bi-calendar me-2"></i>Personal Details
         </h6>
         <div class="row">
-          <div class="col-md-4 mb-3">
-            <label for="date_of_birth" class="form-label">Date of Birth</label>
+          <div v-if="cfg.isActive('date_of_birth')" class="col-md-3 mb-3">
+            <label for="date_of_birth" class="form-label">{{ cfg.label('date_of_birth', 'Date of Birth') }} <span v-if="cfg.isRequired('date_of_birth', true)" class="text-danger">*</span></label>
             <input
               id="date_of_birth"
               v-model="form.date_of_birth"
               type="date"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('date_of_birth') }"
+              :required="cfg.isRequired('date_of_birth', true)"
             />
             <div v-if="hasFieldError('date_of_birth')" class="invalid-feedback">
               {{ getFieldError('date_of_birth') }}
             </div>
           </div>
-          <div class="col-md-4 mb-3">
-            <label for="gender" class="form-label">Gender</label>
+          <div v-if="cfg.isActive('gender')" class="col-md-3 mb-3">
+            <label for="gender" class="form-label">{{ cfg.label('gender', 'Gender') }} <span v-if="cfg.isRequired('gender')" class="text-danger">*</span></label>
             <select
               id="gender"
               v-model="form.gender"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('gender') }"
+              :required="cfg.isRequired('gender')"
             >
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="non-binary">Non-binary</option>
-              <option value="other">Other</option>
-              <option value="prefer_not_to_say">Prefer not to say</option>
+              <option value="">{{ cfg.placeholder('gender', 'Select Gender') }}</option>
+              <option v-for="opt in cfg.options('gender')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
             <div v-if="hasFieldError('gender')" class="invalid-feedback">
               {{ getFieldError('gender') }}
             </div>
           </div>
-          <div class="col-md-4 mb-3">
-            <label for="preferred_pronouns" class="form-label">Preferred Pronouns</label>
+          <div v-if="cfg.isActive('sex')" class="col-md-3 mb-3">
+            <label for="sex" class="form-label">{{ cfg.label('sex', 'Sex') }} <span v-if="cfg.isRequired('sex')" class="text-danger">*</span></label>
+            <select
+              id="sex"
+              v-model="form.sex"
+              class="form-select"
+              :class="{ 'is-invalid': hasFieldError('sex') }"
+              :required="cfg.isRequired('sex')"
+            >
+              <option value="">{{ cfg.placeholder('sex', 'Select Sex') }}</option>
+              <option v-for="opt in cfg.options('sex')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+            <div v-if="hasFieldError('sex')" class="invalid-feedback">
+              {{ getFieldError('sex') }}
+            </div>
+          </div>
+          <div v-if="cfg.isActive('preferred_pronouns')" class="col-md-3 mb-3">
+            <label for="preferred_pronouns" class="form-label">{{ cfg.label('preferred_pronouns', 'Preferred Pronouns') }} <span v-if="cfg.isRequired('preferred_pronouns')" class="text-danger">*</span></label>
             <input
               id="preferred_pronouns"
               v-model="form.preferred_pronouns"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('preferred_pronouns') }"
-              placeholder="e.g., he/him, she/her, they/them"
+              :placeholder="cfg.placeholder('preferred_pronouns', 'e.g., he/him, she/her, they/them')"
+              :required="cfg.isRequired('preferred_pronouns')"
             />
             <div v-if="hasFieldError('preferred_pronouns')" class="invalid-feedback">
               {{ getFieldError('preferred_pronouns') }}
@@ -135,43 +152,45 @@
           <i class="bi bi-telephone me-2"></i>Contact Information
         </h6>
         <div class="row">
-          <div class="col-md-4 mb-3">
-            <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+          <div v-if="cfg.isActive('email_address')" class="col-md-4 mb-3">
+            <label for="email" class="form-label">{{ cfg.label('email_address', 'Email Address') }} <span v-if="cfg.isRequired('email_address', true)" class="text-danger">*</span></label>
             <input
               id="email"
               v-model="form.email_address"
               type="email"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('email_address') }"
-              required
+              :required="cfg.isRequired('email_address', true)"
             />
             <div v-if="hasFieldError('email_address')" class="invalid-feedback">
               {{ getFieldError('email_address') }}
             </div>
           </div>
-          <div class="col-md-4 mb-3">
-            <label for="phone" class="form-label">Phone Number</label>
+          <div v-if="cfg.isActive('phone_number')" class="col-md-4 mb-3">
+            <label for="phone" class="form-label">{{ cfg.label('phone_number', 'Phone Number') }} <span v-if="cfg.isRequired('phone_number')" class="text-danger">*</span></label>
             <input
               id="phone"
               v-model="form.phone_number"
               type="tel"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('phone_number') }"
-              placeholder="(000) 000-0000"
+              :placeholder="cfg.placeholder('phone_number', '(000) 000-0000')"
+              :required="cfg.isRequired('phone_number')"
             />
             <div v-if="hasFieldError('phone_number')" class="invalid-feedback">
               {{ getFieldError('phone_number') }}
             </div>
           </div>
-          <div class="col-md-4 mb-3">
-            <label for="alternate_phone" class="form-label">Alternate Phone Number</label>
+          <div v-if="cfg.isActive('alternate_phone_number')" class="col-md-4 mb-3">
+            <label for="alternate_phone" class="form-label">{{ cfg.label('alternate_phone_number', 'Alternate Phone Number') }} <span v-if="cfg.isRequired('alternate_phone_number')" class="text-danger">*</span></label>
             <input
               id="alternate_phone"
               v-model="form.alternate_phone_number"
               type="tel"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('alternate_phone_number') }"
-              placeholder="(000) 000-0000"
+              :placeholder="cfg.placeholder('alternate_phone_number', '(000) 000-0000')"
+              :required="cfg.isRequired('alternate_phone_number')"
             />
             <div v-if="hasFieldError('alternate_phone_number')" class="invalid-feedback">
               {{ getFieldError('alternate_phone_number') }}
@@ -186,44 +205,47 @@
           <i class="bi bi-card-text me-2"></i>Identity Numbers
         </h6>
         <div class="row">
-          <div class="col-md-4 mb-3">
-            <label for="sin" class="form-label">Social Insurance Number (SIN)</label>
+          <div v-if="cfg.isActive('social_insurance_number')" class="col-md-4 mb-3">
+            <label for="sin" class="form-label">{{ cfg.label('social_insurance_number', 'Social Insurance Number (SIN)') }} <span v-if="cfg.isRequired('social_insurance_number')" class="text-danger">*</span></label>
             <input
               id="sin"
               v-model="form.social_insurance_number"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('social_insurance_number') }"
-              placeholder="000-000-000"
+              :placeholder="cfg.placeholder('social_insurance_number', '000-000-000')"
               maxlength="11"
+              :required="cfg.isRequired('social_insurance_number')"
             />
             <div v-if="hasFieldError('social_insurance_number')" class="invalid-feedback">
               {{ getFieldError('social_insurance_number') }}
             </div>
           </div>
-          <div class="col-md-4 mb-3">
-            <label for="pen_number" class="form-label">Provincial Education Number (PEN)</label>
+          <div v-if="cfg.isActive('provincial_education_number')" class="col-md-4 mb-3">
+            <label for="pen_number" class="form-label">{{ cfg.label('provincial_education_number', 'Provincial Education Number (PEN)') }} <span v-if="cfg.isRequired('provincial_education_number')" class="text-danger">*</span></label>
             <input
               id="pen_number"
               v-model="form.provincial_education_number"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('provincial_education_number') }"
-              placeholder="e.g., BC Student Number"
+              :placeholder="cfg.placeholder('provincial_education_number', 'e.g., BC Student Number')"
+              :required="cfg.isRequired('provincial_education_number')"
             />
             <div v-if="hasFieldError('provincial_education_number')" class="invalid-feedback">
               {{ getFieldError('provincial_education_number') }}
             </div>
           </div>
-          <div class="col-md-4 mb-3">
-            <label for="government_id_number" class="form-label">Government ID Number</label>
+          <div v-if="cfg.isActive('government_issued_id')" class="col-md-4 mb-3">
+            <label for="government_id_number" class="form-label">{{ cfg.label('government_issued_id', 'Government ID Number') }} <span v-if="cfg.isRequired('government_issued_id')" class="text-danger">*</span></label>
             <input
               id="government_id_number"
               v-model="form.government_issued_id"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('government_issued_id') }"
-              placeholder="Driver's License, Health Card, etc."
+              :placeholder="cfg.placeholder('government_issued_id', 'License, Health Card, etc.')"
+              :required="cfg.isRequired('government_issued_id')"
             />
             <div v-if="hasFieldError('government_issued_id')" class="invalid-feedback">
               {{ getFieldError('government_issued_id') }}
@@ -238,34 +260,57 @@
           <i class="bi bi-universal-access me-2"></i>Accessibility & Accommodation
         </h6>
         <div class="row">
-          <div class="col-md-6 mb-3">
-            <div class="form-check">
-              <input
-                id="disability_status"
-                v-model="form.disability_status"
-                class="form-check-input"
-                type="checkbox"
-              />
-              <label class="form-check-label" for="disability_status">
-                I have a disability or accessibility needs
-              </label>
+          <div v-if="cfg.isActive('disability_status')" class="col-md-6 mb-3">
+            <label for="disability_status" class="form-label">
+              {{ cfg.label('disability_status', 'Disability Status') }}
+              <span v-if="cfg.isRequired('disability_status')" class="text-danger">*</span>
+            </label>
+            <select
+              id="disability_status"
+              v-model="form.disability_status"
+              class="form-select"
+              :class="{ 'is-invalid': hasFieldError('disability_status') }"
+              :required="cfg.isRequired('disability_status')"
+            >
+              <option value="">{{ cfg.placeholder('disability_status', 'Select an answer') }}</option>
+              <option v-for="opt in cfg.options('disability_status')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+            <div v-if="hasFieldError('disability_status')" class="invalid-feedback">
+              {{ getFieldError('disability_status') }}
             </div>
           </div>
         </div>
-        <div v-if="form.disability_status" class="row">
+        <div v-if="form.disability_status === 'yes' && cfg.isActive('accommodation_needs')" class="row">
           <div class="col-md-12 mb-3">
-            <label for="accommodation_needs" class="form-label">Accommodation Needs</label>
+            <label for="accommodation_needs" class="form-label">{{ cfg.label('accommodation_needs', 'Accommodation Needs') }}</label>
             <textarea
               id="accommodation_needs"
               v-model="form.accommodation_needs"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('accommodation_needs') }"
               rows="3"
-              placeholder="Please describe any accommodations you require"
+              :placeholder="cfg.placeholder('accommodation_needs', 'Please describe any accommodations you require')"
             ></textarea>
             <div v-if="hasFieldError('accommodation_needs')" class="invalid-feedback">
               {{ getFieldError('accommodation_needs') }}
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Information (admin-managed fields) -->
+      <div v-if="extraFields.length" class="mb-4">
+        <h6 class="border-bottom pb-2 mb-3">
+          <i class="bi bi-plus-square me-2"></i>Additional Information
+        </h6>
+        <div class="row">
+          <div v-for="field in extraFields" :key="field.field_id" class="col-md-6 mb-3">
+            <DynamicField
+              :field="field"
+              :model-value="form[field.field_id]"
+              :error="getFieldError(field.field_id)"
+              @update:model-value="(val) => (form[field.field_id] = val)"
+            />
           </div>
         </div>
       </div>
@@ -274,12 +319,37 @@
 </template>
 
 <script setup>
-import { reactive, watchEffect } from 'vue'
+import { reactive, watchEffect, toRef, computed } from 'vue'
+import { useFieldConfig } from '../../../composables/useFieldConfig'
+import DynamicField from './DynamicField.vue'
 
 const props = defineProps({
   form: Object,
-  errors: Object
+  errors: Object,
+  config: {
+    type: Object,
+    default: () => ({})
+  }
 })
+
+// DB-driven field configuration (labels, required, options, placeholders, visibility)
+const cfg = useFieldConfig(toRef(props, 'config'))
+
+// Fields already rendered above with bespoke controls.
+const KNOWN_FIELDS = [
+  'first_name', 'middle_name', 'last_name', 'preferred_name',
+  'date_of_birth', 'gender', 'sex', 'preferred_pronouns',
+  'email_address', 'phone_number', 'alternate_phone_number',
+  'social_insurance_number', 'provincial_education_number', 'government_issued_id',
+  'disability_status', 'accommodation_needs'
+]
+
+// Admin-managed fields for this tab that have no bespoke control here.
+const extraFields = computed(() =>
+  Object.values(props.config || {})
+    .filter((f) => f && f.tab === 'general' && f.is_active && !KNOWN_FIELDS.includes(f.field_id))
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+)
 
 const emit = defineEmits(['update:form'])
 

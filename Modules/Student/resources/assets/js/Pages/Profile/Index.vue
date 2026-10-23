@@ -90,7 +90,7 @@
                         <div>{{ individual.preferred_pronouns }}</div>
                       </div>
                     </div>
-                    <div class="row mb-3" v-if="individual.disability_status">
+                    <div class="row mb-3" v-if="individual.disability_status === 'yes'">
                       <div class="col-sm-12">
                         <strong>Accessibility Needs:</strong>
                         <div class="mb-2">
@@ -146,7 +146,7 @@
                         <div>{{ individual.identity.racial_identity }}</div>
                       </div>
                     </div>
-                    <div class="row mb-3" v-if="individual.identity?.indigenous_status">
+                    <div class="row mb-3" v-if="individual.identity?.indigenous_status === 'yes'">
                       <div class="col-sm-12">
                         <strong>Indigenous Identity:</strong>
                         <div class="mb-2">

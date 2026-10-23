@@ -3,8 +3,10 @@
 namespace Modules\Student\Http\Requests;
 
 use App\Models\Individual;
+use App\Models\ProfileFormField;
 use App\Rules\ValidSin;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class UpdateIndividualMultiStepRequest extends FormRequest
@@ -25,103 +27,79 @@ class UpdateIndividualMultiStepRequest extends FormRequest
         $individual = Individual::where('user_guid', auth()->user()->guid)->first();
         $individualId = $individual ? $individual->id : null;
 
-        return [
-            // General Information Step
-            'social_insurance_number' => ['nullable', 'string', 'max:255', 
-                new ValidSin(), 
-                Rule::unique('individuals', 'social_insurance_number')->ignore($individualId)
-            ],
-            // 'government_issued_id' => 'nullable|string|max:255',
-            'provincial_education_number' => [
-                'nullable',
-                'string',
-                'max:255',
-                Rule::unique('individuals', 'provincial_education_number')->ignore($individualId),
-            ],
-            'first_name' => 'required|string|max:255',
-            'middle_name' => 'nullable|string|max:255',
-            'last_name' => 'required|string|max:255',
-            // 'preferred_name' => 'nullable|string|max:255',
-            'email_address' => [
-                'required',
-                'email',
-            ],
-            // 'phone_number' => 'nullable|string|max:255',
-            // 'alternate_phone_number' => 'nullable|string|max:255',
-            'date_of_birth' => 'nullable|date|before:today',
-            'gender' => 'nullable|string|in:man,woman,non-binary,unknown',
-            'sex' => 'nullable|string|in:male,female,indeterminate,unknown',
-            // 'preferred_pronouns' => 'nullable|string|max:255',
-            // 'disability_status' => 'boolean',
-            // 'accommodation_needs' => 'nullable|string|required_if:disability_status,true',
+        // Build rules dynamically from the admin-managed profile form fields so
+        // every active field (including newly added ones) survives validation
+        // and is persisted. Dynamic fields are kept lenient (nullable) so saves
+        // are never blocked; critical general fields are overridden below.
+        $rules = $this->dynamicRules();
 
-            // Address Information Step
-            // 'current_address' => 'nullable|array',
-            // 'current_address.address_line1' => 'nullable|string|max:255',
-            // 'current_address.address_line2' => 'nullable|string|max:50',
-            // 'current_address.city' => 'nullable|string|max:255',
-            // 'current_address.province' => 'nullable|string|max:255',
-            // 'current_address.postal_code' => 'nullable|string|max:20',
-            // 'current_address.country' => 'nullable|string|max:255',
-            
-            // 'use_different_mailing_address' => 'boolean',
-            // 'mailing_address' => 'nullable|array|required_if:use_different_mailing_address,true',
-            // 'mailing_address.address_line1' => 'nullable|string|max:255|required_if:use_different_mailing_address,true',
-            // 'mailing_address.address_line2' => 'nullable|string|max:50',
-            // 'mailing_address.city' => 'nullable|string|max:255|required_if:use_different_mailing_address,true',
-            // 'mailing_address.province' => 'nullable|string|max:255|required_if:use_different_mailing_address,true',
-            // 'mailing_address.postal_code' => 'nullable|string|max:20|required_if:use_different_mailing_address,true',
-            // 'mailing_address.country' => 'nullable|string|max:255|required_if:use_different_mailing_address,true',
-
-            // // Employment Information Step
-            // 'current_employment' => 'nullable|array',
-            // 'current_employment.employment_status' => 'nullable|string|max:255',
-            // 'current_employment.is_looking_for_work' => 'boolean',
-            // 'current_employment.job_title' => 'nullable|string|max:255',
-            // 'current_employment.employer_name' => 'nullable|string|max:255',
-            // 'current_employment.employer_industry' => 'nullable|string|max:255',
-            // 'current_employment.employment_start_date' => 'nullable|date',
-            // 'current_employment.employment_end_date' => 'nullable|date|after:current_employment.employment_start_date',
-            // 'current_employment.work_hours_per_week' => 'nullable|integer|min:0|max:168',
-            // 'current_employment.monthly_income' => 'nullable|numeric|min:0',
-            // 'current_employment.is_job_related_to_program' => 'boolean',
-            // 'current_employment.previous_job_title' => 'nullable|string|max:255',
-            // 'current_employment.previous_employer_name' => 'nullable|string|max:255',
-            // 'current_employment.previous_employment_start_date' => 'nullable|date',
-            // 'current_employment.previous_employment_end_date' => 'nullable|date|after:current_employment.previous_employment_start_date',
-            // 'current_employment.reason_for_leaving' => 'nullable|string|max:255',
-            // 'current_employment.career_interest_area' => 'nullable|string|max:255',
-            // 'current_employment.desired_job_title' => 'nullable|string|max:255',
-            // 'current_employment.career_readiness_level' => 'nullable|string|max:255',
-            // 'current_employment.has_career_plan' => 'boolean',
-            // 'current_employment.is_receiving_employment_insurance' => 'boolean',
-            // 'current_employment.is_participating_in_work_study_program' => 'boolean',
-            // 'current_employment.barriers_to_employment' => 'nullable|string',
-
-            // // Identity Information Step
-            // 'identity' => 'nullable|array',
-            // 'identity.citizenship_status' => 'nullable|string|max:255',
-            // 'identity.country_of_birth' => 'nullable|string|max:255',
-            // 'identity.language_spoken_at_home' => 'nullable|string|max:255',
-            // 'identity.years_in_country' => 'nullable|integer|min:0',
-            // 'identity.refugee_status' => 'boolean',
-            // 'identity.immigration_status' => 'nullable|string|max:255',
-            // 'identity.indigenous_status' => 'boolean',
-            // 'identity.indigenous_group' => 'nullable|array',
-            // 'identity.indigenous_group.*' => 'string|max:255',
-            // 'identity.band_affiliation' => 'nullable|string|max:255',
-            // 'identity.indigenous_status_card_number' => 'nullable|string|max:255',
-            // 'identity.is_registered_with_band' => 'boolean',
-            // 'identity.on_reserve_resident' => 'boolean',
-            // 'identity.racial_identity' => 'nullable|array',
-            // 'identity.racial_identity.*' => 'string|max:255',
-            // 'identity.racial_identity_other_text' => 'nullable|string|max:200',
-            // 'identity.is_visible_minority' => 'boolean',
-            // 'identity.receives_indigenous_support_services' => 'boolean',
-            // 'identity.receives_minority_support_services' => 'boolean',
-            // 'metadata' => 'nullable|array',
-
+        $rules['social_insurance_number'] = ['nullable', 'string', 'max:255',
+            new ValidSin(),
+            Rule::unique('individuals', 'social_insurance_number')->ignore($individualId),
         ];
+        $rules['provincial_education_number'] = ['nullable', 'string', 'max:255',
+            Rule::unique('individuals', 'provincial_education_number')->ignore($individualId),
+        ];
+        $rules['first_name'] = ['required', 'string', 'max:255'];
+        $rules['last_name'] = ['required', 'string', 'max:255'];
+        $rules['email_address'] = ['required', 'email'];
+        $rules['date_of_birth'] = ['nullable', 'date', 'before:today'];
+        $rules['gender'] = ['nullable', 'string', 'in:man,woman,non-binary,unknown'];
+        $rules['sex'] = ['nullable', 'string', 'in:male,female,indeterminate,unknown'];
+        $rules['disability_status'] = ['nullable', 'string', 'in:yes,no,unknown'];
+        $rules['identity.indigenous_status'] = ['nullable', 'string', 'in:yes,no,unknown'];
+        $rules['identity.is_visible_minority'] = ['nullable', 'string', 'in:yes,no,unknown'];
+
+        return $rules;
+    }
+
+    /**
+     * Build validation rules from the student profile form field definitions.
+     *
+     * Each field maps to a key on the payload depending on its tab:
+     *   general    -> <field_id>
+     *   address    -> current_address.<field_id> (mailing_* -> mailing_address.<...>)
+     *   employment -> current_employment.<field_id>
+     *   identity   -> identity.<field_id>
+     */
+    private function dynamicRules(): array
+    {
+        $rules = [
+            'current_address' => ['nullable', 'array'],
+            'mailing_address' => ['nullable', 'array'],
+            'current_employment' => ['nullable', 'array'],
+            'identity' => ['nullable', 'array'],
+            'use_different_mailing_address' => ['boolean'],
+        ];
+
+        $fields = ProfileFormField::where('profile_type', 'student')->get();
+
+        foreach ($fields as $field) {
+            // The mailing toggle is handled as a root boolean above.
+            if ($field->field_id === 'use_different_mailing_address') {
+                continue;
+            }
+
+            $key = match ($field->tab) {
+                'general' => $field->field_id,
+                'address' => str_starts_with($field->field_id, 'mailing_')
+                    ? 'mailing_address.' . Str::after($field->field_id, 'mailing_')
+                    : 'current_address.' . $field->field_id,
+                'employment' => 'current_employment.' . $field->field_id,
+                'identity' => 'identity.' . $field->field_id,
+                default => null,
+            };
+
+            if ($key === null) {
+                continue;
+            }
+
+            // Keep dynamic fields lenient so a form save is never blocked. The
+            // key still needs a rule to be returned by validated() and persisted.
+            $rules[$key] = ['nullable'];
+        }
+
+        return $rules;
     }
 
     /**
@@ -179,9 +157,9 @@ class UpdateIndividualMultiStepRequest extends FormRequest
         }
 
         // Ensure boolean fields are properly cast
-        if (!$this->has('disability_status')) {
-            $this->merge(['disability_status' => false]);
-        }
+        // if (!$this->has('disability_status')) {
+        //     $this->merge(['disability_status' => false]);
+        // }
 
         if (!$this->has('use_different_mailing_address')) {
             $this->merge(['use_different_mailing_address' => false]);
@@ -193,18 +171,14 @@ class UpdateIndividualMultiStepRequest extends FormRequest
             
             // Set default boolean values only if not present
             $identity['refugee_status'] = $identity['refugee_status'] ?? false;
-            $identity['indigenous_status'] = $identity['indigenous_status'] ?? false;
             $identity['is_registered_with_band'] = $identity['is_registered_with_band'] ?? false;
             $identity['on_reserve_resident'] = $identity['on_reserve_resident'] ?? false;
-            $identity['is_visible_minority'] = $identity['is_visible_minority'] ?? false;
             $identity['receives_indigenous_support_services'] = $identity['receives_indigenous_support_services'] ?? false;
             $identity['receives_minority_support_services'] = $identity['receives_minority_support_services'] ?? false;
             
         }
 
         // Set racial identity for mini profile
-        $identity['racial_identity'] = $this->input('racial_identity', []);
-        $identity['racial_identity_other_text'] = $this->input('racial_identity_other_text', null);
         $this->merge(['identity' => $identity]);
 
         // Set employment boolean fields
@@ -225,5 +199,74 @@ class UpdateIndividualMultiStepRequest extends FormRequest
             $employment['is_participating_in_work_study_program'] = false;
         }
         $this->merge(['current_employment' => $employment]);
+
+        // Coerce every field to its configured type so empty strings become
+        // null (or false for checkboxes, [] for multi-selects). Without this,
+        // empty inputs would error when written to integer/date/boolean columns.
+        $fields = ProfileFormField::where('profile_type', 'student')->get()->groupBy('tab');
+
+        // General fields live at the payload root.
+        $root = [];
+        foreach ($fields->get('general', collect()) as $field) {
+            if ($this->has($field->field_id)) {
+                $root[$field->field_id] = $this->coerceValue($this->input($field->field_id), $field);
+            }
+        }
+        if (! empty($root)) {
+            $this->merge($root);
+        }
+
+        // Nested containers.
+        $addressFields = $fields->get('address', collect());
+        $this->coerceContainer('current_address', $addressFields->filter(fn ($f) => ! str_starts_with($f->field_id, 'mailing_')), false);
+        $this->coerceContainer('mailing_address', $addressFields->filter(fn ($f) => str_starts_with($f->field_id, 'mailing_')), true);
+        $this->coerceContainer('current_employment', $fields->get('employment', collect()), false);
+        $this->coerceContainer('identity', $fields->get('identity', collect()), false);
+    }
+
+    /**
+     * Coerce the values inside a nested container (address/employment/identity)
+     * according to their configured field types.
+     *
+     * @param  \Illuminate\Support\Collection<int, ProfileFormField>  $fields
+     * @param  bool  $stripMailingPrefix  Whether the container key drops the "mailing_" prefix (mailing address).
+     */
+    private function coerceContainer(string $containerKey, $fields, bool $stripMailingPrefix): void
+    {
+        $data = $this->input($containerKey);
+
+        if (! is_array($data)) {
+            return;
+        }
+
+        foreach ($fields as $field) {
+            $subKey = $stripMailingPrefix ? Str::after($field->field_id, 'mailing_') : $field->field_id;
+
+            if (array_key_exists($subKey, $data)) {
+                $data[$subKey] = $this->coerceValue($data[$subKey], $field);
+            }
+        }
+
+        $this->merge([$containerKey => $data]);
+    }
+
+    /**
+     * Coerce a single value to a persistable form based on its field type.
+     */
+    private function coerceValue($value, ProfileFormField $field)
+    {
+        if ($field->multi_select) {
+            if ($value === '' || $value === null) {
+                return [];
+            }
+
+            return is_array($value) ? $value : [$value];
+        }
+
+        if ($field->type === 'checkbox') {
+            return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        return $value === '' ? null : $value;
     }
 }

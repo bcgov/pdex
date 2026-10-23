@@ -4,10 +4,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\HasVersionTracking;
+use App\Traits\HasDynamicProfileColumns;
 
 class IndividualIdentity extends Model
 {
-    use HasFactory, HasVersionTracking;
+    use HasFactory, HasVersionTracking, HasDynamicProfileColumns;
+
+    /** The student profile form tab backed by this model. */
+    protected string $profileFieldTab = 'identity';
 
     protected $fillable = [
         'individual_id',
@@ -36,10 +40,10 @@ class IndividualIdentity extends Model
     protected $casts = [
         'racial_identity' => 'array',
         'indigenous_group' => 'array',
-        'indigenous_status' => 'boolean',
+        // 'indigenous_status' => 'boolean',
         'is_registered_with_band' => 'boolean',
         'on_reserve_resident' => 'boolean',
-        'is_visible_minority' => 'boolean',
+        // 'is_visible_minority' => 'boolean',
         'latest_version' => 'boolean',
     ];
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use App\Models\User;
 use App\Models\Institution;
+use App\Models\Role;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -71,6 +72,21 @@ class HandleInertiaRequests extends Middleware
             $user = User::where('id', $request->user()->id)->with('roles')->first();
         }
 
+        // Check if the user has a BCeID business GUID and an existing institution
+        $institutionPortal = [
+            'hasBCeIDBusinessGuid' => false,
+            'hasExistingInstitution' => false,
+        ];
+
+        if ($user && $user->hasAnyRole([Role::INSTITUTION_ADMIN, Role::INSTITUTION_USER])) {
+            $institution = $user->bceid_business_guid ? $user->institution() : null;
+
+            $institutionPortal = [
+                'hasBCeIDBusinessGuid' => filled($user->bceid_business_guid),
+                'hasExistingInstitution' => $institution !== null,
+            ];
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -86,6 +102,7 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'logoutUrl' => $logoutUrl,
             'logoutBcscUrl' => $logoutBcscUrl,
+            'institutionPortal' => $institutionPortal,
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error'   => $request->session()->get('error'),
