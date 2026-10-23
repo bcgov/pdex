@@ -5,6 +5,7 @@ use Modules\Admin\Http\Controllers\AdminController;
 use Modules\Admin\Http\Controllers\AdminUserController;
 use Modules\Admin\Http\Controllers\ApplicationController;
 use Modules\Admin\Http\Controllers\AdminLogoutController;
+use Modules\Admin\Http\Controllers\ProfileFormFieldController;
 
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\InstitutionSiteController;
@@ -23,6 +24,15 @@ Route::prefix('admin')->group(function () {
         // Ministry Dashboard Access for Admin Users
         Route::get('ministry-access', [AdminController::class, 'ministryAccess'])->name('ministry-access');
         
+        // Student Profile Form Field Manager
+        Route::prefix('utils')->name('utils.')->group(function () {
+            Route::get('student', [ProfileFormFieldController::class, 'index'])->name('student.index');
+            Route::post('student/fields', [ProfileFormFieldController::class, 'store'])->name('student.fields.store');
+            Route::put('student/fields/{field}', [ProfileFormFieldController::class, 'update'])->name('student.fields.update');
+            Route::delete('student/fields/{field}', [ProfileFormFieldController::class, 'destroy'])->name('student.fields.destroy');
+            Route::post('student/fields/reorder', [ProfileFormFieldController::class, 'reorder'])->name('student.fields.reorder');
+        });
+
         // Admin User Management
         Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
         Route::patch('users/update-roles/{user}', [AdminUserController::class, 'updateRoles'])->name('users.update-roles');

@@ -142,8 +142,8 @@
   position: absolute;
 }
 
-.bcds-header > .bcds-header--container > ul.bcds-header--skiplinks li a,
-.bcds-header > .bcds-header--container > ul.bcds-header--skiplinks li button {
+.bcds-header > .bcds-header--container > ul.bcds-header--skiplinks li :deep(a),
+.bcds-header > .bcds-header--container > ul.bcds-header--skiplinks li :deep(button) {
   background-color: var(--surface-color-background-white);
   box-sizing: border-box;
   color: var(--typography-color-link);
@@ -154,12 +154,12 @@
   margin-left: -100000px;
 }
 
-.bcds-header > .bcds-header--container > ul.bcds-header--skiplinks li a:focus,
+.bcds-header > .bcds-header--container > ul.bcds-header--skiplinks li :deep(a:focus),
 .bcds-header
   > .bcds-header--container
   > ul.bcds-header--skiplinks
   li
-  button:focus {
+  :deep(button:focus) {
   margin-left: 0; /* Line up left edge with left edge of logo image */
   text-wrap: nowrap;
 }

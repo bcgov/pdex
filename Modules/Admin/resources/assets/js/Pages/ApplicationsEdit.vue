@@ -353,7 +353,7 @@
                                     <p class="card-text text-muted small mb-2">{{ column.description }}</p>
                                     <!-- Display Name Input -->
                                     <div class="mb-2">
-                                      <label :for="`display-name-${table.name}-${column.name}`" class="form-label small">Display Name</label>
+                                      <label :for="`display-name-${table.name}-${column.name}`" class="form-label small">Display Name on PDEX</label>
                                       <input 
                                         :id="`display-name-${table.name}-${column.name}`"
                                         v-model="dataPermissions[`${table.name}.${column.name}`].display_name"
@@ -361,6 +361,18 @@
                                         type="text"
                                         :placeholder="column.default_display_name"
                                       >
+                                    </div>
+                                    <!-- Destination Application Field -->
+                                    <div class="mb-2">
+                                      <label :for="`dest-field-${table.name}-${column.name}`" class="form-label small">Destination Application Field</label>
+                                      <input 
+                                        :id="`dest-field-${table.name}-${column.name}`"
+                                        v-model="dataPermissions[`${table.name}.${column.name}`].destination_field"
+                                        class="form-control form-control-sm font-monospace"
+                                        type="text"
+                                        :placeholder="column.name"
+                                      >
+                                      <div class="form-text">Key name used in the JWT token sent to the destination application.</div>
                                     </div>
                                     <div class="mb-2">
                                       <label class="form-label small">Access Level</label>
@@ -425,95 +437,22 @@
                           <!-- Client ID -->
                           <div class="mb-2">
                             <label for="client_id" class="form-label">Client ID</label>
-                            <div class="input-group">
-                              <input 
-                                v-model="form.client_id" 
-                                type="text"
-                                id="client_id"
-                                class="form-control font-monospace"
-                                :class="{ 'is-invalid': form.errors.client_id }"
-                                placeholder="Auto-generated client ID"
-                                readonly
-                              >
-                              <button 
-                                type="button" 
-                                class="btn btn-outline-secondary"
-                                @click="generateClientId"
-                                title="Generate new Client ID"
-                              >
-                                <i class="bi bi-arrow-clockwise"></i>
-                              </button>
+                            <input 
+                              v-model="form.client_id" 
+                              type="text"
+                              id="client_id"
+                              class="form-control font-monospace"
+                              :class="{ 'is-invalid': form.errors.client_id }"
+                              placeholder="OAuth client ID (azp) issued by the API gateway"
+                            >
+                            <div class="form-text">
+                              This must exactly match the <code>azp</code> (authorized party) claim of the
+                              OAuth token the application presents. API requests are mapped to this application
+                              by comparing the token's client id to this value.
                             </div>
                             <div v-if="form.errors.client_id" class="invalid-feedback">
                               {{ form.errors.client_id }}
                             </div>
-                          </div>
-                          <!-- API Key -->
-                          <div class="mb-2">
-                            <label for="api_key" class="form-label">API Key</label>
-                            <div class="input-group">
-                              <input 
-                                v-model="form.api_key" 
-                                type="text"
-                                id="api_key"
-                                class="form-control font-monospace"
-                                :class="{ 'is-invalid': form.errors.api_key }"
-                                placeholder="Auto-generated API key"
-                                readonly
-                              >
-                              <button 
-                                type="button" 
-                                class="btn btn-outline-secondary"
-                                @click="generateApiKey"
-                                title="Generate new API Key"
-                              >
-                                <i class="bi bi-arrow-clockwise"></i>
-                              </button>
-                            </div>
-                            <div v-if="form.errors.api_key" class="invalid-feedback">
-                              {{ form.errors.api_key }}
-                            </div>
-                          </div>
-                          <!-- Client Secret -->
-                          <div class="mb-2">
-                            <label for="client_secret" class="form-label">Client Secret</label>
-                            <div class="input-group">
-                              <input 
-                                v-model="form.client_secret" 
-                                :type="showSecret ? 'text' : 'password'"
-                                id="client_secret"
-                                class="form-control font-monospace"
-                                :class="{ 'is-invalid': form.errors.client_secret }"
-                                placeholder="Auto-generated client secret"
-                                readonly
-                              >
-                              <button 
-                                type="button" 
-                                class="btn btn-outline-secondary"
-                                @click="showSecret = !showSecret"
-                                title="Toggle visibility"
-                              >
-                                <i :class="showSecret ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
-                              </button>
-                              <button 
-                                type="button" 
-                                class="btn btn-outline-secondary"
-                                @click="generateClientSecret"
-                                title="Generate new Client Secret"
-                              >
-                                <i class="bi bi-arrow-clockwise"></i>
-                              </button>
-                            </div>
-                            <div v-if="form.errors.client_secret" class="invalid-feedback">
-                              {{ form.errors.client_secret }}
-                            </div>
-                          </div>
-                          
-                          <div class="alert alert-warning mt-2">
-                            <small>
-                              <i class="bi bi-exclamation-triangle me-1"></i>
-                              <strong>Warning:</strong> Regenerating credentials will invalidate existing API access.
-                            </small>
                           </div>
                         </div>
 
@@ -973,28 +912,6 @@
               <h6 class="small text-muted">Privacy Notes:</h6>
               <p class="small">{{ application.privacy_approval_notes }}</p>
             </div>
-            
-            <div v-if="!canManageApplication">
-              <h6 class="card-title mt-4">API Credentials</h6>
-              <div class="mb-2">
-                <label class="form-label small">API Key</label>
-                <div class="input-group input-group-sm">
-                  <input :value="application.api_key || 'Not generated'" class="form-control" readonly />
-                  <button v-if="application.api_key" @click="copyToClipboard(application.api_key)" class="btn btn-outline-secondary" type="button">
-                    <i class="bi bi-clipboard"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label small">API Secret</label>
-                <div class="input-group input-group-sm">
-                  <input :value="application.api_secret ? (showSecret ? application.api_secret : '••••••••••••••••') : 'Not generated'" class="form-control" readonly />
-                  <button v-if="application.api_secret" @click="showSecret = !showSecret" class="btn btn-outline-secondary" type="button">
-                    <i :class="`bi bi-eye${showSecret ? '-slash' : ''}`"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -1040,7 +957,6 @@ export default {
     }
   },
   setup(props) {
-    const showSecret = ref(false);
 
     // Permission checks
     const canApproveSecurity = computed(() => {
@@ -1192,12 +1108,14 @@ export default {
         });
       });
 
-      // Set existing permissions
+      // Set existing permissions — only process individual permissions (those with is_required defined).
+      // API permissions share the same table names but must not contaminate this section.
       if (props.application.data_permissions) {
         props.application.data_permissions.forEach(permission => {
+          // Skip API permissions — they don't have the is_required attribute
+          if (!('is_required' in permission)) return;
           const key = `${permission.table_name}.${permission.column_name}`;
           if (permissions[key]) {
-            // Map existing permission data to access level
             if (permission.is_required) {
               permissions[key].access_level = 'required';
             } else if (permission.can_read || permission.can_write) {
@@ -1205,6 +1123,7 @@ export default {
             } else {
               permissions[key].access_level = 'none';
             }
+            permissions[key].destination_field = permission.destination_field || permissions[key].destination_field;
             permissions[key].display_name = permission.display_name || permissions[key].display_name;
           }
         });
@@ -1230,12 +1149,14 @@ export default {
         });
       });
 
-      // Set existing permissions (same data source as data permissions)
+      // Set existing permissions — only process API permissions (those without is_required).
+      // Individual permissions must not contaminate this section.
       if (props.application.data_permissions) {
         props.application.data_permissions.forEach(permission => {
+          // Skip individual permissions — they always have the is_required attribute
+          if ('is_required' in permission) return;
           const key = `${permission.table_name}.${permission.column_name}`;
           if (permissions[key]) {
-            // Map existing permission data to access level
             if (permission.can_read && permission.can_write) {
               permissions[key].access_level = 'read_write';
             } else if (permission.can_read) {
@@ -1336,6 +1257,7 @@ export default {
         .map(permission => ({
           table_name: permission.table_name,
           column_name: permission.column_name,
+          destination_field: permission.destination_field || permission.column_name,
           display_name: permission.display_name,
           can_read: permission.access_level === 'required' || permission.access_level === 'optional',
           can_write: false, // Data permissions are typically read-only
@@ -1415,39 +1337,6 @@ export default {
       });
     }
 
-    // Generate functions for API credentials
-    const SECURE_CHARSET = 'abcdefghijklmnopqrstuvwxyz0123456789';
-
-    function generateSecureRandomString(length) {
-      const cryptoObj = (typeof window !== 'undefined' && window.crypto) || (typeof self !== 'undefined' && self.crypto) || (typeof globalThis !== 'undefined' && globalThis.crypto);
-      if (!cryptoObj || !cryptoObj.getRandomValues) {
-        throw new Error('Secure random number generator not available.');
-      }
-
-      const randomValues = new Uint32Array(length);
-      cryptoObj.getRandomValues(randomValues);
-
-      let result = '';
-      const charsetLength = SECURE_CHARSET.length;
-      for (let i = 0; i < length; i++) {
-        const index = randomValues[i] % charsetLength;
-        result += SECURE_CHARSET.charAt(index);
-      }
-      return result;
-    }
-
-    function generateClientId() {
-      form.client_id = 'client_' + generateSecureRandomString(16) + Date.now().toString(36);
-    }
-
-    function generateClientSecret() {
-      form.client_secret = 'secret_' + generateSecureRandomString(32) + Date.now().toString(36);
-    }
-
-    function generateApiKey() {
-      form.api_key = 'key_' + generateSecureRandomString(24) + Date.now().toString(36);
-    }
-
     function getSecurityApprovalBadgeColor(status) {
       const colors = {
         approved: 'success',
@@ -1487,7 +1376,6 @@ export default {
     }
 
     return {
-      showSecret,
       canApproveSecurity,
       canApprovePrivacy,
       canManageApplication,
@@ -1503,9 +1391,6 @@ export default {
       submit,
       saveSecurityApproval,
       savePrivacyApproval,
-      generateClientId,
-      generateClientSecret,
-      generateApiKey,
       getSecurityApprovalBadgeColor,
       getPrivacyApprovalBadgeColor,
       getStatusBadgeColor,

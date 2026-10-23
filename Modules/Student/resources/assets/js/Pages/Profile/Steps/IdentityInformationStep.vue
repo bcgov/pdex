@@ -15,28 +15,22 @@
         </h6>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="citizenship_status" class="form-label">Citizenship Status</label>
+            <label for="citizenship_status" class="form-label">{{ cfg.label('citizenship_status', 'Citizenship Status') }} <span v-if="cfg.isRequired('citizenship_status')" class="text-danger">*</span></label>
             <select
               id="citizenship_status"
               v-model="form.citizenship_status"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('citizenship_status') }"
             >
-              <option value="">Select Status</option>
-              <option value="canadian_citizen">Canadian Citizen</option>
-              <option value="permanent_resident">Permanent Resident</option>
-              <option value="work_permit">Work Permit Holder</option>
-              <option value="study_permit">Study Permit Holder</option>
-              <option value="visitor">Visitor</option>
-              <option value="refugee">Refugee</option>
-              <option value="other">Other</option>
+              <option value="">{{ cfg.placeholder('citizenship_status', 'Select Status') }}</option>
+              <option v-for="opt in cfg.options('citizenship_status')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
             <div v-if="hasFieldError('citizenship_status')" class="invalid-feedback">
               {{ hasFieldError('citizenship_status') }}
             </div>
           </div>
           <div class="col-md-6 mb-3">
-            <label for="country_of_birth" class="form-label">Country of Birth</label>
+            <label for="country_of_birth" class="form-label">{{ cfg.label('country_of_birth', 'Country of Birth') }}</label>
             <input
               id="country_of_birth"
               v-model="form.country_of_birth"
@@ -52,27 +46,22 @@
         </div>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="immigration_status" class="form-label">Immigration Status</label>
+            <label for="immigration_status" class="form-label">{{ cfg.label('immigration_status', 'Immigration Status') }} <span v-if="cfg.isRequired('immigration_status')" class="text-danger">*</span></label>
             <select
               id="immigration_status"
               v-model="form.immigration_status"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('immigration_status') }"
             >
-              <option value="">Select Status</option>
-              <option value="born_in_canada">Born in Canada</option>
-              <option value="naturalized_citizen">Naturalized Citizen</option>
-              <option value="permanent_resident">Permanent Resident</option>
-              <option value="temporary_resident">Temporary Resident</option>
-              <option value="refugee_protected_person">Refugee/Protected Person</option>
-              <option value="other">Other</option>
+              <option value="">{{ cfg.placeholder('immigration_status', 'Select Status') }}</option>
+              <option v-for="opt in cfg.options('immigration_status')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
             <div v-if="hasFieldError('immigration_status')" class="invalid-feedback">
               {{ hasFieldError('immigration_status') }}
             </div>
           </div>
           <div class="col-md-6 mb-3">
-            <label for="years_in_country" class="form-label">Years in Canada</label>
+            <label for="years_in_country" class="form-label">{{ cfg.label('years_in_country', 'Years in Canada') }}</label>
             <input
               id="years_in_country"
               v-model="form.years_in_country"
@@ -97,7 +86,7 @@
         </h6>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="language_spoken_at_home" class="form-label">Language Spoken at Home</label>
+            <label for="language_spoken_at_home" class="form-label">{{ cfg.label('language_spoken_at_home', 'Language Spoken at Home') }}</label>
             <input
               id="language_spoken_at_home"
               v-model="form.language_spoken_at_home"
@@ -120,41 +109,35 @@
         </h6>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="racial_identity" class="form-label">Racial Identity</label>
+            <label for="racial_identity" class="form-label">{{ cfg.label('racial_identity', 'Racial Identity') }}</label>
             <select
               id="racial_identity"
               v-model="form.racial_identity"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('racial_identity') }"
             >
-              <option value="">Select Identity</option>
-              <option value="black">Black</option>
-              <option value="east_asian">East Asian</option>
-              <option value="indigenous">Indigenous</option>
-              <option value="latino">Latino</option>
-              <option value="middle_eastern">Middle Eastern</option>
-              <option value="south_asian">South Asian</option>
-              <option value="southeast_asian">Southeast Asian</option>
-              <option value="white">White</option>
-              <option value="mixed_race">Mixed Race</option>
-              <option value="other">Other</option>
-              <option value="prefer_not_to_say">Prefer not to say</option>
+              <option value="">{{ cfg.placeholder('racial_identity', 'Select Identity') }}</option>
+              <option v-for="opt in cfg.options('racial_identity')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
             <div v-if="hasFieldError('racial_identity')" class="invalid-feedback">
               {{ hasFieldError('racial_identity') }}
             </div>
           </div>
           <div class="col-md-6 mb-3">
-            <div class="form-check mt-4">
-              <input
-                id="is_visible_minority"
-                v-model="form.is_visible_minority"
-                class="form-check-input"
-                type="checkbox"
-              />
-              <label class="form-check-label" for="is_visible_minority">
-                I identify as a visible minority
-              </label>
+            <label for="is_visible_minority" class="form-label">
+              {{ cfg.label('is_visible_minority', 'I identify as a visible minority') }}
+            </label>
+            <select
+              id="is_visible_minority"
+              v-model="form.is_visible_minority"
+              class="form-select"
+              :class="{ 'is-invalid': hasFieldError('is_visible_minority') }"
+            >
+              <option value="">{{ cfg.placeholder('is_visible_minority', 'Select an answer') }}</option>
+              <option v-for="opt in cfg.options('is_visible_minority')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+            <div v-if="hasFieldError('is_visible_minority')" class="invalid-feedback">
+              {{ getFieldError('is_visible_minority') }}
             </div>
           </div>
         </div>
@@ -167,40 +150,41 @@
         </h6>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <div class="form-check">
-              <input
-                id="is_indigenous"
-                v-model="form.indigenous_status"
-                class="form-check-input"
-                type="checkbox"
-              />
-              <label class="form-check-label" for="is_indigenous">
-                I identify as Indigenous
-              </label>
+            <label for="is_indigenous" class="form-label">
+              {{ cfg.label('indigenous_status', 'I identify as Indigenous') }}
+            </label>
+            <select
+              id="is_indigenous"
+              v-model="form.indigenous_status"
+              class="form-select"
+              :class="{ 'is-invalid': hasFieldError('indigenous_status') }"
+            >
+              <option value="">{{ cfg.placeholder('indigenous_status', 'Select an answer') }}</option>
+              <option v-for="opt in cfg.options('indigenous_status')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+            <div v-if="hasFieldError('indigenous_status')" class="invalid-feedback">
+              {{ hasFieldError('indigenous_status') }}
             </div>
           </div>
         </div>
-        <div v-if="form.indigenous_status" class="row">
+        <div v-if="form.indigenous_status === 'yes'" class="row">
           <div class="col-md-6 mb-3">
-            <label for="indigenous_group" class="form-label">Indigenous Group</label>
+            <label for="indigenous_group" class="form-label">{{ cfg.label('indigenous_group', 'Indigenous Group') }}</label>
             <select
               id="indigenous_group"
               v-model="form.indigenous_group"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('indigenous_group') }"
             >
-              <option value="">Select Group</option>
-              <option value="first_nations">First Nations</option>
-              <option value="metis">Métis</option>
-              <option value="inuit">Inuit</option>
-              <option value="other">Other</option>
+              <option value="">{{ cfg.placeholder('indigenous_group', 'Select Group') }}</option>
+              <option v-for="opt in cfg.options('indigenous_group')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
             <div v-if="hasFieldError('indigenous_group')" class="invalid-feedback">
               {{ hasFieldError('indigenous_group') }}
             </div>
           </div>
           <div class="col-md-6 mb-3">
-            <label for="band_affiliation" class="form-label">Band/Nation Affiliation</label>
+            <label for="band_affiliation" class="form-label">{{ cfg.label('band_affiliation', 'Band/Nation Affiliation') }}</label>
             <input
               id="band_affiliation"
               v-model="form.band_affiliation"
@@ -216,7 +200,7 @@
         </div>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="indigenous_status_card_number" class="form-label">Status Card Number</label>
+            <label for="indigenous_status_card_number" class="form-label">{{ cfg.label('indigenous_status_card_number', 'Status Card Number') }}</label>
             <input
               id="indigenous_status_card_number"
               v-model="form.indigenous_status_card_number"
@@ -238,7 +222,7 @@
                 type="checkbox"
               />
               <label class="form-check-label" for="is_registered_with_band">
-                Registered with band/nation
+                {{ cfg.label('is_registered_with_band', 'Registered with band/nation') }}
               </label>
             </div>
           </div>
@@ -253,7 +237,7 @@
                 type="checkbox"
               />
               <label class="form-check-label" for="on_reserve_resident">
-                Currently living on reserve
+                {{ cfg.label('on_reserve_resident', 'Currently living on reserve') }}
               </label>
             </div>
           </div>
@@ -266,7 +250,7 @@
                 type="checkbox"
               />
               <label class="form-check-label" for="receives_indigenous_support_services">
-                Receiving Indigenous support services
+                {{ cfg.label('receives_indigenous_support_services', 'Receiving Indigenous support services') }}
               </label>
             </div>
           </div>
@@ -288,7 +272,7 @@
                 type="checkbox"
               />
               <label class="form-check-label" for="receives_minority_support_services">
-                Receiving minority support services
+                {{ cfg.label('receives_minority_support_services', 'Receiving minority support services') }}
               </label>
             </div>
           </div>
@@ -301,9 +285,26 @@
                 type="checkbox"
               />
               <label class="form-check-label" for="refugee_status">
-                I am a refugee or protected person
+                {{ cfg.label('refugee_status', 'I am a refugee or protected person') }}
               </label>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Information (admin-managed fields) -->
+      <div v-if="extraFields.length" class="mb-4">
+        <h6 class="border-bottom pb-2 mb-3">
+          <i class="bi bi-plus-square me-2"></i>Additional Information
+        </h6>
+        <div class="row">
+          <div v-for="field in extraFields" :key="field.field_id" class="col-md-6 mb-3">
+            <DynamicField
+              :field="field"
+              :model-value="form[field.field_id]"
+              :error="getFieldError(field.field_id)"
+              @update:model-value="(val) => (form[field.field_id] = val)"
+            />
           </div>
         </div>
       </div>
@@ -313,12 +314,38 @@
 </template>
 
 <script setup>
-import { reactive, watchEffect } from 'vue'
+import { reactive, watchEffect, toRef, computed } from 'vue'
+import { useFieldConfig } from '../../../composables/useFieldConfig'
+import DynamicField from './DynamicField.vue'
 
 const props = defineProps({
   form: Object,
-  errors: Object
+  errors: Object,
+  config: {
+    type: Object,
+    default: () => ({})
+  }
 })
+
+// DB-driven field configuration (labels, required, options, placeholders, visibility)
+const cfg = useFieldConfig(toRef(props, 'config'))
+
+// Fields already rendered above with bespoke controls.
+const KNOWN_FIELDS = [
+  'citizenship_status', 'country_of_birth', 'immigration_status', 'years_in_country',
+  'language_spoken_at_home', 'racial_identity', 'racial_identity_other_text',
+  'is_visible_minority', 'indigenous_status', 'indigenous_group', 'band_affiliation',
+  'indigenous_status_card_number', 'is_registered_with_band', 'on_reserve_resident',
+  'receives_indigenous_support_services', 'receives_minority_support_services',
+  'refugee_status'
+]
+
+// Admin-managed fields for this tab that have no bespoke control here.
+const extraFields = computed(() =>
+  Object.values(props.config || {})
+    .filter((f) => f && f.tab === 'identity' && f.is_active && !KNOWN_FIELDS.includes(f.field_id))
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+)
 
 const emit = defineEmits(['update:form'])
 

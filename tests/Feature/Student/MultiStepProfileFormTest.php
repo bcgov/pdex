@@ -177,7 +177,7 @@ class MultiStepProfileFormTest extends TestCase
         $this->actingAs($this->user);
 
         $invalidData = $this->getValidProfileData();
-        $invalidData['disability_status'] = true;
+        $invalidData['disability_status'] = 'yes';
         unset($invalidData['accommodation_needs']);
 
         $response = $this->post(route('student.profile.store'), $invalidData);
@@ -253,7 +253,7 @@ class MultiStepProfileFormTest extends TestCase
         $this->actingAs($this->user);
 
         $data = $this->getValidProfileData();
-        $data['identity']['indigenous_status'] = true;
+        $data['identity']['indigenous_status'] = 'yes';
         $data['identity']['indigenous_group'] = 'first_nations';
         $data['identity']['band_affiliation'] = 'Sample Band';
 
@@ -264,7 +264,7 @@ class MultiStepProfileFormTest extends TestCase
         $individual = Individual::where('user_guid', $this->user->guid)->first();
         $this->assertDatabaseHas('individual_identities', [
             'individual_id' => $individual->id,
-            'indigenous_status' => true,
+            'indigenous_status' => 'yes',
             'indigenous_group' => 'first_nations',
             'band_affiliation' => 'Sample Band',
         ]);
@@ -356,7 +356,7 @@ class MultiStepProfileFormTest extends TestCase
             'date_of_birth' => $this->faker->date('Y-m-d', '-18 years'),
             'gender' => $this->faker->randomElement(['male', 'female', 'non-binary', 'other']),
             'preferred_pronouns' => $this->faker->randomElement(['he/him', 'she/her', 'they/them']),
-            'disability_status' => false,
+            'disability_status' => null,
             'accommodation_needs' => null,
 
             // Address Information
@@ -391,14 +391,14 @@ class MultiStepProfileFormTest extends TestCase
                 'years_in_country' => $this->faker->numberBetween(0, 50),
                 'refugee_status' => false,
                 'immigration_status' => 'born_in_canada',
-                'indigenous_status' => false,
+                'indigenous_status' => null,
                 'indigenous_group' => null,
                 'band_affiliation' => null,
                 'indigenous_status_card_number' => null,
                 'is_registered_with_band' => false,
                 'on_reserve_resident' => false,
                 'racial_identity' => $this->faker->randomElement(['white', 'asian', 'black', 'mixed_race']),
-                'is_visible_minority' => $this->faker->boolean,
+                'is_visible_minority' => $this->faker->randomElement(['yes', 'no', 'unknown', null]),
                 'receives_indigenous_support_services' => false,
                 'receives_minority_support_services' => false,
             ],

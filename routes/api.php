@@ -124,4 +124,45 @@ Route::middleware(['oauth.token'])->prefix('v1')->group(function () {
         Route::get('/{id}', [\App\Http\Controllers\Api\InstitutionController::class, 'show'])
             ->name('api.v1.institutions.show');
     });
+
+    // Institution sites endpoints
+    Route::prefix('institution-sites')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\InstitutionSiteController::class, 'index'])
+            ->name('api.v1.institution-sites.index');
+        Route::get('/{id}', [\App\Http\Controllers\Api\InstitutionSiteController::class, 'show'])
+            ->name('api.v1.institution-sites.show');
+    });
+
+    // Institution staff endpoints
+    Route::prefix('institution-staff')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\InstitutionStaffController::class, 'index'])
+            ->name('api.v1.institution-staff.index');
+        Route::get('/{id}', [\App\Http\Controllers\Api\InstitutionStaffController::class, 'show'])
+            ->name('api.v1.institution-staff.show');
+    });
+
+    // Institution relationships endpoints
+    Route::prefix('institution-relationships')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\InstitutionRelationshipController::class, 'index'])
+            ->name('api.v1.institution-relationships.index');
+        Route::get('/{id}', [\App\Http\Controllers\Api\InstitutionRelationshipController::class, 'show'])
+            ->name('api.v1.institution-relationships.show');
+    });
+
+    // Countries endpoints
+    Route::prefix('countries')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\CountryController::class, 'index'])
+            ->name('api.v1.countries.index');
+        Route::get('/{id}', [\App\Http\Controllers\Api\CountryController::class, 'show'])
+            ->name('api.v1.countries.show');
+    });
+
+    // Utility / configuration endpoints
+    Route::prefix('utils')->group(function () {
+        // Student profile form field catalog (definitions + options)
+        Route::get('/student', [\App\Http\Controllers\Api\ProfileFormFieldController::class, 'index'])
+            ->name('api.v1.utils.student.index');
+        Route::get('/student/{field}', [\App\Http\Controllers\Api\ProfileFormFieldController::class, 'show'])
+            ->name('api.v1.utils.student.show');
+    });
 });

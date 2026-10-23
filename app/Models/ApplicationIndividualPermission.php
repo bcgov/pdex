@@ -16,6 +16,7 @@ class ApplicationIndividualPermission extends Model
         'application_id',
         'table_name',
         'column_name',
+        'destination_field',
         'display_name',
         'can_read',
         'can_write',

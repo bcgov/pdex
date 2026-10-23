@@ -1,16 +1,19 @@
 FROM alpine:latest
 ARG TZ=America/Vancouver
-ARG DEVENV=prod
+ARG DEVENV=build
+ARG PHP_VERSION=8.3.36
 
 WORKDIR /var/www/html
 
 # ---- Packages (Apache + proxy_fcgi + PHP-FPM + common PHP extensions) ----
 RUN apk add --no-cache \
     apache2 apache2-proxy apache2-ssl \
-    php83 php83-fpm php83-opcache \
+    # php83 php83-fpm php83-opcache \
+    "php83>=${PHP_VERSION}" "php83-fpm>=${PHP_VERSION}" "php83-opcache>=${PHP_VERSION}" \
     php83-pdo php83-pdo_pgsql \
     php83-mbstring php83-xml php83-json php83-curl php83-ctype php83-tokenizer php83-phar php83-dom php83-session \
     php83-fileinfo php83-simplexml php83-xmlwriter php83-openssl \
+    php83-iconv \
     curl bash ca-certificates tzdata \
     nodejs npm nano \
   && update-ca-certificates

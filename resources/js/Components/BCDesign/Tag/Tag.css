@@ -13,7 +13,7 @@
   align-items: center;
   gap: 8px;
 }
-.bcds-react-aria-Tag--contents .react-aria-Button {
+.bcds-react-aria-Tag--contents .bcds-react-aria-Tag--remove-button {
   background: none;
   border: none;
   color: var(--typography-color-primary);
@@ -31,7 +31,7 @@
 }
 .bcds-react-aria-Tag.bc-blue
   .bcds-react-aria-Tag--contents
-  > .react-aria-Button {
+  > .bcds-react-aria-Tag--remove-button {
   color: var(--typography-color-primary-invert);
 }
 .bcds-react-aria-Tag.bc-gold {
@@ -47,7 +47,7 @@
   border-color: var(--theme-blue-90);
   color: var(--typography-color-primary-invert);
 }
-.bcds-react-aria-Tag.dark .bcds-react-aria-Tag--contents > .react-aria-Button {
+.bcds-react-aria-Tag.dark .bcds-react-aria-Tag--contents > .bcds-react-aria-Tag--remove-button {
   color: var(--typography-color-primary-invert);
 }
 .bcds-react-aria-Tag.gray,

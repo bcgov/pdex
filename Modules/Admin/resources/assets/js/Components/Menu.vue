@@ -16,6 +16,10 @@
             <i class="bi bi-people me-3"></i>
             Users
         </Link>
+        <Link href="/admin/utils/student" class="list-group-item list-group-item-action d-flex align-items-center py-3 border-0" :class="isActive('admin.utils') ? 'active' : ''">
+            <i class="bi bi-ui-checks me-3"></i>
+            Form Fields
+        </Link>
         <!-- <Link href="/admin/settings" class="list-group-item list-group-item-action d-flex align-items-center py-3 border-0" :class="isActive('admin.settings') ? 'active' : ''">
             <i class="bi bi-gear me-3"></i>
             Settings
@@ -79,6 +83,8 @@ export default {
                     return currentUrl.startsWith('/admin/users');
                 case 'admin.applications':
                     return currentUrl.startsWith('/admin/applications');
+                case 'admin.utils':
+                    return currentUrl.startsWith('/admin/utils');
                 case 'admin.settings':
                     return currentUrl.startsWith('/admin/settings');
                 default:

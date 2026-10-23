@@ -14,28 +14,22 @@
           <i class="bi bi-person-workspace me-2"></i>Current Employment Status
         </h6>
         <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="employment_status" class="form-label">Employment Status</label>
+          <div v-if="cfg.isActive('employment_status')" class="col-md-6 mb-3">
+            <label for="employment_status" class="form-label">{{ cfg.label('employment_status', 'Employment Status') }} <span v-if="cfg.isRequired('employment_status')" class="text-danger">*</span></label>
             <select
               id="employment_status"
               v-model="form.employment_status"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('employment_status') }"
             >
-              <option value="">Select Status</option>
-              <option value="employed">Employed</option>
-              <option value="unemployed">Unemployed</option>
-              <option value="student">Student</option>
-              <option value="self-employed">Self-employed</option>
-              <option value="retired">Retired</option>
-              <option value="homemaker">Homemaker</option>
-              <option value="other">Other</option>
+              <option value="">{{ cfg.placeholder('employment_status', 'Select Status') }}</option>
+              <option v-for="opt in cfg.options('employment_status')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
             <div v-if="hasFieldError('employment_status')" class="invalid-feedback">
               {{ hasFieldError('employment_status') }}
             </div>
           </div>
-          <div class="col-md-6 mb-3">
+          <div v-if="cfg.isActive('is_looking_for_work')" class="col-md-6 mb-3">
             <div class="form-check mt-4">
               <input
                 id="is_looking_for_work"
@@ -44,7 +38,7 @@
                 type="checkbox"
               />
               <label class="form-check-label" for="is_looking_for_work">
-                Currently looking for work
+                {{ cfg.label('is_looking_for_work', 'Currently looking for work') }}
               </label>
             </div>
           </div>
@@ -58,7 +52,7 @@
         </h6>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="employer_name" class="form-label">Employer Name</label>
+            <label for="employer_name" class="form-label">{{ cfg.label('employer_name', 'Employer Name') }}</label>
             <input
               id="employer_name"
               v-model="form.employer_name"
@@ -71,7 +65,7 @@
             </div>
           </div>
           <div class="col-md-6 mb-3">
-            <label for="job_title" class="form-label">Job Title</label>
+            <label for="job_title" class="form-label">{{ cfg.label('job_title', 'Job Title') }}</label>
             <input
               id="job_title"
               v-model="form.job_title"
@@ -86,7 +80,7 @@
         </div>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="employer_industry" class="form-label">Industry</label>
+            <label for="employer_industry" class="form-label">{{ cfg.label('employer_industry', 'Industry') }}</label>
             <input
               id="employer_industry"
               v-model="form.employer_industry"
@@ -102,7 +96,7 @@
         </div>
         <div class="row">
           <div class="col-md-3 mb-3">
-            <label for="employment_start_date" class="form-label">Start Date</label>
+            <label for="employment_start_date" class="form-label">{{ cfg.label('employment_start_date', 'Start Date') }}</label>
             <input
               id="employment_start_date"
               v-model="form.employment_start_date"
@@ -115,7 +109,7 @@
             </div>
           </div>
           <div class="col-md-3 mb-3">
-            <label for="employment_end_date" class="form-label">End Date</label>
+            <label for="employment_end_date" class="form-label">{{ cfg.label('employment_end_date', 'End Date') }}</label>
             <input
               id="employment_end_date"
               v-model="form.employment_end_date"
@@ -129,7 +123,7 @@
             <small class="text-muted">Leave blank if current position</small>
           </div>
           <div class="col-md-3 mb-3">
-            <label for="work_hours_per_week" class="form-label">Hours per Week</label>
+            <label for="work_hours_per_week" class="form-label">{{ cfg.label('work_hours_per_week', 'Hours per Week') }}</label>
             <input
               id="work_hours_per_week"
               v-model="form.work_hours_per_week"
@@ -145,7 +139,7 @@
             </div>
           </div>
           <div class="col-md-3 mb-3">
-            <label for="monthly_income" class="form-label">Monthly Income ($)</label>
+            <label for="monthly_income" class="form-label">{{ cfg.label('monthly_income', 'Monthly Income ($)') }}</label>
             <input
               id="monthly_income"
               v-model="form.monthly_income"
@@ -171,7 +165,7 @@
                 type="checkbox"
               />
               <label class="form-check-label" for="is_job_related_to_program">
-                This job is related to my program of study
+                {{ cfg.label('is_job_related_to_program', 'This job is related to my program of study') }}
               </label>
             </div>
           </div>
@@ -185,7 +179,7 @@
         </h6>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="previous_job_title" class="form-label">Previous Job Title</label>
+            <label for="previous_job_title" class="form-label">{{ cfg.label('previous_job_title', 'Previous Job Title') }}</label>
             <input
               id="previous_job_title"
               v-model="form.previous_job_title"
@@ -198,7 +192,7 @@
             </div>
           </div>
           <div class="col-md-6 mb-3">
-            <label for="previous_employer_name" class="form-label">Previous Employer Name</label>
+            <label for="previous_employer_name" class="form-label">{{ cfg.label('previous_employer_name', 'Previous Employer Name') }}</label>
             <input
               id="previous_employer_name"
               v-model="form.previous_employer_name"
@@ -213,7 +207,7 @@
         </div>
         <div class="row">
           <div class="col-md-4 mb-3">
-            <label for="previous_employment_start_date" class="form-label">Previous Employment Start Date</label>
+            <label for="previous_employment_start_date" class="form-label">{{ cfg.label('previous_employment_start_date', 'Previous Employment Start Date') }}</label>
             <input
               id="previous_employment_start_date"
               v-model="form.previous_employment_start_date"
@@ -226,7 +220,7 @@
             </div>
           </div>
           <div class="col-md-4 mb-3">
-            <label for="previous_employment_end_date" class="form-label">Previous Employment End Date</label>
+            <label for="previous_employment_end_date" class="form-label">{{ cfg.label('previous_employment_end_date', 'Previous Employment End Date') }}</label>
             <input
               id="previous_employment_end_date"
               v-model="form.previous_employment_end_date"
@@ -239,7 +233,7 @@
             </div>
           </div>
           <div class="col-md-4 mb-3">
-            <label for="reason_for_leaving" class="form-label">Reason for Leaving</label>
+            <label for="reason_for_leaving" class="form-label">{{ cfg.label('reason_for_leaving', 'Reason for Leaving') }}</label>
             <input
               id="reason_for_leaving"
               v-model="form.reason_for_leaving"
@@ -270,7 +264,7 @@
                 type="checkbox"
               />
               <label class="form-check-label" for="is_receiving_employment_insurance">
-                Currently receiving Employment Insurance (EI)
+                {{ cfg.label('is_receiving_employment_insurance', 'Currently receiving Employment Insurance (EI)') }}
               </label>
             </div>
           </div>
@@ -283,14 +277,14 @@
                 type="checkbox"
               />
               <label class="form-check-label" for="is_participating_in_work_study_program">
-                Participating in work-study program
+                {{ cfg.label('is_participating_in_work_study_program', 'Participating in work-study program') }}
               </label>
             </div>
           </div>
         </div>
         <div class="row">
           <div class="col-md-12 mb-3">
-            <label for="barriers_to_employment" class="form-label">Barriers to Employment</label>
+            <label for="barriers_to_employment" class="form-label">{{ cfg.label('barriers_to_employment', 'Barriers to Employment') }}</label>
             <textarea
               id="barriers_to_employment"
               v-model="form.barriers_to_employment"
@@ -313,7 +307,7 @@
         </h6>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="career_interest_area" class="form-label">Career Interest Area</label>
+            <label for="career_interest_area" class="form-label">{{ cfg.label('career_interest_area', 'Career Interest Area') }}</label>
             <input
               id="career_interest_area"
               v-model="form.career_interest_area"
@@ -327,7 +321,7 @@
             </div>
           </div>
           <div class="col-md-6 mb-3">
-            <label for="desired_job_title" class="form-label">Desired Job Title</label>
+            <label for="desired_job_title" class="form-label">{{ cfg.label('desired_job_title', 'Desired Job Title') }}</label>
             <input
               id="desired_job_title"
               v-model="form.desired_job_title"
@@ -343,18 +337,15 @@
         </div>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="career_readiness_level" class="form-label">Career Readiness Level</label>
+            <label for="career_readiness_level" class="form-label">{{ cfg.label('career_readiness_level', 'Career Readiness Level') }} <span v-if="cfg.isRequired('career_readiness_level')" class="text-danger">*</span></label>
             <select
               id="career_readiness_level"
               v-model="form.career_readiness_level"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('career_readiness_level') }"
             >
-              <option value="">Select Level</option>
-              <option value="beginner">Beginner</option>
-              <option value="developing">Developing</option>
-              <option value="proficient">Proficient</option>
-              <option value="advanced">Advanced</option>
+              <option value="">{{ cfg.placeholder('career_readiness_level', 'Select Level') }}</option>
+              <option v-for="opt in cfg.options('career_readiness_level')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
             <div v-if="hasFieldError('career_readiness_level')" class="invalid-feedback">
               {{ hasFieldError('career_readiness_level') }}
@@ -369,9 +360,26 @@
                 type="checkbox"
               />
               <label class="form-check-label" for="has_career_plan">
-                I have a clear career plan
+                {{ cfg.label('has_career_plan', 'I have a clear career plan') }}
               </label>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Information (admin-managed fields) -->
+      <div v-if="extraFields.length" class="mb-4">
+        <h6 class="border-bottom pb-2 mb-3">
+          <i class="bi bi-plus-square me-2"></i>Additional Information
+        </h6>
+        <div class="row">
+          <div v-for="field in extraFields" :key="field.field_id" class="col-md-6 mb-3">
+            <DynamicField
+              :field="field"
+              :model-value="form[field.field_id]"
+              :error="getFieldError(field.field_id)"
+              @update:model-value="(val) => (form[field.field_id] = val)"
+            />
           </div>
         </div>
       </div>
@@ -380,12 +388,40 @@
 </template>
 
 <script setup>
-import { reactive, watchEffect } from 'vue'
+import { reactive, watchEffect, toRef, computed } from 'vue'
+import { useFieldConfig } from '../../../composables/useFieldConfig'
+import DynamicField from './DynamicField.vue'
 
 const props = defineProps({
   form: Object,
-  errors: Object
+  errors: Object,
+  config: {
+    type: Object,
+    default: () => ({})
+  }
 })
+
+// DB-driven field configuration (labels, required, options, placeholders, visibility)
+const cfg = useFieldConfig(toRef(props, 'config'))
+
+// Fields already rendered above with bespoke controls.
+const KNOWN_FIELDS = [
+  'employment_status', 'is_looking_for_work', 'employer_name', 'job_title',
+  'employer_industry', 'employment_start_date', 'employment_end_date',
+  'work_hours_per_week', 'monthly_income', 'is_job_related_to_program',
+  'previous_job_title', 'previous_employer_name', 'previous_employment_start_date',
+  'previous_employment_end_date', 'reason_for_leaving',
+  'is_receiving_employment_insurance', 'is_participating_in_work_study_program',
+  'barriers_to_employment', 'career_interest_area', 'desired_job_title',
+  'career_readiness_level', 'has_career_plan'
+]
+
+// Admin-managed fields for this tab that have no bespoke control here.
+const extraFields = computed(() =>
+  Object.values(props.config || {})
+    .filter((f) => f && f.tab === 'employment' && f.is_active && !KNOWN_FIELDS.includes(f.field_id))
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+)
 
 const emit = defineEmits(['update:form'])
 

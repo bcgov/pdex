@@ -175,6 +175,7 @@ class ApplicationController extends Controller
                     $application->individualPermissions()->create([
                         'table_name' => $permission['table_name'],
                         'column_name' => $permission['column_name'],
+                        'destination_field' => $permission['destination_field'] ?: $permission['column_name'],
                         'display_name' => $permission['display_name'] ?? ucwords(str_replace('_', ' ', $permission['column_name'])),
                         'can_read' => $permission['can_read'] ?? false,
                         'can_write' => $permission['can_write'] ?? false,

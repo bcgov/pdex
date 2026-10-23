@@ -84,6 +84,7 @@
                   :form="form.general"
                   :errors="form.errors"
                   :countries="countries"
+                  :config="formConfig"
                   @update:form="(data) => form.general = data"
                 />
 
@@ -93,6 +94,7 @@
                   :form="form.addresses"
                   :errors="form.errors"
                   :countries="countries"
+                  :config="formConfig"
                   @update:form="(data) => form.addresses = data"
                 />
 
@@ -101,6 +103,7 @@
                   v-if="currentStep === 3"
                   :form="form.employments"
                   :errors="form.errors"
+                  :config="formConfig"
                   @update:form="(data) => form.employments = data"
                 />
 
@@ -109,6 +112,7 @@
                   v-if="currentStep === 4"
                   :form="form.identities"
                   :errors="form.errors"
+                  :config="formConfig"
                   @update:form="(data) => form.identities = data"
                 />
               </div>
@@ -178,14 +182,37 @@ const props = defineProps({
   countries: {
     type: Array,
     default: () => []
+  },
+  formConfig: {
+    type: Object,
+    default: () => ({})
   }
 })
+
+// Helper function to format date for input[type="date"]
+const formatDateForInput = (dateString) => {
+  if (!dateString) return ''
+  // Extract just the date part (YYYY-MM-DD) from ISO timestamp
+  return dateString.split('T')[0]
+}
 
 // Current step tracking
 const currentStep = ref(1)
 
+// Prepare individual data with formatted dates
+const prepareIndividualData = (data) => {
+  const prepared = { ...data }
+  
+  // Format date_of_birth in general section if it exists
+  if (prepared.general?.date_of_birth) {
+    prepared.general.date_of_birth = formatDateForInput(prepared.general.date_of_birth)
+  }
+  
+  return prepared
+}
+
 // Form data with existing individual data
-const form = useForm(props.individual)
+const form = useForm(prepareIndividualData(props.individual))
 
 // Set mailing address flag if mailing address exists
 onMounted(() => {
