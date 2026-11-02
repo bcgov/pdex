@@ -11,6 +11,8 @@
     "require": {
         "php": "^8.3",
         "darkaonline/l5-swagger": "^11.0",
+        "doctrine/annotations": "^2.0",
+        "firebase/php-jwt": "^7.0.2",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
@@ -18,8 +20,7 @@
         "nwidart/laravel-modules": "^13.0",
         "predis/predis": "^2.2",
         "stevenmaguire/oauth2-keycloak": "^6.1.0",
-        "tightenco/ziggy": "^2.4",
-        "firebase/php-jwt": "^7.0.2"
+        "tightenco/ziggy": "^2.4"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.1",
