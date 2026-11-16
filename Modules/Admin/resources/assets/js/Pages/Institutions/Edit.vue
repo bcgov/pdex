@@ -75,6 +75,20 @@
                                             {{ errors.bceid_business_guid }}
                                         </div>
                                     </div>
+                                    <div class="col-12">
+                                        <label for="notes" class="form-label">Notes</label>
+                                        <textarea
+                                            class="form-control"
+                                            :class="{ 'is-invalid': errors.notes }"
+                                            id="notes"
+                                            v-model="form.notes"
+                                            rows="3"
+                                            placeholder="Additional notes or comments about this institution..."
+                                        ></textarea>
+                                        <div class="invalid-feedback" v-if="errors.notes">
+                                            {{ errors.notes }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -199,6 +213,7 @@ export default {
             institution_type: props.institution.institution_type || '',
             dli: props.institution.dli || '',
             bceid_business_guid: props.institution.bceid_business_guid || '',
+            notes: props.institution.notes || '',
             active_status: Boolean(props.institution.active_status)
         })
 
