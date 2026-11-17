@@ -200,6 +200,7 @@ class InstitutionController extends Controller
 
         return Inertia::render('Institution::Show', [
             'institution' => $institution->load('sites'),
+            'organization' => $user->organization ?? '',
         ]);
     }
 
@@ -227,6 +228,7 @@ class InstitutionController extends Controller
             'standingStatuses' => InstitutionSite::getStandingStatuses(),
             'economicRegions' => InstitutionSite::getEconomicRegions(),
             'businessGuid' => $user->bceid_business_guid,
+            'organization' => $user->organization ?? '',
         ]);
     }
 
@@ -274,6 +276,7 @@ class InstitutionController extends Controller
             'institution_type' => $validated['institution_type'],
             'dli' => $validated['dli'] ?? null,
             'bceid_business_guid' => $user->bceid_business_guid,
+            'submitted_by_user_id' => $user->id,
         ]);
 
         foreach ($validated['sites'] as $site) {

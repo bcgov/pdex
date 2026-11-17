@@ -27,7 +27,7 @@ class InstitutionStoreRequest extends FormRequest
         return [
             'legal_operating_name' => ['required', 'string', 'max:255', Rule::unique('institutions', 'legal_operating_name')->withoutTrashed()],
             'institution_type' => 'required|string|in:' . implode(',', Institution::getInstitutionTypes()),
-            'dli' => 'required|string|max:20',
+            'dli' => 'nullable|string|max:20',
             'sites' => 'required|array|min:1',
             'sites.*.operating_name' => 'required|string|max:255',
             'sites.*.primary_phone' => ['required', 'string', $phoneRegex, 'max:20'],

@@ -104,6 +104,7 @@ class InstitutionController extends Controller
 
         // Get institution users (users with the same bceid_business_guid)
         $institutionUsers = collect();
+        $organization = null;
         if ($institution->bceid_business_guid) {
             try {
                 // First try direct comparison
@@ -116,7 +117,11 @@ class InstitutionController extends Controller
                     ->with('roles')
                     ->get();
             }
-            
+
+            $organization = $institutionUsers->first(function ($user) {
+                return filled($user->organization);
+            })?->organization;
+
             $institutionUsers = $institutionUsers->map(function ($user) {
                     return [
                         'id' => $user->id,
@@ -134,8 +139,20 @@ class InstitutionController extends Controller
                 });
         }
 
+        $institution->load(['sites']);
+
+        // Submitter SSO fields.
+        $submitter = $institution->submittedBy()->withTrashed()->first();
+        $submittedBy = $submitter?->only([
+            'bceid_username',
+            'bceid_user_guid',
+            'email',
+        ]);
+
         return Inertia::render('Admin::Institutions/Show', [
-            'institution' => $institution->load(['sites']),
+            'institution' => $institution,
+            'submittedBy' => $submittedBy,
+            'organization' => $organization ?? '',
             'relationships' => $institution->allRelationships()->with(['institutionA', 'institutionB'])->get(),
             'institutionUsers' => $institutionUsers,
             'canManageInstitutions' => auth()->user()->canManageInstitutions(),
@@ -284,6 +301,7 @@ class InstitutionController extends Controller
             'dli' => 'nullable|string|max:20',
             'bceid_business_guid' => 'nullable|string|max:255',
             'active_status' => 'boolean',
+            'notes' => 'nullable|string',
         ]);
 
         $institution->update($validated);
