@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -21,6 +22,8 @@ class Institution extends Model
         'institution_type',
         'dli',
         'active_status',
+        'submitted_by_user_id',
+        'notes',
     ];
 
     protected $casts = [
@@ -126,6 +129,14 @@ class Institution extends Model
     public function getDliDisplayAttribute(): string
     {
         return $this->dli ? "DLI: {$this->dli}" : 'No DLI';
+    }
+
+    /**
+     * User who submitted this institution from the Institution portal.
+     */
+    public function submittedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submitted_by_user_id');
     }
 
     /**

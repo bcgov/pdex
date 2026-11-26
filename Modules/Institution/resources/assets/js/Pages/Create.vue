@@ -64,7 +64,18 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label">DLI Number *</label>
+                                        <label class="form-label">BCeID Business Name</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            :value="organization"
+                                            placeholder="Not available"
+                                            readonly
+                                        >
+                                        <div class="form-text">Business name from BCeID system</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">DLI Number</label>
                                         <input
                                             type="text"
                                             class="form-control"
@@ -73,7 +84,6 @@
                                             @input="clearFieldError('dli')"
                                             placeholder="O12345678"
                                             maxlength="20"
-                                            required
                                         >
                                         <div class="form-text">Designated Learning Institution number (if applicable)</div>
                                         <div class="invalid-feedback" v-if="getError('dli')">
@@ -551,6 +561,10 @@ export default {
         economicRegions: {
             type: Array,
             default: () => []
+        },
+        organization: {
+            type: String,
+            default: ''
         },
         errors: {
             type: Object,

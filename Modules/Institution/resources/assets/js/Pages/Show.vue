@@ -45,6 +45,10 @@
                                     </p>
                                 </div>
                                 <div class="col-md-6">
+                                    <label class="form-label text-muted">BCeID Business Name</label>
+                                    <p class="mb-0 text-muted">{{ organization || 'Not available' }}</p>
+                                </div>
+                                <div class="col-md-6">
                                     <label class="form-label text-muted">DLI Number</label>
                                     <p class="mb-0">
                                         <code v-if="institution.dli">{{ institution.dli }}</code>
@@ -238,6 +242,10 @@ export default {
         institution: {
             type: Object,
             required: true
+        },
+        organization: {
+            type: String,
+            default: ''
         }
     },
     computed: {
