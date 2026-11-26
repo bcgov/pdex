@@ -52,6 +52,10 @@
                                         <code>{{ institution.dli }}</code>
                                     </p>
                                 </div>
+                                <div class="col-12" v-if="institution.notes">
+                                    <label class="form-label text-muted">Notes</label>
+                                    <p class="mb-0">{{ institution.notes }}</p>
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label text-muted">Status</label>
                                     <p class="mb-0">
@@ -318,6 +322,10 @@
                                 </p>
                             </div>
                             <div class="mb-3">
+                                <label class="form-label text-muted">BCeID Business Name</label>
+                                <p class="mb-0 small text-muted">{{ organization || 'Not available' }}</p>
+                            </div>
+                            <div class="mb-3">
                                 <label class="form-label text-muted">Created</label>
                                 <p class="mb-0 small text-muted">{{ formatDate(institution.created_at) }}</p>
                             </div>
@@ -325,6 +333,31 @@
                                 <label class="form-label text-muted">Last Updated</label>
                                 <p class="mb-0 small text-muted">{{ formatDate(institution.updated_at) }}</p>
                             </div>
+                            <hr>
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Submitted By</label>
+                                <p v-if="!submittedBy" class="mb-0">Not recorded</p>
+                            </div>
+                            <template v-if="submittedBy">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">BCeID Username</label>
+                                    <p class="mb-0">
+                                        <code>{{ submittedBy.bceid_username }}</code>
+                                    </p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">BCeID User GUID</label>
+                                    <p class="mb-0">
+                                        <code class="small">{{ submittedBy.bceid_user_guid }}</code>
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="form-label text-muted">Email</label>
+                                    <p class="mb-0">
+                                        <a :href="`mailto:${submittedBy.email}`">{{ submittedBy.email }}</a>
+                                    </p>
+                                </div>
+                            </template>
                         </div>
                     </div>
 
@@ -389,6 +422,14 @@ export default {
         canManageInstitutions: {
             type: Boolean,
             default: false
+        },
+        submittedBy: {
+            type: Object,
+            default: null
+        },
+        organization: {
+            type: String,
+            default: ''
         }
     },
     methods: {

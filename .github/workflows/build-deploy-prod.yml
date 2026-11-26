@@ -4,6 +4,8 @@ on:
   pull_request:
     branches: [ main ]
     types: [ closed ]
+permissions:
+  contents: read
 jobs:
   # Print variables for logging and debugging purposes
   checkEnv:
